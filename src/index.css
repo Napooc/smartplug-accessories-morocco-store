@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 100% 40%; /* SmartPlug Blue */
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -36,12 +35,19 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
+
     --sidebar-foreground: 240 5.3% 26.1%;
+
     --sidebar-primary: 240 5.9% 10%;
+
     --sidebar-primary-foreground: 0 0% 98%;
+
     --sidebar-accent: 240 4.8% 95.9%;
+
     --sidebar-accent-foreground: 240 5.9% 10%;
+
     --sidebar-border: 220 13% 91%;
+
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -55,7 +61,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 100% 40%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -91,43 +97,5 @@
 
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-@layer components {
-  .sale-badge {
-    @apply bg-smartplug-red text-white px-2 py-0.5 text-xs rounded-md font-medium;
-  }
-  
-  .product-card {
-    @apply bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 relative border border-gray-200;
-  }
-  
-  .product-card-image {
-    @apply w-full h-48 object-contain p-4 bg-gray-50;
-  }
-  
-  .product-card-content {
-    @apply p-4;
-  }
-  
-  .product-price {
-    @apply text-lg font-bold text-smartplug-blue;
-  }
-  
-  .product-old-price {
-    @apply line-through text-gray-500 text-sm ml-2;
-  }
-  
-  .button-primary {
-    @apply bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-2 px-4 rounded transition-colors duration-300;
-  }
-  
-  .button-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition-colors duration-300;
-  }
-  
-  .product-rating {
-    @apply flex text-yellow-400 text-sm mb-2;
   }
 }
