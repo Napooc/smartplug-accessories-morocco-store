@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -27,7 +26,9 @@ const AdminAddProduct = () => {
     featured: false,
     onSale: false,
     stock: 0,
-    images: ['https://via.placeholder.com/300']
+    images: ['https://via.placeholder.com/300'],
+    rating: 0,
+    sku: ''
   });
   
   const [errors, setErrors] = useState({
@@ -47,7 +48,6 @@ const AdminAddProduct = () => {
       [name]: name === 'price' || name === 'oldPrice' || name === 'stock' ? parseFloat(value) : value
     }));
     
-    // Clear error
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -69,7 +69,6 @@ const AdminAddProduct = () => {
       category: value
     }));
     
-    // Clear error
     if (errors.category) {
       setErrors(prev => ({
         ...prev,
@@ -107,7 +106,6 @@ const AdminAddProduct = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
     const newErrors = {
       name: product.name ? '' : 'Name is required',
       description: product.description ? '' : 'Description is required',
@@ -118,15 +116,18 @@ const AdminAddProduct = () => {
     
     setErrors(newErrors);
     
-    // If there are errors, don't submit
     if (Object.values(newErrors).some(error => error)) {
       return;
     }
     
-    // Add the product
-    addProduct(product);
+    if (!product.sku) {
+      const randomSku = `SKU-${Math.floor(Math.random() * 10000)}`;
+      const productWithSku = {...product, sku: randomSku};
+      addProduct(productWithSku);
+    } else {
+      addProduct(product);
+    }
     
-    // Reset form
     setProduct({
       name: '',
       description: '',
@@ -136,7 +137,9 @@ const AdminAddProduct = () => {
       featured: false,
       onSale: false,
       stock: 0,
-      images: ['https://via.placeholder.com/300']
+      images: ['https://via.placeholder.com/300'],
+      rating: 0,
+      sku: ''
     });
   };
   
@@ -232,6 +235,17 @@ const AdminAddProduct = () => {
               value={product.stock || ''}
               onChange={handleChange}
               placeholder="0"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="sku">SKU</Label>
+            <Input
+              id="sku"
+              name="sku"
+              value={product.sku}
+              onChange={handleChange}
+              placeholder="Enter SKU (or leave blank to generate)"
             />
           </div>
         </div>

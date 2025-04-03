@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts, mockOrders } from './data';
@@ -110,9 +109,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addProduct = (product: Omit<Product, 'id'>) => {
     const newProduct: Product = {
       ...product,
-      id: `prod-${Date.now()}`,
-      rating: 0,
-      reviews: []
+      id: `prod-${Date.now()}`
     };
     
     setProducts(prevProducts => [...prevProducts, newProduct]);
