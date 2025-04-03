@@ -5,15 +5,26 @@ import AdminMessages from '@/components/Admin/AdminMessages';
 import { useStore } from '@/lib/store';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEffect, useState } from 'react';
 
 const AdminDashboard = () => {
   const { orders, products, contactMessages } = useStore();
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // Switch to messages tab if coming from contact page with messages
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'messages') {
+      setActiveTab('messages');
+    }
+  }, []);
   
   // Calculate statistics
   const totalOrders = orders.length;
   const totalProducts = products.length;
   const pendingOrders = orders.filter(order => order.status === 'pending').length;
   const totalRevenue = orders.reduce((total, order) => total + order.total, 0);
+  const unreadMessages = contactMessages.length;
   
   return (
     <AdminLayout title="Dashboard">
@@ -69,10 +80,10 @@ const AdminDashboard = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm p-6 border">
+        <div className={`bg-white rounded-lg shadow-sm p-6 border ${unreadMessages > 0 ? 'ring-2 ring-yellow-300' : ''}`}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">New Messages</p>
+              <p className="text-gray-500 mb-1">Messages</p>
               <h3 className="text-3xl font-bold">{contactMessages.length}</h3>
             </div>
             <div className="p-2 bg-yellow-100 rounded-md">
@@ -80,17 +91,27 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="mt-4">
-            <Link to="#messages" className="text-sm text-smartplug-blue hover:underline">
+            <button 
+              onClick={() => setActiveTab('messages')}
+              className="text-sm text-smartplug-blue hover:underline"
+            >
               View messages
-            </Link>
+            </button>
           </div>
         </div>
       </div>
       
-      <Tabs defaultValue="overview" className="mb-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="messages" className="relative">
+            Messages
+            {unreadMessages > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {unreadMessages}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">

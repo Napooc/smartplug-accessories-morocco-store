@@ -35,6 +35,7 @@ interface StoreContextType {
   // Contact
   contactMessages: ContactMessage[];
   addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => void;
+  deleteContactMessage: (messageId: string) => void;
 
   // Admin
   isAdmin: boolean;
@@ -52,7 +53,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
-  // Load cart from localStorage on initial load
   useEffect(() => {
     const savedCart = localStorage.getItem('smartplug-cart');
     if (savedCart) {
@@ -64,19 +64,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Check if admin is logged in
     const adminLoggedIn = localStorage.getItem('smartplug-admin');
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
   }, []);
   
-  // Save cart to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
   
-  // Computed values
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
   
@@ -85,7 +82,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     0
   );
   
-  // Product functions
   const getProductById = (id: string) => {
     return products.find(product => product.id === id);
   };
@@ -130,7 +126,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toast.success('Product deleted successfully');
   };
   
-  // Cart functions
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.product.id === product.id);
@@ -170,7 +165,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
-  // Order functions
   const placeOrder = () => {
     if (!customerInfo || cart.length === 0) return undefined;
     
@@ -203,7 +197,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toast.success(`Order ${orderId} updated to ${status}`);
   };
   
-  // Contact message functions
   const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
     const newMessage: ContactMessage = {
       ...message,
@@ -214,9 +207,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setContactMessages(prev => [newMessage, ...prev]);
   };
   
-  // Admin functions
+  const deleteContactMessage = (messageId: string) => {
+    setContactMessages(prev => prev.filter(message => message.id !== messageId));
+  };
+  
   const login = (username: string, password: string) => {
-    // In a real app, this would be a proper authentication system
     if (username === 'admin' && password === 'admin123') {
       setIsAdmin(true);
       localStorage.setItem('smartplug-admin', 'true');
@@ -253,6 +248,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     updateOrderStatus,
     contactMessages,
     addContactMessage,
+    deleteContactMessage,
     isAdmin,
     login,
     logout

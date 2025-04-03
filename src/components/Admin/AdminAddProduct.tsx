@@ -1,10 +1,12 @@
-import { useState } from 'react';
+
+import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Upload, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -13,9 +15,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { categories } from '@/lib/data';
+import { toast } from 'sonner';
 
 const AdminAddProduct = () => {
   const { addProduct } = useStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [product, setProduct] = useState({
     name: '',
@@ -26,7 +30,7 @@ const AdminAddProduct = () => {
     featured: false,
     onSale: false,
     stock: 0,
-    images: ['https://via.placeholder.com/300'],
+    images: [] as string[],
     rating: 0,
     sku: ''
   });
@@ -40,6 +44,7 @@ const AdminAddProduct = () => {
   });
   
   const [imageUrl, setImageUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -88,8 +93,43 @@ const AdminAddProduct = () => {
     setImageUrl('');
   };
   
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    setIsUploading(true);
+    
+    // In a real app, you would upload the file to a server here
+    // For now we'll just use FileReader to get a data URL
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setProduct(prev => ({
+            ...prev,
+            images: [...prev.images, event.target!.result as string]
+          }));
+        }
+        setIsUploading(false);
+      };
+      
+      reader.onerror = () => {
+        toast.error("Failed to read the image file");
+        setIsUploading(false);
+      };
+      
+      reader.readAsDataURL(file);
+    });
+    
+    // Clear the file input for future uploads
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
   const removeImage = (index: number) => {
-    if (product.images.length <= 1) {
+    if (product.images.length <= 1 && index === 0) {
       setErrors(prev => ({
         ...prev,
         images: 'Product must have at least one image'
@@ -137,16 +177,16 @@ const AdminAddProduct = () => {
       featured: false,
       onSale: false,
       stock: 0,
-      images: ['https://via.placeholder.com/300'],
+      images: [],
       rating: 0,
       sku: ''
     });
+    
+    toast.success("Product added successfully");
   };
   
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
-      <h2 className="text-xl font-bold mb-6">Add New Product</h2>
-      
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -289,6 +329,27 @@ const AdminAddProduct = () => {
                 Add
               </Button>
             </div>
+            
+            <div className="flex">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              <Button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="w-full flex items-center justify-center"
+                disabled={isUploading}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {isUploading ? "Uploading..." : "Upload from device"}
+              </Button>
+            </div>
           </div>
           
           {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
@@ -306,10 +367,19 @@ const AdminAddProduct = () => {
                   onClick={() => removeImage(index)}
                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  ×
+                  <X size={12} />
                 </button>
               </div>
             ))}
+            
+            {product.images.length === 0 && (
+              <div className="border border-dashed rounded-md flex items-center justify-center h-32 bg-gray-50">
+                <div className="text-center text-gray-500">
+                  <Plus size={24} className="mx-auto mb-1" />
+                  <p className="text-xs">No images yet</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         

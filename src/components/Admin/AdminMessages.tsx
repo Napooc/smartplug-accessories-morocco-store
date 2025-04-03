@@ -3,9 +3,21 @@ import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight, Mail, Trash2 } from 'lucide-react';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from 'sonner';
 
 const AdminMessages = () => {
-  const { contactMessages } = useStore();
+  const { contactMessages, deleteContactMessage } = useStore();
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
   
   const toggleMessage = (messageId: string) => {
@@ -66,17 +78,39 @@ const AdminMessages = () => {
                     <ChevronRight size={18} />
                   }
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Delete functionality would go here
-                  }}
-                >
-                  <Trash2 size={16} />
-                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete message</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this message? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        className="bg-red-500 hover:bg-red-600"
+                        onClick={() => {
+                          deleteContactMessage(message.id);
+                          toast.success("Message deleted successfully");
+                        }}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
             
@@ -91,7 +125,6 @@ const AdminMessages = () => {
                     size="sm" 
                     className="text-smartplug-blue border-smartplug-blue flex items-center"
                     onClick={() => {
-                      // Reply functionality would go here
                       window.location.href = `mailto:${message.email}?subject=Re: ${message.subject || 'Your SmartPlug Inquiry'}`;
                     }}
                   >
