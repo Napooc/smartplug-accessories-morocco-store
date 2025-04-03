@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -84,7 +83,18 @@ const AdminEditProduct = ({ product, onComplete }: AdminEditProductProps) => {
       // Update the product in Supabase
       const { error } = await supabase
         .from('products')
-        .update(updatedProduct)
+        .update({
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          old_price: data.oldPrice > 0 ? data.oldPrice : null,
+          category: data.category,
+          sku: data.sku,
+          stock: data.stock,
+          featured: data.featured,
+          on_sale: data.onSale,
+          images: uploadedImages
+        })
         .eq('id', product.id);
       
       if (error) {

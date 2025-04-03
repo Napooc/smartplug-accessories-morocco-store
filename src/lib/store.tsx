@@ -333,7 +333,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ status })
+        .update({ status: status })
         .eq('id', orderId);
 
       if (error) {

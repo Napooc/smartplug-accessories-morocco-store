@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -90,8 +89,7 @@ const AdminAddProduct = ({ onComplete }: AdminAddProductProps) => {
       const { data: insertedProduct, error } = await supabase
         .from('products')
         .insert(newProduct)
-        .select()
-        .single();
+        .select();
       
       if (error) {
         throw new Error(error.message);

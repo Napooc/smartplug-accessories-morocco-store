@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -21,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cities } from '@/lib/data';
-import { CustomerInfo } from '@/lib/types';
+import { CustomerInfo, Order } from '@/lib/types';
 import { toast } from 'sonner';
 
 const Checkout = () => {
@@ -86,7 +87,7 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -96,7 +97,7 @@ const Checkout = () => {
     
     setCustomerInfo(formData);
     
-    const orderResult = placeOrder();
+    const orderResult = await placeOrder();
     
     if (orderResult) {
       navigate('/confirmation', { state: { orderId: orderResult.id } });
