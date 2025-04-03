@@ -100,13 +100,16 @@ const Checkout = () => {
     // Save customer info
     setCustomerInfo(formData);
     
-    // Place order
+    // Place order and get order details
     const order = placeOrder();
     
-    // Navigate to confirmation
-    navigate('/confirmation', { state: { orderId: order?.id } });
+    if (order) {
+      // Navigate to confirmation with order ID
+      navigate('/confirmation', { state: { orderId: order.id } });
+    }
   };
   
+  // Redirect if cart is empty
   if (cart.length === 0) {
     navigate('/cart');
     return null;
