@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { CartItem, CustomerInfo, Product, Order, OrderStatus } from './types';
-import { products, mockOrders } from './data';
+import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
+import { products as initialProducts, mockOrders } from './data';
 import { toast } from 'sonner';
 
 interface StoreContextType {
@@ -11,6 +11,10 @@ interface StoreContextType {
   saleProducts: Product[];
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
+  addProduct: (product: Omit<Product, 'id'>) => void;
+  updateProduct: (id: string, product: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
+  searchProducts: (query: string) => Product[];
   
   // Cart
   cart: CartItem[];
@@ -29,6 +33,10 @@ interface StoreContextType {
   orders: Order[];
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
 
+  // Contact
+  contactMessages: ContactMessage[];
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => void;
+
   // Admin
   isAdmin: boolean;
   login: (username: string, password: string) => boolean;
@@ -38,10 +46,12 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
   // Load cart from localStorage on initial load
   useEffect(() => {
@@ -83,6 +93,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const getProductsByCategory = (category: string) => {
     return products.filter(product => product.category === category);
+  };
+  
+  const searchProducts = (query: string) => {
+    if (!query.trim()) return [];
+    
+    const lowerCaseQuery = query.toLowerCase().trim();
+    
+    return products.filter(product => 
+      product.name.toLowerCase().includes(lowerCaseQuery) ||
+      product.description.toLowerCase().includes(lowerCaseQuery) ||
+      product.category.toLowerCase().includes(lowerCaseQuery)
+    );
+  };
+  
+  const addProduct = (product: Omit<Product, 'id'>) => {
+    const newProduct: Product = {
+      ...product,
+      id: `prod-${Date.now()}`,
+      rating: 0,
+      reviews: []
+    };
+    
+    setProducts(prevProducts => [...prevProducts, newProduct]);
+    toast.success(`${product.name} added to products`);
+  };
+  
+  const updateProduct = (id: string, productUpdate: Partial<Product>) => {
+    setProducts(prevProducts => 
+      prevProducts.map(product => 
+        product.id === id ? { ...product, ...productUpdate } : product
+      )
+    );
+    toast.success('Product updated successfully');
+  };
+  
+  const deleteProduct = (id: string) => {
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    toast.success('Product deleted successfully');
   };
   
   // Cart functions
@@ -158,6 +206,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toast.success(`Order ${orderId} updated to ${status}`);
   };
   
+  // Contact message functions
+  const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
+    const newMessage: ContactMessage = {
+      ...message,
+      id: `msg-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0]
+    };
+    
+    setContactMessages(prev => [newMessage, ...prev]);
+  };
+  
   // Admin functions
   const login = (username: string, password: string) => {
     // In a real app, this would be a proper authentication system
@@ -180,6 +239,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     saleProducts,
     getProductById,
     getProductsByCategory,
+    searchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
     cart,
     addToCart,
     removeFromCart,
@@ -191,6 +254,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     placeOrder,
     orders,
     updateOrderStatus,
+    contactMessages,
+    addContactMessage,
     isAdmin,
     login,
     logout

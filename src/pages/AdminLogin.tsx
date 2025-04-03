@@ -90,10 +90,6 @@ const AdminLogin = () => {
                 >
                   Login
                 </Button>
-                
-                <p className="text-center text-sm text-gray-600 mt-4">
-                  Use username: "admin" and password: "admin123" for demo access
-                </p>
               </div>
             </form>
           </div>

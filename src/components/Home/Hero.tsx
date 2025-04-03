@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const slides = [
   {
-    image: '/public/lovable-uploads/c4ef3adc-3f74-445b-aa83-7a85b48c199a.png',
+    image: 'https://images.unsplash.com/photo-1655826630513-6a9ad02f8ad9?q=80&w=1200&auto=format&fit=crop',
     title: 'SmartPlug: Innovation Meets Excellence!',
     subtitle: 'Premium Phone Accessories',
     price: '199.00 DH',
@@ -13,7 +13,7 @@ const slides = [
     link: '/shop'
   },
   {
-    image: '/public/lovable-uploads/630c44e5-1c0c-4664-8ac2-18390ad254fb.png',
+    image: 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?q=80&w=1200&auto=format&fit=crop',
     title: 'Premium Headphones',
     subtitle: 'Experience Sound Like Never Before',
     price: '499.00 DH',
@@ -21,7 +21,7 @@ const slides = [
     link: '/product/3'
   },
   {
-    image: '/public/lovable-uploads/563a1834-b7fa-40eb-8a01-96162ae40d11.png',
+    image: 'https://images.unsplash.com/photo-1587652880114-a47d4e48701f?q=80&w=1200&auto=format&fit=crop',
     title: 'Fast Charging',
     subtitle: 'Power Up Your Devices Quickly',
     price: '149.00 DH',
@@ -67,7 +67,7 @@ export default function Hero() {
             <div className="max-w-lg text-white">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">{slide.title}</h1>
               <p className="text-xl mb-2">{slide.subtitle}</p>
-              <p className="text-2xl font-bold text-smartplug-blue mb-6">${slide.price}</p>
+              <p className="text-2xl font-bold text-smartplug-blue mb-6">{slide.price}</p>
               <Link
                 to={slide.link}
                 className="inline-block bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-3 px-8 rounded-md transition-colors"

@@ -1,11 +1,12 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   ShoppingCart, 
   Search, 
   Menu, 
   User,
-  Headphones
+  Headphones,
+  X
 } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
@@ -16,18 +17,51 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function Navbar() {
-  const { cart, isAdmin } = useStore();
+  const navigate = useNavigate();
+  const { cart, isAdmin, searchProducts } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<any>>([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement search functionality
-    console.log("Searching for:", searchQuery);
+    
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    if (value.trim().length >= 2) {
+      const results = searchProducts(value);
+      setSearchResults(results.slice(0, 5));
+      setIsSearching(true);
+    } else {
+      setSearchResults([]);
+      setIsSearching(false);
+    }
+  };
+  
+  const handleSearchResultClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsSearching(false);
   };
   
   return (
@@ -54,21 +88,67 @@ export default function Navbar() {
           
           {/* Search bar - visible on desktop */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="w-full flex">
-              <Input
-                type="text"
-                placeholder="What are you looking for?"
-                className="rounded-l-md border-r-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button 
-                type="submit" 
-                className="rounded-l-none bg-smartplug-blue hover:bg-smartplug-lightblue"
-              >
-                <Search size={18} />
-              </Button>
-            </form>
+            <Popover open={isSearching && searchResults.length > 0} onOpenChange={setIsSearching}>
+              <div className="w-full flex relative">
+                <PopoverTrigger asChild>
+                  <form onSubmit={handleSearch} className="w-full flex">
+                    <Input
+                      type="text"
+                      placeholder="What are you looking for?"
+                      className="rounded-l-md border-r-0"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="rounded-l-none bg-smartplug-blue hover:bg-smartplug-lightblue"
+                    >
+                      <Search size={18} />
+                    </Button>
+                  </form>
+                </PopoverTrigger>
+                
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  {searchResults.length > 0 ? (
+                    <div className="py-2">
+                      {searchResults.map((product) => (
+                        <div 
+                          key={product.id}
+                          className="flex items-center p-2 cursor-pointer hover:bg-gray-100"
+                          onClick={() => handleSearchResultClick(product.id)}
+                        >
+                          <img 
+                            src={product.images[0]} 
+                            alt={product.name}
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                          <div className="ml-3">
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-sm text-gray-500">{product.price} DH</div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="border-t pt-2 px-2 mt-1">
+                        <Button 
+                          variant="ghost" 
+                          className="w-full justify-center text-smartplug-blue"
+                          onClick={() => {
+                            navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                            setIsSearching(false);
+                          }}
+                        >
+                          View all results
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">No results found</div>
+                  )}
+                </PopoverContent>
+              </div>
+            </Popover>
           </div>
           
           {/* Nav links */}
@@ -148,8 +228,10 @@ export default function Navbar() {
                   <nav className="space-y-4 mt-8">
                     <Link to="/" className="block px-2 py-1 text-lg">Home</Link>
                     <Link to="/shop" className="block px-2 py-1 text-lg">Shop</Link>
-                    <Link to="/categories" className="block px-2 py-1 text-lg">Categories</Link>
+                    <Link to="/categories/earbuds" className="block px-2 py-1 text-lg">Categories</Link>
                     <Link to="/cart" className="block px-2 py-1 text-lg">Cart</Link>
+                    <Link to="/about" className="block px-2 py-1 text-lg">About Us</Link>
+                    <Link to="/contact" className="block px-2 py-1 text-lg">Contact</Link>
                     {isAdmin ? (
                       <Link to="/admin" className="block px-2 py-1 text-lg">Admin Dashboard</Link>
                     ) : (
@@ -172,9 +254,22 @@ export default function Navbar() {
       <div className="bg-gray-100 py-2 hidden md:block">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1">
-              <Menu size={18} className="text-gray-600" />
-              <span className="font-medium">CATEGORIES</span>
+            <div className="relative group">
+              <div className="flex items-center space-x-1 cursor-pointer">
+                <Menu size={18} className="text-gray-600" />
+                <span className="font-medium">CATEGORIES</span>
+              </div>
+              
+              <div className="absolute left-0 top-full mt-2 w-60 bg-white shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="py-2">
+                  <Link to="/categories/earbuds" className="block px-4 py-2 hover:bg-gray-100">Earbuds</Link>
+                  <Link to="/categories/cases" className="block px-4 py-2 hover:bg-gray-100">Phone Cases</Link>
+                  <Link to="/categories/chargers" className="block px-4 py-2 hover:bg-gray-100">Chargers</Link>
+                  <Link to="/categories/cables" className="block px-4 py-2 hover:bg-gray-100">Cables</Link>
+                  <Link to="/categories/speakers" className="block px-4 py-2 hover:bg-gray-100">Speakers</Link>
+                  <Link to="/categories/accessories" className="block px-4 py-2 hover:bg-gray-100">Accessories</Link>
+                </div>
+              </div>
             </div>
             
             <div className="flex space-x-8">
@@ -185,7 +280,7 @@ export default function Navbar() {
             </div>
             
             <div className="flex items-center">
-              <Link to="/sale" className="flex items-center">
+              <Link to="/shop" className="flex items-center">
                 <span className="font-medium mr-2">Ongoing Offers</span>
                 <span className="sale-badge">Sale</span>
               </Link>
