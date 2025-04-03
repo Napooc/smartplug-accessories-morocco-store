@@ -23,7 +23,7 @@ interface StoreContextType {
   // Checkout
   customerInfo: CustomerInfo | null;
   setCustomerInfo: (info: CustomerInfo) => void;
-  placeOrder: () => void;
+  placeOrder: () => Order | undefined;
   
   // Orders
   orders: Order[];
@@ -127,7 +127,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   // Order functions
   const placeOrder = () => {
-    if (!customerInfo || cart.length === 0) return;
+    if (!customerInfo || cart.length === 0) return undefined;
     
     const newOrder: Order = {
       id: `ORD-${Math.floor(Math.random() * 1000)}`,

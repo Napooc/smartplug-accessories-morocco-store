@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -44,7 +43,6 @@ const Checkout = () => {
       [name]: value,
     });
     
-    // Clear error when user starts typing
     if (errors[name as keyof CustomerInfo]) {
       setErrors({
         ...errors,
@@ -59,7 +57,6 @@ const Checkout = () => {
       city: value,
     });
     
-    // Clear error when user selects a city
     if (errors.city) {
       setErrors({
         ...errors,
@@ -97,19 +94,15 @@ const Checkout = () => {
       return;
     }
     
-    // Save customer info
     setCustomerInfo(formData);
     
-    // Place order and get order details
-    const order = placeOrder();
+    const orderResult = placeOrder();
     
-    if (order) {
-      // Navigate to confirmation with order ID
-      navigate('/confirmation', { state: { orderId: order.id } });
+    if (orderResult) {
+      navigate('/confirmation', { state: { orderId: orderResult.id } });
     }
   };
   
-  // Redirect if cart is empty
   if (cart.length === 0) {
     navigate('/cart');
     return null;
