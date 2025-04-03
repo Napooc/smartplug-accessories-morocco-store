@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,11 +23,32 @@ import AdminProducts from "./pages/AdminProducts";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import { supabase } from "./integrations/supabase/client";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 const App = () => {
+  useEffect(() => {
+    // Set up Supabase auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN') {
+          console.log('User signed in:', session?.user);
+          localStorage.setItem('smartplug-admin', 'true');
+        } else if (event === 'SIGNED_OUT') {
+          console.log('User signed out');
+          localStorage.removeItem('smartplug-admin');
+        }
+      }
+    );
+
+    // Clean up subscription when component unmounts
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>

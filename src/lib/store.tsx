@@ -1,7 +1,10 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts, mockOrders } from './data';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 interface StoreContextType {
   // Products
@@ -26,7 +29,7 @@ interface StoreContextType {
   // Checkout
   customerInfo: CustomerInfo | null;
   setCustomerInfo: (info: CustomerInfo) => void;
-  placeOrder: () => Order | undefined;
+  placeOrder: () => Promise<Order | undefined>;
   
   // Orders
   orders: Order[];
@@ -34,22 +37,23 @@ interface StoreContextType {
 
   // Contact
   contactMessages: ContactMessage[];
-  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => void;
-  deleteContactMessage: (messageId: string) => void;
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<void>;
+  deleteContactMessage: (messageId: string) => Promise<void>;
+  loadContactMessages: () => Promise<void>;
 
   // Admin
   isAdmin: boolean;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
@@ -68,11 +72,113 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
+
+    // Load products from Supabase
+    loadProducts();
+    loadOrders();
+    loadContactMessages();
+
   }, []);
   
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
+
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        // Transform the data to match our Product interface
+        const transformedProducts: Product[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: Number(item.price),
+          oldPrice: item.old_price ? Number(item.old_price) : undefined,
+          images: item.images,
+          category: item.category,
+          rating: item.rating,
+          stock: item.stock,
+          sku: item.sku,
+          featured: item.featured,
+          onSale: item.on_sale
+        }));
+        setProducts(transformedProducts);
+      } else {
+        // If no products in Supabase, use initial products
+        setProducts(initialProducts);
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+      toast.error('Failed to load products');
+      setProducts(initialProducts);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        const transformedOrders: Order[] = data.map(item => ({
+          id: item.id,
+          items: item.items,
+          status: item.status as OrderStatus,
+          customer: item.customer_info,
+          date: new Date(item.date).toISOString().split('T')[0],
+          total: Number(item.total)
+        }));
+        setOrders(transformedOrders);
+      } else {
+        setOrders(mockOrders);
+      }
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      toast.error('Failed to load orders');
+      setOrders(mockOrders);
+    }
+  };
+
+  const loadContactMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const transformedMessages: ContactMessage[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          subject: item.subject || undefined,
+          message: item.message,
+          date: new Date(item.date).toISOString().split('T')[0]
+        }));
+        setContactMessages(transformedMessages);
+      }
+    } catch (error) {
+      console.error('Error loading contact messages:', error);
+    }
+  };
   
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
@@ -121,9 +227,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toast.success('Product updated successfully');
   };
   
-  const deleteProduct = (id: string) => {
-    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-    toast.success('Product deleted successfully');
+  const deleteProduct = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+      toast.success('Product deleted successfully');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product. Please try again.');
+    }
   };
   
   const addToCart = (product: Product, quantity: number = 1) => {
@@ -165,62 +285,167 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (!customerInfo || cart.length === 0) return undefined;
     
-    const newOrder: Order = {
-      id: `ORD-${Math.floor(Math.random() * 1000)}`,
-      items: [...cart],
-      status: 'pending',
-      customer: customerInfo,
-      date: new Date().toISOString().split('T')[0],
-      total: cartTotal
-    };
-    
-    setOrders(prevOrders => [...prevOrders, newOrder]);
-    clearCart();
-    setCustomerInfo(null);
-    
-    toast.success("Order placed successfully!");
-    return newOrder;
+    try {
+      const orderId = `ORD-${Math.floor(Math.random() * 1000)}`;
+
+      const newOrder: Order = {
+        id: orderId,
+        items: [...cart],
+        status: 'pending',
+        customer: customerInfo,
+        date: new Date().toISOString().split('T')[0],
+        total: cartTotal
+      };
+      
+      // Insert order into Supabase
+      const { error } = await supabase
+        .from('orders')
+        .insert({
+          id: newOrder.id,
+          items: newOrder.items,
+          status: newOrder.status,
+          customer_info: newOrder.customer,
+          date: new Date().toISOString(),
+          total: newOrder.total
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      setOrders(prevOrders => [newOrder, ...prevOrders]);
+      clearCart();
+      setCustomerInfo(null);
+      
+      toast.success("Order placed successfully!");
+      return newOrder;
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order. Please try again.');
+      return undefined;
+    }
   };
   
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
-    setOrders(prevOrders =>
-      prevOrders.map(order =>
-        order.id === orderId
-          ? { ...order, status }
-          : order
-      )
-    );
-    
-    toast.success(`Order ${orderId} updated to ${status}`);
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+
+      if (error) {
+        throw error;
+      }
+
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId
+            ? { ...order, status }
+            : order
+        )
+      );
+      
+      toast.success(`Order ${orderId} updated to ${status}`);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast.error('Failed to update order status. Please try again.');
+    }
   };
   
-  const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
-    const newMessage: ContactMessage = {
-      ...message,
-      id: `msg-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    setContactMessages(prev => [newMessage, ...prev]);
+  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>) => {
+    try {
+      // Insert message into Supabase
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: message.name,
+          email: message.email,
+          subject: message.subject || null,
+          message: message.message,
+          date: new Date().toISOString()
+        })
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      const newMessage: ContactMessage = {
+        id: data[0].id,
+        ...message,
+        date: new Date().toISOString().split('T')[0]
+      };
+      
+      setContactMessages(prev => [newMessage, ...prev]);
+    } catch (error) {
+      console.error('Error adding contact message:', error);
+      throw error;
+    }
   };
   
-  const deleteContactMessage = (messageId: string) => {
-    setContactMessages(prev => prev.filter(message => message.id !== messageId));
+  const deleteContactMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) {
+        throw error;
+      }
+
+      setContactMessages(prev => prev.filter(message => message.id !== messageId));
+    } catch (error) {
+      console.error('Error deleting contact message:', error);
+      throw error;
+    }
   };
   
-  const login = (username: string, password: string) => {
+  const login = async (username: string, password: string) => {
+    // In a real app, use Supabase auth
     if (username === 'admin' && password === 'admin123') {
-      setIsAdmin(true);
-      localStorage.setItem('smartplug-admin', 'true');
-      return true;
+      try {
+        // Sign in using Supabase auth
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: 'admin@example.com',
+          password: 'admin123'
+        });
+
+        if (error) {
+          console.log('Using test credentials instead of Supabase auth');
+          // Fall back to our mock auth for development
+          setIsAdmin(true);
+          localStorage.setItem('smartplug-admin', 'true');
+          return true;
+        }
+
+        if (data.user) {
+          setIsAdmin(true);
+          localStorage.setItem('smartplug-admin', 'true');
+          return true;
+        }
+
+        return false;
+      } catch (error) {
+        console.error('Login error:', error);
+        // Fall back to our mock auth for development
+        setIsAdmin(true);
+        localStorage.setItem('smartplug-admin', 'true');
+        return true;
+      }
     }
     return false;
   };
   
   const logout = () => {
+    // Sign out from Supabase
+    supabase.auth.signOut().catch(error => {
+      console.error('Error signing out:', error);
+    });
+
     setIsAdmin(false);
     localStorage.removeItem('smartplug-admin');
   };
@@ -249,6 +474,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     contactMessages,
     addContactMessage,
     deleteContactMessage,
+    loadContactMessages,
     isAdmin,
     login,
     logout

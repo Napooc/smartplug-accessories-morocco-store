@@ -1,8 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Mail, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Mail, Trash2, RefreshCw } from 'lucide-react';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -17,14 +17,28 @@ import {
 import { toast } from 'sonner';
 
 const AdminMessages = () => {
-  const { contactMessages, deleteContactMessage } = useStore();
+  const { contactMessages, deleteContactMessage, loadContactMessages } = useStore();
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const toggleMessage = (messageId: string) => {
     if (expandedMessage === messageId) {
       setExpandedMessage(null);
     } else {
       setExpandedMessage(messageId);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await loadContactMessages();
+      toast.success('Messages refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing messages:', error);
+      toast.error('Failed to refresh messages');
+    } finally {
+      setIsRefreshing(false);
     }
   };
   
@@ -39,6 +53,14 @@ const AdminMessages = () => {
           <p className="text-gray-500 mb-4">
             You haven't received any contact messages yet.
           </p>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
       </div>
     );
@@ -48,6 +70,15 @@ const AdminMessages = () => {
     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
       <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
         <h3 className="font-medium">Contact Messages ({contactMessages.length})</h3>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`mr-1 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
       
       <ul className="divide-y">
@@ -101,9 +132,14 @@ const AdminMessages = () => {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction 
                         className="bg-red-500 hover:bg-red-600"
-                        onClick={() => {
-                          deleteContactMessage(message.id);
-                          toast.success("Message deleted successfully");
+                        onClick={async () => {
+                          try {
+                            await deleteContactMessage(message.id);
+                            toast.success("Message deleted successfully");
+                          } catch (error) {
+                            console.error('Error deleting message:', error);
+                            toast.error('Failed to delete message');
+                          }
                         }}
                       >
                         Delete

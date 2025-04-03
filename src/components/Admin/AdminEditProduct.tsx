@@ -1,9 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useStore } from '@/lib/store';
+import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,98 +31,74 @@ const schema = z.object({
   price: z.coerce.number().positive('Price must be positive'),
   oldPrice: z.coerce.number().nonnegative('Old price must be non-negative').optional(),
   category: z.string().min(1, 'Category is required'),
+  sku: z.string().min(1, 'SKU is required'),
   stock: z.coerce.number().int().nonnegative('Stock must be non-negative'),
   featured: z.boolean().default(false),
   onSale: z.boolean().default(false),
 });
 
-interface AdminAddProductProps {
-  onComplete?: () => void;
+interface AdminEditProductProps {
+  product: Product;
+  onComplete: () => void;
 }
 
-const AdminAddProduct = ({ onComplete }: AdminAddProductProps) => {
-  const { addProduct } = useStore();
+const AdminEditProduct = ({ product, onComplete }: AdminEditProductProps) => {
+  const { updateProduct } = useStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>(product.images);
   const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: '',
-      description: '',
-      price: 0,
-      oldPrice: 0,
-      category: '',
-      stock: 0,
-      featured: false,
-      onSale: false,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      oldPrice: product.oldPrice || 0,
+      category: product.category,
+      sku: product.sku,
+      stock: product.stock,
+      featured: product.featured || false,
+      onSale: product.onSale || false,
     }
   });
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
-    if (uploadedImages.length === 0) {
-      toast.error('Please upload at least one product image');
-      return;
-    }
-
     setIsSubmitting(true);
     
     try {
-      // Generate a SKU
-      const sku = `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      
-      // Create new product data
-      const newProduct = {
+      // Create updated product data
+      const updatedProduct: Partial<Product> = {
         name: data.name,
         description: data.description,
         price: data.price,
-        old_price: data.oldPrice && data.oldPrice > 0 ? data.oldPrice : null,
+        oldPrice: data.oldPrice > 0 ? data.oldPrice : undefined,
         category: data.category,
-        sku,
+        sku: data.sku,
         stock: data.stock,
         featured: data.featured,
-        on_sale: data.onSale,
+        onSale: data.onSale,
         images: uploadedImages,
-        rating: 0
       };
       
-      // Insert the product into Supabase
-      const { data: insertedProduct, error } = await supabase
+      // Update the product in Supabase
+      const { error } = await supabase
         .from('products')
-        .insert(newProduct)
-        .select()
-        .single();
+        .update(updatedProduct)
+        .eq('id', product.id);
       
       if (error) {
         throw new Error(error.message);
       }
       
-      // Add to local store
-      addProduct({
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        oldPrice: data.oldPrice && data.oldPrice > 0 ? data.oldPrice : undefined,
-        category: data.category,
-        sku,
-        stock: data.stock,
-        featured: data.featured,
-        onSale: data.onSale,
-        images: uploadedImages,
-        rating: 0
-      });
+      // Update local state
+      updateProduct(product.id, updatedProduct);
       
-      toast.success('Product added successfully!');
-      form.reset();
-      setUploadedImages([]);
-      
-      if (onComplete) {
-        onComplete();
-      }
+      toast.success('Product updated successfully!');
+      onComplete();
     } catch (error) {
-      console.error('Error adding product:', error);
-      toast.error('Failed to add product. Please try again.');
+      console.error('Error updating product:', error);
+      toast.error('Failed to update product. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -184,6 +161,20 @@ const AdminAddProduct = ({ onComplete }: AdminAddProductProps) => {
                     <FormLabel>Product Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter product name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="sku"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SKU</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter SKU" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -349,9 +340,7 @@ const AdminAddProduct = ({ onComplete }: AdminAddProductProps) => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  if (onComplete) onComplete();
-                }}
+                onClick={onComplete}
                 disabled={isSubmitting}
               >
                 Cancel
@@ -364,10 +353,10 @@ const AdminAddProduct = ({ onComplete }: AdminAddProductProps) => {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding...
+                    Updating...
                   </>
                 ) : (
-                  'Add Product'
+                  'Update Product'
                 )}
               </Button>
             </div>
@@ -378,4 +367,4 @@ const AdminAddProduct = ({ onComplete }: AdminAddProductProps) => {
   );
 };
 
-export default AdminAddProduct;
+export default AdminEditProduct;

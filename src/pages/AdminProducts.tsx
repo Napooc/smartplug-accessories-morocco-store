@@ -1,20 +1,25 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
+import AdminEditProduct from '@/components/Admin/AdminEditProduct';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Plus, X, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Product } from '@/lib/types';
+import { toast } from 'sonner';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from '@/components/ui/sheet';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const AdminProducts = () => {
   const { products, deleteProduct } = useStore();
@@ -22,6 +27,7 @@ const AdminProducts = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [sortBy, setSortBy] = useState<string>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   // Filter and sort products
   const filteredProducts = products
@@ -61,6 +67,14 @@ const AdminProducts = () => {
       return sortOrder === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
     }
     return <ChevronDown size={16} className="text-gray-300" />;
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProduct(null);
   };
   
   return (
@@ -106,7 +120,23 @@ const AdminProducts = () => {
               <X size={18} />
             </Button>
           </div>
-          <AdminAddProduct />
+          <AdminAddProduct onComplete={() => setShowAddProduct(false)} />
+        </div>
+      )}
+
+      {editingProduct && (
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Edit Product</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCancelEdit}
+            >
+              <X size={18} />
+            </Button>
+          </div>
+          <AdminEditProduct product={editingProduct} onComplete={handleCancelEdit} />
         </div>
       )}
       
@@ -181,34 +211,46 @@ const AdminProducts = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
-                        <Sheet>
-                          <SheetTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <Edit size={16} />
-                            </Button>
-                          </SheetTrigger>
-                          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-                            <SheetHeader>
-                              <SheetTitle>Edit Product</SheetTitle>
-                              <SheetDescription>
-                                Make changes to the product here.
-                              </SheetDescription>
-                            </SheetHeader>
-                            <div className="py-4">
-                              {/* Edit product form would go here */}
-                              <p className="text-gray-500">This feature is coming soon.</p>
-                            </div>
-                          </SheetContent>
-                        </Sheet>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                          onClick={() => deleteProduct(product.id)}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleEditProduct(product)}
                         >
-                          <Trash2 size={16} />
+                          <Edit size={16} />
                         </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete product</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this product? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600"
+                                onClick={() => {
+                                  deleteProduct(product.id);
+                                  toast.success("Product deleted successfully");
+                                }}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </td>
                   </tr>
