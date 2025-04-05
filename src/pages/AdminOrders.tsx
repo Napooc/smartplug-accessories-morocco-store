@@ -1,7 +1,6 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -24,9 +23,14 @@ import {
 import { OrderStatus } from '@/lib/types';
 
 const AdminOrders = () => {
-  const { orders, updateOrderStatus } = useStore();
+  const { orders, updateOrderStatus, fetchOrders } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  // Fetch orders on component mount
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
   
   // Filter orders
   const filteredOrders = orders.filter((order) => {
@@ -219,6 +223,10 @@ const AdminOrders = () => {
                                             src={item.product.images[0]} 
                                             alt={item.product.name}
                                             className="w-10 h-10 object-cover rounded border mr-3"
+                                            onError={(e) => {
+                                              const target = e.target as HTMLImageElement;
+                                              target.src = 'https://images.unsplash.com/photo-1611254666350-69a2fb8c6354?w=500&auto=format&fit=crop&q=80';
+                                            }}
                                           />
                                           <span className="font-medium">{item.product.name}</span>
                                         </div>

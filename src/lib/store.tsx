@@ -1,7 +1,9 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
-import { products as initialProducts, mockOrders } from './data';
+import { products as initialProducts } from './data';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StoreContextType {
   // Products
@@ -26,10 +28,11 @@ interface StoreContextType {
   // Checkout
   customerInfo: CustomerInfo | null;
   setCustomerInfo: (info: CustomerInfo) => void;
-  placeOrder: () => Order | undefined;
+  placeOrder: () => Promise<Order | undefined>;
   
   // Orders
   orders: Order[];
+  fetchOrders: () => Promise<void>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
 
   // Contact
@@ -49,10 +52,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
+  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('smartplug-cart');
     if (savedCart) {
@@ -68,8 +72,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
+
+    // Fetch orders when component mounts
+    fetchOrders();
   }, []);
   
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
@@ -165,36 +173,111 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
-  const placeOrder = () => {
-    if (!customerInfo || cart.length === 0) return undefined;
-    
-    const newOrder: Order = {
-      id: `ORD-${Math.floor(Math.random() * 1000)}`,
-      items: [...cart],
-      status: 'pending',
-      customer: customerInfo,
-      date: new Date().toISOString().split('T')[0],
-      total: cartTotal
-    };
-    
-    setOrders(prevOrders => [...prevOrders, newOrder]);
-    clearCart();
-    setCustomerInfo(null);
-    
-    toast.success("Order placed successfully!");
-    return newOrder;
+  // Fetch orders from Supabase
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase.from('orders').select('*');
+      
+      if (error) {
+        console.error('Error fetching orders:', error);
+        return;
+      }
+      
+      if (data) {
+        // Transform Supabase data to Order type
+        const formattedOrders: Order[] = data.map(order => ({
+          id: order.id,
+          items: order.items as unknown as CartItem[],
+          status: order.status as OrderStatus,
+          customer: order.customer_info as unknown as CustomerInfo,
+          date: new Date(order.date).toISOString().split('T')[0],
+          total: order.total
+        }));
+        
+        setOrders(formattedOrders);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
   };
   
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
-    setOrders(prevOrders =>
-      prevOrders.map(order =>
-        order.id === orderId
-          ? { ...order, status }
-          : order
-      )
-    );
+  const placeOrder = async () => {
+    if (!customerInfo || cart.length === 0) return undefined;
     
-    toast.success(`Order ${orderId} updated to ${status}`);
+    try {
+      // Format the order data for Supabase
+      const orderData = {
+        customer_info: customerInfo,
+        items: cart,
+        status: 'pending' as OrderStatus,
+        total: cartTotal,
+        date: new Date().toISOString()
+      };
+      
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error saving order:', error);
+        toast.error('Failed to place order. Please try again.');
+        return undefined;
+      }
+
+      // Transform the returned data to our Order type
+      const newOrder: Order = {
+        id: data.id,
+        items: cart,
+        status: data.status as OrderStatus,
+        customer: customerInfo,
+        date: new Date(data.date).toISOString().split('T')[0],
+        total: cartTotal
+      };
+      
+      setOrders(prevOrders => [...prevOrders, newOrder]);
+      clearCart();
+      setCustomerInfo(null);
+      
+      toast.success("Order placed successfully!");
+      return newOrder;
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order. Please try again.');
+      return undefined;
+    }
+  };
+  
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    try {
+      // Update in Supabase
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+      
+      if (error) {
+        console.error('Error updating order status:', error);
+        toast.error('Failed to update order status');
+        return;
+      }
+      
+      // Update local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId
+            ? { ...order, status }
+            : order
+        )
+      );
+      
+      toast.success(`Order ${orderId} updated to ${status}`);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast.error('Failed to update order status');
+    }
   };
   
   const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
@@ -245,6 +328,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCustomerInfo,
     placeOrder,
     orders,
+    fetchOrders,
     updateOrderStatus,
     contactMessages,
     addContactMessage,

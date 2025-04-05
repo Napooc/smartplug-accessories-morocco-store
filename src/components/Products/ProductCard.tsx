@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Product } from '@/lib/types';
@@ -46,6 +47,9 @@ const getUniqueProductImage = (productId: string, productName: string): string =
     'adapter': 'https://images.unsplash.com/photo-1662994581277-ba58862b43d2?w=500&auto=format&fit=crop&q=80',
     'hub': 'https://images.unsplash.com/photo-1649859394614-dc4646ad634c?w=500&auto=format&fit=crop&q=80',
     'plug': 'https://images.unsplash.com/photo-1587212193650-ff26ea75bc92?w=500&auto=format&fit=crop&q=80',
+    'usb': 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80',
+    'cable': 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80',
+    'wireless': 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=500&auto=format&fit=crop&q=80',
   };
   
   // Find the matching key in the uniqueImages object
@@ -71,21 +75,23 @@ export default function ProductCard({ product }: ProductCardProps) {
   const productImage = getUniqueProductImage(product.id, product.name) || product.images[0];
   
   return (
-    <div className="product-card">
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full">
       {product.onSale && (
-        <span className="sale-badge absolute top-2 right-2">Sale</span>
+        <span className="bg-red-500 text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded">
+          Sale
+        </span>
       )}
       
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-48">
         <img 
           src={productImage} 
           alt={product.name}
-          className="product-card-image"
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
       </Link>
       
-      <div className="product-card-content">
-        <div className="product-rating">
+      <div className="p-4 flex-grow flex flex-col">
+        <div className="mb-2">
           <Rating value={product.rating} />
         </div>
         
@@ -95,21 +101,21 @@ export default function ProductCard({ product }: ProductCardProps) {
           </h3>
         </Link>
         
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
           {product.description}
         </p>
         
         <div className="flex items-center mb-3">
-          <span className="product-price">{product.price} DH</span>
+          <span className="text-lg font-bold text-smartplug-blue">{product.price} DH</span>
           {product.oldPrice && (
-            <span className="product-old-price">{product.oldPrice} DH</span>
+            <span className="text-gray-400 text-sm line-through ml-2">{product.oldPrice} DH</span>
           )}
         </div>
         
         <div className="flex justify-between items-center">
           <button 
             onClick={() => addToCart(product)}
-            className="button-primary flex items-center"
+            className="bg-smartplug-blue hover:bg-smartplug-lightblue text-white px-3 py-1.5 rounded text-sm flex items-center transition-colors"
           >
             <ShoppingCart size={16} className="mr-1" />
             Add to Cart

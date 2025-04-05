@@ -8,8 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEffect, useState } from 'react';
 
 const AdminDashboard = () => {
-  const { orders, products, contactMessages } = useStore();
+  const { orders, products, contactMessages, fetchOrders } = useStore();
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Fetch orders on component mount
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
   
   // Switch to messages tab if coming from contact page with messages
   useEffect(() => {
