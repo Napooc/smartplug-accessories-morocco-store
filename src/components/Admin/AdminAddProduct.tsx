@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -15,7 +16,6 @@ import {
 } from '@/components/ui/select';
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
-import { Product } from '@/lib/types';
 
 const AdminAddProduct = () => {
   const { addProduct } = useStore();
@@ -99,6 +99,8 @@ const AdminAddProduct = () => {
     
     setIsUploading(true);
     
+    // In a real app, you would upload the file to a server here
+    // For now we'll just use FileReader to get a data URL
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       
@@ -120,6 +122,7 @@ const AdminAddProduct = () => {
       reader.readAsDataURL(file);
     });
     
+    // Clear the file input for future uploads
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -157,7 +160,13 @@ const AdminAddProduct = () => {
       return;
     }
     
-    addProduct(product);
+    if (!product.sku) {
+      const randomSku = `SKU-${Math.floor(Math.random() * 10000)}`;
+      const productWithSku = {...product, sku: randomSku};
+      addProduct(productWithSku);
+    } else {
+      addProduct(product);
+    }
     
     setProduct({
       name: '',

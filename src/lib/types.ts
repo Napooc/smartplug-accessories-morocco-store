@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -17,7 +16,6 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
-  productId?: string; // Adding this for backward compatibility
 }
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -27,14 +25,6 @@ export interface CustomerInfo {
   nickname?: string;
   phone: string;
   city: string;
-  // Additional fields needed for Checkout.tsx
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  address?: string;
-  state?: string;
-  zipCode?: string;
-  paymentMethod?: string;
 }
 
 export interface Order {
@@ -44,8 +34,6 @@ export interface Order {
   customer: CustomerInfo;
   date: string;
   total: number;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export type Category = {
@@ -66,11 +54,4 @@ export interface ContactMessage {
   subject?: string;
   message: string;
   date: string;
-}
-
-export interface ProductFilter {
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  search?: string;
 }
