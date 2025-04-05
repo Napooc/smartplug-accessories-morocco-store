@@ -14,6 +14,7 @@ const Checkout = () => {
   const { cart, cartTotal, setCustomerInfo, placeOrder } = useStore();
   
   const [formData, setFormData] = useState<CustomerInfo>({
+    name: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -28,7 +29,6 @@ const Checkout = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Redirect if cart is empty
   if (cart.length === 0) {
     navigate('/cart');
     return null;
@@ -37,14 +37,14 @@ const Checkout = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
+    if (!formData.firstName?.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName?.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email?.trim()) newErrors.email = 'Email is required';
+    if (!formData.phone?.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.address?.trim()) newErrors.address = 'Address is required';
+    if (!formData.city?.trim()) newErrors.city = 'City is required';
+    if (!formData.state?.trim()) newErrors.state = 'State is required';
+    if (!formData.zipCode?.trim()) newErrors.zipCode = 'ZIP code is required';
     
     return newErrors;
   };
@@ -56,7 +56,6 @@ const Checkout = () => {
       [name]: value
     }));
     
-    // Clear error when field is filled
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -81,11 +80,15 @@ const Checkout = () => {
       return;
     }
     
+    const customerInfo: CustomerInfo = {
+      ...formData,
+      name: `${formData.firstName} ${formData.lastName}`
+    };
+    
     setIsSubmitting(true);
     
     try {
-      // Save customer info and place order
-      setCustomerInfo(formData);
+      setCustomerInfo(customerInfo);
       const order = await placeOrder();
       
       toast.success('Order placed successfully!');
@@ -105,7 +108,6 @@ const Checkout = () => {
         
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contact Information */}
             <div>
               <h2 className="text-lg font-semibold mb-3">Contact Information</h2>
               
@@ -164,7 +166,6 @@ const Checkout = () => {
               </div>
             </div>
             
-            {/* Shipping Information */}
             <div>
               <h2 className="text-lg font-semibold mb-3">Shipping Information</h2>
               
@@ -224,7 +225,6 @@ const Checkout = () => {
             </div>
           </div>
           
-          {/* Payment Information */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold mb-3">Payment Information</h2>
             
@@ -241,14 +241,13 @@ const Checkout = () => {
             </RadioGroup>
           </div>
           
-          {/* Order Summary */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold mb-3">Order Summary</h2>
             
             <div className="border rounded-md p-4">
               <ul>
                 {cart.map(item => (
-                  <li key={item.productId} className="flex justify-between items-center py-2 border-b last:border-b-0">
+                  <li key={item.product.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
                     <span>{item.product.name} ({item.quantity})</span>
                     <span>{item.product.price * item.quantity} DH</span>
                   </li>

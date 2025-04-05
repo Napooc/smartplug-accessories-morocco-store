@@ -2,8 +2,9 @@
 import { create } from 'zustand';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { Product, CartItem, Order, CustomerInfo } from './types';
+import { Product, CartItem, Order, CustomerInfo, OrderStatus, ContactMessage, ProductFilter } from './types';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define the store state type
 interface State {
@@ -12,6 +13,7 @@ interface State {
   // Products state
   products: Product[];
   featuredProducts: Product[];
+  saleProducts: Product[]; // Adding this for Index.tsx
   // Cart state
   cart: CartItem[];
   // Customer info
@@ -19,7 +21,7 @@ interface State {
   // Orders
   orders: Order[];
   // Contact messages
-  contactMessages: any[];
+  contactMessages: ContactMessage[];
 }
 
 // Define the store actions type
@@ -30,7 +32,8 @@ interface Actions {
   // Product actions
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
-  addProduct: (product: Product) => void;
+  searchProducts: (query: string) => Product[];
+  addProduct: (productData: Omit<Product, 'id'>) => void;
   updateProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
   // Cart actions
@@ -44,11 +47,17 @@ interface Actions {
   placeOrder: () => Promise<Order>;
   // Order actions
   getOrderById: (id: string) => Order | undefined;
-  updateOrderStatus: (orderId: string, status: string) => void;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   // Contact form actions
-  addContactMessage: (message: any) => void;
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => void;
   deleteContactMessage: (id: string) => void;
 }
+
+// Helper to check if user is admin
+export const isAdmin = () => {
+  const { user } = useStore.getState();
+  return user?.isAdmin || false;
+};
 
 // Create the store
 export const useStore = create<State & Actions>((set, get) => ({
@@ -56,6 +65,7 @@ export const useStore = create<State & Actions>((set, get) => ({
   user: null,
   products: [],
   featuredProducts: [],
+  saleProducts: [], // Initialize saleProducts array
   cart: [],
   customerInfo: null,
   orders: [],
@@ -68,7 +78,20 @@ export const useStore = create<State & Actions>((set, get) => ({
   // Product actions
   getProductById: (id) => get().products.find(p => p.id === id),
   getProductsByCategory: (category) => get().products.filter(p => p.category === category),
-  addProduct: (product) => set(state => ({ products: [...state.products, product] })),
+  searchProducts: (query) => {
+    const lowerQuery = query.toLowerCase();
+    return get().products.filter(product => 
+      product.name.toLowerCase().includes(lowerQuery) || 
+      product.description.toLowerCase().includes(lowerQuery)
+    );
+  },
+  addProduct: (productData) => {
+    const newProduct: Product = {
+      ...productData,
+      id: uuidv4() // Generate a new ID for the product
+    };
+    set(state => ({ products: [...state.products, newProduct] }));
+  },
   updateProduct: (product) => set(state => ({
     products: state.products.map(p => p.id === product.id ? product : p)
   })),
@@ -79,19 +102,19 @@ export const useStore = create<State & Actions>((set, get) => ({
   // Cart actions
   addToCart: (product, quantity = 1) => {
     const cart = get().cart;
-    const existingItem = cart.find(item => item.productId === product.id);
+    const existingItem = cart.find(item => item.product.id === product.id);
     
     if (existingItem) {
       set({
         cart: cart.map(item =>
-          item.productId === product.id
+          item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       });
     } else {
       set({
-        cart: [...cart, { productId: product.id, product, quantity }]
+        cart: [...cart, { product, quantity }]
       });
     }
     
@@ -99,14 +122,14 @@ export const useStore = create<State & Actions>((set, get) => ({
   },
   
   removeFromCart: (productId) => set(state => ({
-    cart: state.cart.filter(item => item.productId !== productId)
+    cart: state.cart.filter(item => item.product.id !== productId)
   })),
   
   clearCart: () => set({ cart: [] }),
   
   updateCartItemQuantity: (productId, quantity) => set(state => ({
     cart: state.cart.map(item =>
-      item.productId === productId
+      item.product.id === productId
         ? { ...item, quantity }
         : item
     )
@@ -130,9 +153,9 @@ export const useStore = create<State & Actions>((set, get) => ({
     try {
       // Format the order for Supabase
       const orderData = {
-        customer_info: customerInfo,
-        items: cart,
-        status: 'pending',
+        customer_info: customerInfo as any, // Type assertion to bypass Supabase JSON validation
+        items: cart as any, // Type assertion to bypass Supabase JSON validation
+        status: 'pending' as OrderStatus,
         total: cartTotal(),
         date: format(new Date(), 'yyyy-MM-dd')
       };
@@ -157,7 +180,7 @@ export const useStore = create<State & Actions>((set, get) => ({
         id: data.id,
         customer: customerInfo,
         items: cart,
-        status: data.status,
+        status: data.status as OrderStatus,
         total: data.total,
         date: data.date,
         created_at: data.created_at,
@@ -187,17 +210,19 @@ export const useStore = create<State & Actions>((set, get) => ({
   })),
 
   // Contact form actions
-  addContactMessage: (message) => set(state => ({
-    contactMessages: [...state.contactMessages, message]
-  })),
+  addContactMessage: (message) => {
+    const newMessage: ContactMessage = {
+      id: uuidv4(),
+      date: new Date().toISOString(),
+      ...message
+    };
+    
+    set(state => ({
+      contactMessages: [...state.contactMessages, newMessage]
+    }));
+  },
   
   deleteContactMessage: (id) => set(state => ({
     contactMessages: state.contactMessages.filter(msg => msg.id !== id)
   }))
 }));
-
-// Helper to check if user is admin
-export const isAdmin = () => {
-  const { user } = useStore.getState();
-  return user?.isAdmin || false;
-};

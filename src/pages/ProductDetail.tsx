@@ -87,7 +87,7 @@ const ProductDetail = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             <div className="flex items-center mb-4">
-              <Rating rating={product.rating} />
+              <Rating value={product.rating} />
               <span className="text-gray-500 ml-2">({product.rating})</span>
             </div>
             

@@ -99,8 +99,6 @@ const AdminAddProduct = () => {
     
     setIsUploading(true);
     
-    // In a real app, you would upload the file to a server here
-    // For now we'll just use FileReader to get a data URL
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       
@@ -122,7 +120,6 @@ const AdminAddProduct = () => {
       reader.readAsDataURL(file);
     });
     
-    // Clear the file input for future uploads
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

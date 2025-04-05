@@ -1,7 +1,7 @@
 
 import { Star } from 'lucide-react';
 
-interface RatingProps {
+export interface RatingProps {
   value: number;
   max?: number;
 }
