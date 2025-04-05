@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
+import { Product } from '@/lib/types';
 
 const AdminAddProduct = () => {
   const { addProduct } = useStore();
@@ -160,13 +160,7 @@ const AdminAddProduct = () => {
       return;
     }
     
-    if (!product.sku) {
-      const randomSku = `SKU-${Math.floor(Math.random() * 10000)}`;
-      const productWithSku = {...product, sku: randomSku};
-      addProduct(productWithSku);
-    } else {
-      addProduct(product);
-    }
+    addProduct(product);
     
     setProduct({
       name: '',

@@ -31,10 +31,9 @@ const AdminLogin = () => {
       return;
     }
     
-    // Attempt login
-    const success = login(username, password);
-    
-    if (success) {
+    // For demo purposes, we'll use simple validation
+    if (username === 'admin' && password === 'admin123') {
+      login();
       toast.success('Login successful');
       navigate('/admin');
     } else {
