@@ -2,288 +2,274 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { cities } from '@/lib/data';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CustomerInfo } from '@/lib/types';
 import { toast } from 'sonner';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, cartTotal, customerInfo, setCustomerInfo, placeOrder } = useStore();
-  const [errors, setErrors] = useState<Partial<CustomerInfo>>({});
+  const { cart, cartTotal, setCustomerInfo, placeOrder } = useStore();
   
   const [formData, setFormData] = useState<CustomerInfo>({
-    name: customerInfo?.name || '',
-    nickname: customerInfo?.nickname || '',
-    phone: customerInfo?.phone || '',
-    city: customerInfo?.city || '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    paymentMethod: 'creditCard'
   });
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    
-    if (errors[name as keyof CustomerInfo]) {
-      setErrors({
-        ...errors,
-        [name]: undefined,
-      });
-    }
-  };
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleCityChange = (value: string) => {
-    setFormData({
-      ...formData,
-      city: value,
-    });
-    
-    if (errors.city) {
-      setErrors({
-        ...errors,
-        city: undefined,
-      });
-    }
-  };
-  
-  const validateForm = () => {
-    const newErrors: Partial<CustomerInfo> = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^0[567]\d{8}$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid Moroccan phone number';
-    }
-    
-    if (!formData.city) {
-      newErrors.city = 'Please select a city';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly');
-      return;
-    }
-    
-    setCustomerInfo(formData);
-    
-    const orderResult = placeOrder();
-    
-    if (orderResult) {
-      navigate('/confirmation', { state: { orderId: orderResult.id } });
-    }
-  };
-  
+  // Redirect if cart is empty
   if (cart.length === 0) {
     navigate('/cart');
     return null;
   }
   
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.address.trim()) newErrors.address = 'Address is required';
+    if (!formData.city.trim()) newErrors.city = 'City is required';
+    if (!formData.state.trim()) newErrors.state = 'State is required';
+    if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
+    
+    return newErrors;
+  };
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when field is filled
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+  
+  const handlePaymentMethodChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      paymentMethod: value
+    }));
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Save customer info and place order
+      setCustomerInfo(formData);
+      const order = await placeOrder();
+      
+      toast.success('Order placed successfully!');
+      navigate('/confirmation', { state: { orderId: order.id } });
+    } catch (error) {
+      console.error('Order placement error:', error);
+      toast.error('Error placing order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   return (
     <Layout>
-      <div className="bg-gray-100 py-6">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold">Checkout</h1>
-          <div className="flex items-center text-sm mt-2">
-            <a href="/" className="text-gray-500 hover:text-smartplug-blue">Home</a>
-            <span className="mx-2">/</span>
-            <a href="/cart" className="text-gray-500 hover:text-smartplug-blue">Cart</a>
-            <span className="mx-2">/</span>
-            <span className="font-medium">Checkout</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Information</CardTitle>
-                <CardDescription>
-                  Please fill in your details for delivery
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Full Name <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className={errors.name ? 'border-red-500' : ''}
-                      />
-                      {errors.name && (
-                        <p className="text-red-500 text-sm">{errors.name}</p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="nickname">
-                        Nickname (Optional)
-                      </Label>
-                      <Input
-                        id="nickname"
-                        name="nickname"
-                        value={formData.nickname}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">
-                        Phone Number <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className={errors.phone ? 'border-red-500' : ''}
-                        placeholder="e.g., 0612345678"
-                      />
-                      {errors.phone && (
-                        <p className="text-red-500 text-sm">{errors.phone}</p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="city">
-                        City <span className="text-red-500">*</span>
-                      </Label>
-                      <Select
-                        value={formData.city}
-                        onValueChange={handleCityChange}
-                      >
-                        <SelectTrigger
-                          id="city"
-                          className={errors.city ? 'border-red-500' : ''}
-                        >
-                          <SelectValue placeholder="Select a city" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.name}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.city && (
-                        <p className="text-red-500 text-sm">{errors.city}</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="payment">Payment Method</Label>
-                    <div className="p-4 border rounded-md bg-gray-50 flex items-center gap-3">
-                      <div>
-                        <input
-                          type="radio"
-                          id="cod"
-                          name="payment"
-                          checked
-                          className="rounded-full"
-                          readOnly
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="cod" className="font-medium">Cash on Delivery</label>
-                        <p className="text-gray-600 text-sm">Pay when you receive your products</p>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Contact Information */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Contact Information</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="First Name"
+                  />
+                  {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Last Name"
+                  />
+                  {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Email"
+                  />
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Phone Number"
+                  />
+                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                </div>
+              </div>
+            </div>
+            
+            {/* Shipping Information */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Shipping Information</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="Address"
+                  />
+                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="City"
+                  />
+                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    type="text"
+                    id="state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    placeholder="State"
+                  />
+                  {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="zipCode">ZIP Code</Label>
+                  <Input
+                    type="text"
+                    id="zipCode"
+                    name="zipCode"
+                    value={formData.zipCode}
+                    onChange={handleChange}
+                    placeholder="ZIP Code"
+                  />
+                  {errors.zipCode && <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>}
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
-                <CardDescription>
-                  {cart.length} {cart.length === 1 ? 'item' : 'items'} in your cart
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {cart.map((item) => (
-                  <div key={item.product.id} className="flex justify-between">
-                    <div>
-                      <span className="font-medium">{item.product.name}</span>
-                      <span className="text-sm text-gray-600 block">
-                        {item.quantity} x {item.product.price} DH
-                      </span>
-                    </div>
-                    <span className="font-medium">
-                      {(item.product.price * item.quantity).toFixed(2)} DH
-                    </span>
-                  </div>
-                ))}
-                
-                <div className="border-t pt-4 space-y-2">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>{cartTotal.toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Shipping</span>
-                    <span>Free</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span className="text-smartplug-blue">{cartTotal.toFixed(2)} DH</span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue"
-                  onClick={handleSubmit}
-                >
-                  Place Order
-                </Button>
-              </CardFooter>
-            </Card>
+          {/* Payment Information */}
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold mb-3">Payment Information</h2>
+            
+            <RadioGroup defaultValue="creditCard" className="flex flex-col space-y-2" onValueChange={handlePaymentMethodChange}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="creditCard" id="creditCard" className="peer h-4 w-4 border border-gray-300 text-smartplug-blue focus:ring-smartplug-blue" />
+                <Label htmlFor="creditCard">Credit Card</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="paypal" id="paypal" className="peer h-4 w-4 border border-gray-300 text-smartplug-blue focus:ring-smartplug-blue" />
+                <Label htmlFor="paypal">PayPal</Label>
+              </div>
+            </RadioGroup>
           </div>
-        </div>
+          
+          {/* Order Summary */}
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold mb-3">Order Summary</h2>
+            
+            <div className="border rounded-md p-4">
+              <ul>
+                {cart.map(item => (
+                  <li key={item.productId} className="flex justify-between items-center py-2 border-b last:border-b-0">
+                    <span>{item.product.name} ({item.quantity})</span>
+                    <span>{item.product.price * item.quantity} DH</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className="flex justify-between items-center mt-4 font-semibold">
+                <span>Total:</span>
+                <span>{cartTotal()} DH</span>
+              </div>
+            </div>
+          </div>
+          
+          <Button
+            type="submit"
+            className="w-full mt-8 bg-smartplug-blue hover:bg-smartplug-lightblue"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Placing Order...' : 'Place Order'}
+          </Button>
+        </form>
       </div>
     </Layout>
   );

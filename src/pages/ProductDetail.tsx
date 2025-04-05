@@ -1,9 +1,10 @@
+
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/lib/store';
-import Rating from '@/components/Products/Rating';
+import { Rating } from '@/components/Products/Rating';
 import { ShoppingCart, ChevronRight, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
