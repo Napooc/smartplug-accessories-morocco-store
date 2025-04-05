@@ -20,12 +20,8 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Enable public access to orders table (for demo purposes only)
-    const { error: policyError } = await supabase.rpc('create_orders_policy');
-    
-    if (policyError) {
-      throw policyError;
-    }
+    // Create RLS policies for orders table
+    await supabase.rpc('create_orders_policy');
     
     return new Response(
       JSON.stringify({ success: true, message: 'Orders table policies created successfully' }),

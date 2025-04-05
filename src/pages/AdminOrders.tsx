@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Search, Filter, Eye } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -153,7 +152,6 @@ const AdminOrders = () => {
                           </DialogHeader>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                            {/* Customer Info */}
                             <div className="space-y-4">
                               <h3 className="font-medium">Customer Information</h3>
                               <div className="space-y-2">
@@ -178,7 +176,6 @@ const AdminOrders = () => {
                               </div>
                             </div>
                             
-                            {/* Order Status */}
                             <div className="space-y-4">
                               <h3 className="font-medium">Order Status</h3>
                               <div>
@@ -201,7 +198,6 @@ const AdminOrders = () => {
                             </div>
                           </div>
                           
-                          {/* Order Items */}
                           <div className="mt-6">
                             <h3 className="font-medium mb-4">Order Items</h3>
                             <div className="overflow-x-auto">

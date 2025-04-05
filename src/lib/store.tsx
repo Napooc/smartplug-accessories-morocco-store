@@ -210,8 +210,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       // Format the order data for Supabase
       const orderData = {
-        customer_info: customerInfo,
-        items: cart,
+        customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
+        items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
         status: 'pending' as OrderStatus,
         total: cartTotal,
         date: new Date().toISOString()
@@ -238,9 +238,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // Transform the returned data to our Order type
       const newOrder: Order = {
         id: data.id,
-        items: cart,
+        items: data.items as unknown as CartItem[],
         status: data.status as OrderStatus,
-        customer: customerInfo,
+        customer: data.customer_info as unknown as CustomerInfo,
         date: new Date(data.date).toISOString().split('T')[0],
         total: data.total
       };
