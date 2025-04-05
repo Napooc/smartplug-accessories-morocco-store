@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
+import AdminEditProduct from '@/components/Admin/AdminEditProduct';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,8 +14,19 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from '@/components/ui/sheet';
+import { Product } from '@/lib/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const AdminProducts = () => {
   const { products, deleteProduct } = useStore();
@@ -22,6 +34,7 @@ const AdminProducts = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [sortBy, setSortBy] = useState<string>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   // Filter and sort products
   const filteredProducts = products
@@ -61,6 +74,14 @@ const AdminProducts = () => {
       return sortOrder === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
     }
     return <ChevronDown size={16} className="text-gray-300" />;
+  };
+  
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+  };
+  
+  const handleCloseEditSheet = () => {
+    setSelectedProduct(null);
   };
   
   return (
@@ -183,11 +204,16 @@ const AdminProducts = () => {
                       <div className="flex space-x-2">
                         <Sheet>
                           <SheetTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleEditProduct(product)}
+                            >
                               <Edit size={16} />
                             </Button>
                           </SheetTrigger>
-                          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+                          <SheetContent side="right" className="w-[400px] sm:w-[600px] overflow-y-auto">
                             <SheetHeader>
                               <SheetTitle>Edit Product</SheetTitle>
                               <SheetDescription>
@@ -195,20 +221,44 @@ const AdminProducts = () => {
                               </SheetDescription>
                             </SheetHeader>
                             <div className="py-4">
-                              {/* Edit product form would go here */}
-                              <p className="text-gray-500">This feature is coming soon.</p>
+                              {selectedProduct && selectedProduct.id === product.id && (
+                                <AdminEditProduct 
+                                  product={selectedProduct} 
+                                  onClose={handleCloseEditSheet} 
+                                />
+                              )}
                             </div>
                           </SheetContent>
                         </Sheet>
                         
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                          onClick={() => deleteProduct(product.id)}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this product? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600"
+                                onClick={() => deleteProduct(product.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </td>
                   </tr>
