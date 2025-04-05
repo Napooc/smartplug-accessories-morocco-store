@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { Product, CartItem, Order, CustomerInfo, OrderStatus, ContactMessage, ProductFilter } from './types';
+import { Product, CartItem, Order, CustomerInfo, OrderStatus, ContactMessage } from './types';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,7 +13,7 @@ interface State {
   // Products state
   products: Product[];
   featuredProducts: Product[];
-  saleProducts: Product[]; // Adding this for Index.tsx
+  saleProducts: Product[]; 
   // Cart state
   cart: CartItem[];
   // Customer info
@@ -29,6 +29,7 @@ interface Actions {
   // Authentication actions
   login: () => void;
   logout: () => void;
+  isAdmin: () => boolean;
   // Product actions
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
@@ -53,19 +54,13 @@ interface Actions {
   deleteContactMessage: (id: string) => void;
 }
 
-// Helper to check if user is admin
-export const isAdmin = () => {
-  const { user } = useStore.getState();
-  return user?.isAdmin || false;
-};
-
 // Create the store
 export const useStore = create<State & Actions>((set, get) => ({
   // Initial state
   user: null,
   products: [],
   featuredProducts: [],
-  saleProducts: [], // Initialize saleProducts array
+  saleProducts: [], 
   cart: [],
   customerInfo: null,
   orders: [],
@@ -74,6 +69,7 @@ export const useStore = create<State & Actions>((set, get) => ({
   // Authentication actions
   login: () => set({ user: { isLoggedIn: true, isAdmin: true } }),
   logout: () => set({ user: null }),
+  isAdmin: () => get().user?.isAdmin || false,
 
   // Product actions
   getProductById: (id) => get().products.find(p => p.id === id),
