@@ -131,11 +131,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           id: order.id,
           items: typeof order.items === 'string' 
             ? JSON.parse(order.items) 
-            : order.items as unknown as CartItem[],
+            : (order.items as unknown) as CartItem[],
           status: order.status as OrderStatus,
           customer: typeof order.customer_info === 'string'
             ? JSON.parse(order.customer_info)
-            : order.customer_info as unknown as CustomerInfo,
+            : (order.customer_info as unknown) as CustomerInfo,
           date: new Date(order.date).toISOString().split('T')[0],
           total: Number(order.total)
         }));
@@ -354,9 +354,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       throw new Error('Missing customer information or empty cart');
     }
     
-    const newOrderId = `ORD-${Math.floor(Math.random() * 1000)}`;
-    
     try {
+      // Convert the cart items to a format that can be stored in the database
       const { data, error } = await supabase
         .from('orders')
         .insert({
@@ -371,6 +370,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         throw error;
+      }
+      
+      if (!data) {
+        throw new Error('No data returned from database');
       }
       
       const newOrder: Order = {
@@ -439,17 +442,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw error;
       }
       
-      const newMessage: ContactMessage = {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        subject: data.subject || '',
-        message: data.message,
-        date: new Date(data.date).toISOString().split('T')[0]
-      };
-      
-      setContactMessages(prev => [newMessage, ...prev]);
-      toast.success('Message sent successfully!');
+      if (data) {
+        const newMessage: ContactMessage = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          subject: data.subject || '',
+          message: data.message,
+          date: new Date(data.date).toISOString().split('T')[0]
+        };
+        
+        setContactMessages(prev => [newMessage, ...prev]);
+        toast.success('Message sent successfully!');
+      }
     } catch (error) {
       console.error('Error sending contact message:', error);
       toast.error('Failed to send message');

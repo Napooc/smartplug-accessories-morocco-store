@@ -23,7 +23,7 @@ const Index = () => {
             categoryName="Audio"
             bgColor="bg-gray-100"
             textColor="text-gray-900"
-            imageUrl="/public/lovable-uploads/630c44e5-1c0c-4664-8ac2-18390ad254fb.png"
+            imageUrl="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80"
             link="/categories/headphones"
           />
         </div>
@@ -37,7 +37,7 @@ const Index = () => {
             categoryName="Chargers"
             bgColor="bg-smartplug-blue"
             textColor="text-white"
-            imageUrl="/public/lovable-uploads/563a1834-b7fa-40eb-8a01-96162ae40d11.png"
+            imageUrl="https://images.unsplash.com/photo-1618842602192-2f9c0d57666f?w=500&auto=format&fit=crop&q=80"
             link="/categories/chargers"
           />
         </div>

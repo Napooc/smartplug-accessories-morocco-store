@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
+import AdminEditProduct from '@/components/Admin/AdminEditProduct';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
+import { Product } from '@/lib/types';
 
 const AdminProducts = () => {
   const { products, deleteProduct } = useStore();
@@ -22,6 +24,7 @@ const AdminProducts = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [sortBy, setSortBy] = useState<string>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   // Filter and sort products
   const filteredProducts = products
@@ -61,6 +64,14 @@ const AdminProducts = () => {
       return sortOrder === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
     }
     return <ChevronDown size={16} className="text-gray-300" />;
+  };
+  
+  const handleEditClick = (product: Product) => {
+    setEditingProduct(product);
+  };
+  
+  const handleCloseEdit = () => {
+    setEditingProduct(null);
   };
   
   return (
@@ -183,7 +194,12 @@ const AdminProducts = () => {
                       <div className="flex space-x-2">
                         <Sheet>
                           <SheetTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleEditClick(product)}
+                            >
                               <Edit size={16} />
                             </Button>
                           </SheetTrigger>
@@ -195,8 +211,12 @@ const AdminProducts = () => {
                               </SheetDescription>
                             </SheetHeader>
                             <div className="py-4">
-                              {/* Edit product form would go here */}
-                              <p className="text-gray-500">This feature is coming soon.</p>
+                              {editingProduct && (
+                                <AdminEditProduct 
+                                  product={editingProduct} 
+                                  onClose={handleCloseEdit} 
+                                />
+                              )}
                             </div>
                           </SheetContent>
                         </Sheet>
