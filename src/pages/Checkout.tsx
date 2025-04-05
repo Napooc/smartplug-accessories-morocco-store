@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -28,6 +29,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, customerInfo, setCustomerInfo, placeOrder } = useStore();
   const [errors, setErrors] = useState<Partial<CustomerInfo>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState<CustomerInfo>({
     name: customerInfo?.name || '',
@@ -86,7 +88,7 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -95,11 +97,16 @@ const Checkout = () => {
     }
     
     setCustomerInfo(formData);
+    setIsSubmitting(true);
     
-    const orderResult = placeOrder();
-    
-    if (orderResult) {
+    try {
+      const orderResult = await placeOrder();
       navigate('/confirmation', { state: { orderId: orderResult.id } });
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('There was a problem placing your order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -277,8 +284,9 @@ const Checkout = () => {
                 <Button 
                   className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue"
                   onClick={handleSubmit}
+                  disabled={isSubmitting}
                 >
-                  Place Order
+                  {isSubmitting ? 'Processing...' : 'Place Order'}
                 </Button>
               </CardFooter>
             </Card>

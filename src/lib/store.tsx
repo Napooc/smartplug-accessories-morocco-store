@@ -1,7 +1,10 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts, mockOrders } from './data';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { PostgrestError } from '@supabase/supabase-js';
 
 interface StoreContextType {
   // Products
@@ -26,7 +29,7 @@ interface StoreContextType {
   // Checkout
   customerInfo: CustomerInfo | null;
   setCustomerInfo: (info: CustomerInfo) => void;
-  placeOrder: () => Order | undefined;
+  placeOrder: () => Promise<Order>;
   
   // Orders
   orders: Order[];
@@ -68,11 +71,109 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
+
+    // Fetch products from Supabase
+    fetchProducts();
+    fetchOrders();
+    fetchContactMessages();
   }, []);
   
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
+  
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        const formattedProducts: Product[] = data.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: Number(product.price),
+          oldPrice: product.old_price ? Number(product.old_price) : undefined,
+          images: product.images,
+          category: product.category,
+          rating: Number(product.rating),
+          stock: Number(product.stock),
+          sku: product.sku,
+          featured: product.featured || false,
+          onSale: product.on_sale || false
+        }));
+        
+        setProducts(formattedProducts);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      // If there's an error, use the initial products as fallback
+    }
+  };
+  
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        const formattedOrders: Order[] = data.map(order => ({
+          id: order.id,
+          items: typeof order.items === 'string' 
+            ? JSON.parse(order.items) 
+            : order.items as unknown as CartItem[],
+          status: order.status as OrderStatus,
+          customer: typeof order.customer_info === 'string'
+            ? JSON.parse(order.customer_info)
+            : order.customer_info as unknown as CustomerInfo,
+          date: new Date(order.date).toISOString().split('T')[0],
+          total: Number(order.total)
+        }));
+        
+        setOrders(formattedOrders);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      // If there's an error, use the mock orders as fallback
+    }
+  };
+  
+  const fetchContactMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        const formattedMessages: ContactMessage[] = data.map(msg => ({
+          id: msg.id,
+          name: msg.name,
+          email: msg.email,
+          subject: msg.subject || '',
+          message: msg.message,
+          date: new Date(msg.date).toISOString().split('T')[0]
+        }));
+        
+        setContactMessages(formattedMessages);
+      }
+    } catch (error) {
+      console.error('Error fetching contact messages:', error);
+    }
+  };
   
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
@@ -102,28 +203,111 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
-  const addProduct = (product: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...product,
-      id: `prod-${Date.now()}`
-    };
-    
-    setProducts(prevProducts => [...prevProducts, newProduct]);
-    toast.success(`${product.name} added to products`);
+  const addProduct = async (product: Omit<Product, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert({
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          old_price: product.oldPrice || null,
+          category: product.category,
+          sku: product.sku,
+          stock: product.stock,
+          featured: product.featured || false,
+          on_sale: product.onSale || false,
+          images: product.images,
+          rating: product.rating
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const newProduct: Product = {
+          id: data.id,
+          name: data.name,
+          description: data.description,
+          price: Number(data.price),
+          oldPrice: data.old_price ? Number(data.old_price) : undefined,
+          images: data.images,
+          category: data.category,
+          rating: Number(data.rating),
+          stock: Number(data.stock),
+          sku: data.sku,
+          featured: data.featured || false,
+          onSale: data.on_sale || false
+        };
+        
+        setProducts(prevProducts => [...prevProducts, newProduct]);
+        toast.success(`${product.name} added to products`);
+      }
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast.error('Failed to add product');
+    }
   };
   
-  const updateProduct = (id: string, productUpdate: Partial<Product>) => {
-    setProducts(prevProducts => 
-      prevProducts.map(product => 
-        product.id === id ? { ...product, ...productUpdate } : product
-      )
-    );
-    toast.success('Product updated successfully');
+  const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
+    try {
+      // Prepare the data for Supabase (convert field names)
+      const supabaseData: Record<string, any> = {};
+      
+      if (productUpdate.name !== undefined) supabaseData.name = productUpdate.name;
+      if (productUpdate.description !== undefined) supabaseData.description = productUpdate.description;
+      if (productUpdate.price !== undefined) supabaseData.price = productUpdate.price;
+      if (productUpdate.oldPrice !== undefined) supabaseData.old_price = productUpdate.oldPrice;
+      if (productUpdate.images !== undefined) supabaseData.images = productUpdate.images;
+      if (productUpdate.category !== undefined) supabaseData.category = productUpdate.category;
+      if (productUpdate.rating !== undefined) supabaseData.rating = productUpdate.rating;
+      if (productUpdate.stock !== undefined) supabaseData.stock = productUpdate.stock;
+      if (productUpdate.sku !== undefined) supabaseData.sku = productUpdate.sku;
+      if (productUpdate.featured !== undefined) supabaseData.featured = productUpdate.featured;
+      if (productUpdate.onSale !== undefined) supabaseData.on_sale = productUpdate.onSale;
+      
+      const { error } = await supabase
+        .from('products')
+        .update(supabaseData)
+        .eq('id', id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setProducts(prevProducts => 
+        prevProducts.map(product => 
+          product.id === id ? { ...product, ...productUpdate } : product
+        )
+      );
+      
+      toast.success('Product updated successfully');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error('Failed to update product');
+    }
   };
   
-  const deleteProduct = (id: string) => {
-    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-    toast.success('Product deleted successfully');
+  const deleteProduct = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+      toast.success('Product deleted successfully');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
+    }
   };
   
   const addToCart = (product: Product, quantity: number = 1) => {
@@ -165,50 +349,130 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
-  const placeOrder = () => {
-    if (!customerInfo || cart.length === 0) return undefined;
+  const placeOrder = async (): Promise<Order> => {
+    if (!customerInfo || cart.length === 0) {
+      throw new Error('Missing customer information or empty cart');
+    }
     
-    const newOrder: Order = {
-      id: `ORD-${Math.floor(Math.random() * 1000)}`,
-      items: [...cart],
-      status: 'pending',
-      customer: customerInfo,
-      date: new Date().toISOString().split('T')[0],
-      total: cartTotal
-    };
+    const newOrderId = `ORD-${Math.floor(Math.random() * 1000)}`;
     
-    setOrders(prevOrders => [...prevOrders, newOrder]);
-    clearCart();
-    setCustomerInfo(null);
-    
-    toast.success("Order placed successfully!");
-    return newOrder;
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          customer_info: customerInfo,
+          items: cart,
+          status: 'pending',
+          total: cartTotal,
+          date: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      const newOrder: Order = {
+        id: data.id,
+        items: cart,
+        status: 'pending',
+        customer: customerInfo,
+        date: new Date().toISOString().split('T')[0],
+        total: cartTotal
+      };
+      
+      setOrders(prevOrders => [...prevOrders, newOrder]);
+      clearCart();
+      setCustomerInfo(null);
+      
+      toast.success("Order placed successfully!");
+      return newOrder;
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order');
+      throw error;
+    }
   };
   
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
-    setOrders(prevOrders =>
-      prevOrders.map(order =>
-        order.id === orderId
-          ? { ...order, status }
-          : order
-      )
-    );
-    
-    toast.success(`Order ${orderId} updated to ${status}`);
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId
+            ? { ...order, status }
+            : order
+        )
+      );
+      
+      toast.success(`Order ${orderId} updated to ${status}`);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast.error('Failed to update order status');
+    }
   };
   
-  const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
-    const newMessage: ContactMessage = {
-      ...message,
-      id: `msg-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    setContactMessages(prev => [newMessage, ...prev]);
+  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: message.name,
+          email: message.email,
+          subject: message.subject,
+          message: message.message,
+          date: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      const newMessage: ContactMessage = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        subject: data.subject || '',
+        message: data.message,
+        date: new Date(data.date).toISOString().split('T')[0]
+      };
+      
+      setContactMessages(prev => [newMessage, ...prev]);
+      toast.success('Message sent successfully!');
+    } catch (error) {
+      console.error('Error sending contact message:', error);
+      toast.error('Failed to send message');
+    }
   };
   
-  const deleteContactMessage = (messageId: string) => {
-    setContactMessages(prev => prev.filter(message => message.id !== messageId));
+  const deleteContactMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', messageId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setContactMessages(prev => prev.filter(message => message.id !== messageId));
+      toast.success('Message deleted successfully');
+    } catch (error) {
+      console.error('Error deleting contact message:', error);
+      toast.error('Failed to delete message');
+    }
   };
   
   const login = (username: string, password: string) => {
