@@ -4,6 +4,7 @@ import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } f
 import { products as initialProducts } from './data';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
 interface StoreContextType {
   // Products
@@ -176,7 +177,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Fetch orders from Supabase
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase.from('orders').select('*');
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*');
       
       if (error) {
         console.error('Error fetching orders:', error);
@@ -227,6 +230,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return undefined;
       }
 
+      if (!data) {
+        toast.error('Failed to place order. No data returned.');
+        return undefined;
+      }
+
       // Transform the returned data to our Order type
       const newOrder: Order = {
         id: data.id,
@@ -234,7 +242,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         status: data.status as OrderStatus,
         customer: customerInfo,
         date: new Date(data.date).toISOString().split('T')[0],
-        total: cartTotal
+        total: data.total
       };
       
       setOrders(prevOrders => [...prevOrders, newOrder]);

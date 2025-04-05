@@ -225,7 +225,7 @@ const AdminOrders = () => {
                                             className="w-10 h-10 object-cover rounded border mr-3"
                                             onError={(e) => {
                                               const target = e.target as HTMLImageElement;
-                                              target.src = 'https://images.unsplash.com/photo-1611254666350-69a2fb8c6354?w=500&auto=format&fit=crop&q=80';
+                                              target.src = 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80';
                                             }}
                                           />
                                           <span className="font-medium">{item.product.name}</span>

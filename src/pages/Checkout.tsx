@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -86,7 +87,7 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -96,10 +97,15 @@ const Checkout = () => {
     
     setCustomerInfo(formData);
     
-    const orderResult = placeOrder();
-    
-    if (orderResult) {
-      navigate('/confirmation', { state: { orderId: orderResult.id } });
+    try {
+      const orderResult = await placeOrder();
+      
+      if (orderResult) {
+        navigate('/confirmation', { state: { orderId: orderResult.id } });
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order. Please try again.');
     }
   };
   

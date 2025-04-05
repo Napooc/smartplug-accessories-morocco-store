@@ -5,9 +5,15 @@ import CategoryGrid from "@/components/Home/CategoryGrid";
 import ProductGrid from "@/components/Products/ProductGrid";
 import FeaturedSection from "@/components/Home/FeaturedSection";
 import { useStore } from "@/lib/store";
+import { useEffect } from "react";
 
 const Index = () => {
-  const { featuredProducts, saleProducts } = useStore();
+  const { featuredProducts, saleProducts, fetchOrders } = useStore();
+  
+  // Fetch orders when the component mounts
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
   
   return (
     <Layout>
