@@ -1,264 +1,270 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { Product, CustomerInfo, Order } from '@/lib/types';
-import { supabase } from '@/integrations/supabase/client';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
+import { products as initialProducts, mockOrders } from './data';
 import { toast } from 'sonner';
-import React, { createContext, useContext, ReactNode } from 'react';
 
-interface CartItem extends Product {
-  quantity: number;
-}
-
-interface State {
-  cart: CartItem[];
+interface StoreContextType {
+  // Products
   products: Product[];
   featuredProducts: Product[];
   saleProducts: Product[];
-  orders: Order[];
-  customerInfo: CustomerInfo | null;
-  isAdmin: boolean;
-  searchTerm: string;
-}
-
-interface Actions {
-  addToCart: (product: Product) => void;
+  getProductById: (id: string) => Product | undefined;
+  getProductsByCategory: (category: string) => Product[];
+  addProduct: (product: Omit<Product, 'id'>) => void;
+  updateProduct: (id: string, product: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
+  searchProducts: (query: string) => Product[];
+  
+  // Cart
+  cart: CartItem[];
+  addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
-  increaseQuantity: (productId: string) => void;
-  decreaseQuantity: (productId: string) => void;
+  updateCartItemQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  setProducts: (products: Product[]) => void;
-  setFeaturedProducts: (products: Product[]) => void;
-  setSaleProducts: (products: Product[]) => void;
-  setOrders: (orders: Order[]) => void;
-  updateCustomerInfo: (customerInfo: CustomerInfo) => void;
-  clearCustomerInfo: () => void;
-  login: () => void;
+  cartTotal: number;
+  
+  // Checkout
+  customerInfo: CustomerInfo | null;
+  setCustomerInfo: (info: CustomerInfo) => void;
+  placeOrder: () => Order | undefined;
+  
+  // Orders
+  orders: Order[];
+  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+
+  // Contact
+  contactMessages: ContactMessage[];
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => void;
+  deleteContactMessage: (messageId: string) => void;
+
+  // Admin
+  isAdmin: boolean;
+  login: (username: string, password: string) => boolean;
   logout: () => void;
-  addProduct: (product: Product) => Promise<Product | null>;
-  updateProduct: (productId: string, updates: Partial<Product>) => Promise<void>;
-  deleteProduct: (productId: string) => Promise<void>;
-  createOrder: (customerInfo: CustomerInfo) => Promise<Order | null>;
-  searchProducts: (term: string) => Product[];
-  setSearchTerm: (term: string) => void;
 }
 
-const calculateTotal = () => {
-  const cart = useStore.getState().cart;
-  return cart.reduce((total, item) => total + item.price * item.quantity, 0);
-};
+const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-export const useStore = create<State & Actions>()(
-  persist(
-    (set, get) => ({
-      cart: [],
-      products: [],
-      featuredProducts: [],
-      saleProducts: [],
-      orders: [],
-      customerInfo: null,
-      isAdmin: false,
-      searchTerm: '',
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+  
+  useEffect(() => {
+    const savedCart = localStorage.getItem('smartplug-cart');
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setCart(parsedCart);
+      } catch (e) {
+        console.error("Failed to parse cart from localStorage:", e);
+      }
+    }
+    
+    const adminLoggedIn = localStorage.getItem('smartplug-admin');
+    if (adminLoggedIn === 'true') {
+      setIsAdmin(true);
+    }
+  }, []);
+  
+  useEffect(() => {
+    localStorage.setItem('smartplug-cart', JSON.stringify(cart));
+  }, [cart]);
+  
+  const featuredProducts = products.filter(product => product.featured);
+  const saleProducts = products.filter(product => product.onSale);
+  
+  const cartTotal = cart.reduce(
+    (total, item) => total + item.product.price * item.quantity, 
+    0
+  );
+  
+  const getProductById = (id: string) => {
+    return products.find(product => product.id === id);
+  };
+  
+  const getProductsByCategory = (category: string) => {
+    return products.filter(product => product.category === category);
+  };
+  
+  const searchProducts = (query: string) => {
+    if (!query.trim()) return [];
+    
+    const lowerCaseQuery = query.toLowerCase().trim();
+    
+    return products.filter(product => 
+      product.name.toLowerCase().includes(lowerCaseQuery) ||
+      product.description.toLowerCase().includes(lowerCaseQuery) ||
+      product.category.toLowerCase().includes(lowerCaseQuery)
+    );
+  };
+  
+  const addProduct = (product: Omit<Product, 'id'>) => {
+    const newProduct: Product = {
+      ...product,
+      id: `prod-${Date.now()}`
+    };
+    
+    setProducts(prevProducts => [...prevProducts, newProduct]);
+    toast.success(`${product.name} added to products`);
+  };
+  
+  const updateProduct = (id: string, productUpdate: Partial<Product>) => {
+    setProducts(prevProducts => 
+      prevProducts.map(product => 
+        product.id === id ? { ...product, ...productUpdate } : product
+      )
+    );
+    toast.success('Product updated successfully');
+  };
+  
+  const deleteProduct = (id: string) => {
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    toast.success('Product deleted successfully');
+  };
+  
+  const addToCart = (product: Product, quantity: number = 1) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.product.id === product.id);
       
-      addToCart: (product) => {
-        const cart = get().cart;
-        const existingItem = cart.find((item) => item.id === product.id);
-        
-        if (existingItem) {
-          const updatedCart = cart.map((item) =>
-            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-          );
-          set({ cart: updatedCart });
-          toast.success(`${product.name} quantity updated in cart!`);
-        } else {
-          const updatedCart = [...cart, { ...product, quantity: 1 }];
-          set({ cart: updatedCart });
-          toast.success(`${product.name} added to cart!`);
-        }
-      },
-      removeFromCart: (productId) => {
-        const cart = get().cart;
-        const updatedCart = cart.filter((item) => item.id !== productId);
-        set({ cart: updatedCart });
-        toast.success('Item removed from cart!');
-      },
-      increaseQuantity: (productId) => {
-        const cart = get().cart;
-        const updatedCart = cart.map((item) =>
-          item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
-        );
-        set({ cart: updatedCart });
-      },
-      decreaseQuantity: (productId) => {
-        const cart = get().cart;
-        const updatedCart = cart.map((item) =>
-          item.id === productId && item.quantity > 1
-            ? { ...item, quantity: item.quantity - 1 }
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
-        set({ cart: updatedCart });
-      },
-      clearCart: () => {
-        set({ cart: [] });
-        toast.success('Cart cleared!');
-      },
-      setProducts: (products) => {
-        set({ products });
-      },
-      setFeaturedProducts: (products) => {
-        set({ featuredProducts: products });
-      },
-      setSaleProducts: (products) => {
-        set({ saleProducts: products });
-      },
-      setOrders: (orders) => {
-        set({ orders });
-      },
-      updateCustomerInfo: (customerInfo) => {
-        set({ customerInfo });
-      },
-      clearCustomerInfo: () => {
-        set({ customerInfo: null });
-      },
-      login: () => {
-        set({ isAdmin: true });
-      },
-      logout: () => {
-        set({ isAdmin: false });
-        set({ customerInfo: null });
-        set({ cart: [] });
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('my-store');
-        toast.success('Logged out successfully!');
-      },
-      addProduct: async (product: Product): Promise<Product | null> => {
-        try {
-          const { data, error } = await supabase
-            .from('products')
-            .insert([product])
-            .select()
-            .single();
-          
-          if (error) {
-            console.error('Error adding product:', error);
-            toast.error('Failed to add product.');
-            return null;
-          }
-          
-          set((state) => ({ products: [...state.products, data] }));
-          toast.success(`${product.name} added successfully!`);
-          return data;
-        } catch (error) {
-          console.error('Error adding product:', error);
-          toast.error('Failed to add product.');
-          return null;
-        }
-      },
-      updateProduct: async (productId: string, updates: Partial<Product>): Promise<void> => {
-        try {
-          const { error } = await supabase
-            .from('products')
-            .update(updates)
-            .eq('id', productId);
-          
-          if (error) {
-            console.error('Error updating product:', error);
-            toast.error('Failed to update product.');
-            return;
-          }
-          
-          set((state) => ({
-            products: state.products.map((product) =>
-              product.id === productId ? { ...product, ...updates } : product
-            ),
-          }));
-          toast.success('Product updated successfully!');
-        } catch (error) {
-          console.error('Error updating product:', error);
-          toast.error('Failed to update product.');
-        }
-      },
-      deleteProduct: async (productId: string): Promise<void> => {
-        try {
-          const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', productId);
-          
-          if (error) {
-            console.error('Error deleting product:', error);
-            toast.error('Failed to delete product.');
-            return;
-          }
-          
-          set((state) => ({
-            products: state.products.filter((product) => product.id !== productId),
-          }));
-          toast.success('Product deleted successfully!');
-        } catch (error) {
-          console.error('Error deleting product:', error);
-          toast.error('Failed to delete product.');
-        }
-      },
-      createOrder: async (customerInfo: CustomerInfo): Promise<Order | null> => {
-        try {
-          const newOrder = {
-            customer_info: customerInfo,
-            items: get().cart,
-            status: 'pending',
-            total: calculateTotal(),
-            date: new Date().toISOString(),
-          };
-      
-          const { data, error } = await supabase
-            .from('orders')
-            .insert(newOrder)
-            .select();
-      
-          if (error) {
-            console.error('Error creating order:', error);
-            return null;
-          }
-      
-          set({ cart: [] });
-          set({ customerInfo: null });
-          toast.success('Order created successfully!');
-          return data ? data[0] : null;
-        } catch (error) {
-          console.error('Error creating order:', error);
-          return null;
-        }
-      },
-      searchProducts: (term: string) => {
-        const products = get().products;
-        const searchTerm = term.toLowerCase();
-        return products.filter(product =>
-          product.name.toLowerCase().includes(searchTerm) ||
-          product.description.toLowerCase().includes(searchTerm) ||
-          product.category.toLowerCase().includes(searchTerm)
-        );
-      },
-      setSearchTerm: (term: string) => {
-        set({ searchTerm: term });
-      },
-    }),
-    {
-      name: 'my-store',
+      } else {
+        return [...prevCart, { product, quantity }];
+      }
+    });
+    
+    toast.success(`${product.name} added to cart`);
+  };
+  
+  const removeFromCart = (productId: string) => {
+    setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
+    toast.info("Item removed from cart");
+  };
+  
+  const updateCartItemQuantity = (productId: string, quantity: number) => {
+    if (quantity < 1) return;
+    
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.product.id === productId
+          ? { ...item, quantity }
+          : item
+      )
+    );
+  };
+  
+  const clearCart = () => {
+    setCart([]);
+  };
+  
+  const placeOrder = () => {
+    if (!customerInfo || cart.length === 0) return undefined;
+    
+    const newOrder: Order = {
+      id: `ORD-${Math.floor(Math.random() * 1000)}`,
+      items: [...cart],
+      status: 'pending',
+      customer: customerInfo,
+      date: new Date().toISOString().split('T')[0],
+      total: cartTotal
+    };
+    
+    setOrders(prevOrders => [...prevOrders, newOrder]);
+    clearCart();
+    setCustomerInfo(null);
+    
+    toast.success("Order placed successfully!");
+    return newOrder;
+  };
+  
+  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
+    setOrders(prevOrders =>
+      prevOrders.map(order =>
+        order.id === orderId
+          ? { ...order, status }
+          : order
+      )
+    );
+    
+    toast.success(`Order ${orderId} updated to ${status}`);
+  };
+  
+  const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
+    const newMessage: ContactMessage = {
+      ...message,
+      id: `msg-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0]
+    };
+    
+    setContactMessages(prev => [newMessage, ...prev]);
+  };
+  
+  const deleteContactMessage = (messageId: string) => {
+    setContactMessages(prev => prev.filter(message => message.id !== messageId));
+  };
+  
+  const login = (username: string, password: string) => {
+    if (username === 'admin' && password === 'admin123') {
+      setIsAdmin(true);
+      localStorage.setItem('smartplug-admin', 'true');
+      return true;
     }
-  )
-);
-
-type StoreContextValue = {
-  store: State & Actions;
-};
-
-const StoreContext = createContext<StoreContextValue | undefined>(undefined);
-
-export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const store = useStore();
+    return false;
+  };
+  
+  const logout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem('smartplug-admin');
+  };
+  
+  const value = {
+    products,
+    featuredProducts,
+    saleProducts,
+    getProductById,
+    getProductsByCategory,
+    searchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    cart,
+    addToCart,
+    removeFromCart,
+    updateCartItemQuantity,
+    clearCart,
+    cartTotal,
+    customerInfo,
+    setCustomerInfo,
+    placeOrder,
+    orders,
+    updateOrderStatus,
+    contactMessages,
+    addContactMessage,
+    deleteContactMessage,
+    isAdmin,
+    login,
+    logout
+  };
   
   return (
-    <StoreContext.Provider value={{ store }}>
+    <StoreContext.Provider value={value}>
       {children}
     </StoreContext.Provider>
   );
-};
+}
+
+export function useStore() {
+  const context = useContext(StoreContext);
+  if (context === undefined) {
+    throw new Error('useStore must be used within a StoreProvider');
+  }
+  return context;
+}
