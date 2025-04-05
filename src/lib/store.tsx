@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product, CustomerInfo, Order } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import React, { createContext, useContext, ReactNode } from 'react';
 
 interface CartItem extends Product {
   quantity: number;
@@ -57,6 +58,7 @@ export const useStore = create<State & Actions>()(
       customerInfo: null,
       isAdmin: false,
       searchTerm: '',
+      
       addToCart: (product) => {
         const cart = get().cart;
         const existingItem = cart.find((item) => item.id === product.id);
@@ -209,13 +211,7 @@ export const useStore = create<State & Actions>()(
       
           const { data, error } = await supabase
             .from('orders')
-            .insert({
-              customer_info: newOrder.customer_info,
-              items: newOrder.items,
-              status: newOrder.status,
-              total: newOrder.total,
-              date: newOrder.date
-            })
+            .insert(newOrder)
             .select();
       
           if (error) {
@@ -250,3 +246,19 @@ export const useStore = create<State & Actions>()(
     }
   )
 );
+
+type StoreContextValue = {
+  store: State & Actions;
+};
+
+const StoreContext = createContext<StoreContextValue | undefined>(undefined);
+
+export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const store = useStore();
+  
+  return (
+    <StoreContext.Provider value={{ store }}>
+      {children}
+    </StoreContext.Provider>
+  );
+};
