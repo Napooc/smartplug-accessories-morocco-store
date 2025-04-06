@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
-import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,7 +27,6 @@ const ContactPage = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -72,7 +70,6 @@ const ContactPage = () => {
       await addContactMessage(formData);
       
       toast.success(t('messageSent'));
-      setIsSubmitted(true);
       
       // Reset form
       setFormData({
@@ -145,104 +142,74 @@ const ContactPage = () => {
             </div>
           </div>
           
-          {/* Contact Form or Thank You Message */}
+          {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-lg shadow-md border">
-              {isSubmitted ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <div className="bg-green-100 p-3 rounded-full mb-4">
-                    <CheckCircle className="h-12 w-12 text-green-600" />
+              <h2 className="text-2xl font-bold mb-6">{t('sendMessage')}</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">{t('fullName')}</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder={t('yourName')}
+                      className={errors.name ? 'border-red-500' : ''}
+                    />
+                    {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                   </div>
-                  <h2 className="text-2xl font-bold mb-3 text-center">{t('thankYou')}</h2>
-                  <p className="text-gray-600 text-center mb-6">
-                    {t('messageReceived')}
-                  </p>
-                  <Button 
-                    onClick={() => setIsSubmitted(false)} 
-                    variant="outline"
-                  >
-                    {t('sendAnotherMessage')}
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <h2 className="text-2xl font-bold mb-6">{t('sendMessage')}</h2>
                   
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">{t('fullName')}</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder={t('yourName')}
-                          className={errors.name ? 'border-red-500' : ''}
-                        />
-                        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">{t('emailTitle')}</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder={t('yourEmail')}
-                          className={errors.email ? 'border-red-500' : ''}
-                        />
-                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">{t('subjectOptional')}</Label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        placeholder={t('subjectPlaceholder')}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="message">{t('message')}</Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        placeholder={t('messagePlaceholder')}
-                        rows={5}
-                        className={errors.message ? 'border-red-500' : ''}
-                      />
-                      {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="animate-spin mr-2">◌</span>
-                          {t('sending')}
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          {t('sendMessageButton')}
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </>
-              )}
+                  <div className="space-y-2">
+                    <Label htmlFor="email">{t('emailTitle')}</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder={t('yourEmail')}
+                      className={errors.email ? 'border-red-500' : ''}
+                    />
+                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="subject">{t('subjectOptional')}</Label>
+                  <Input
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    placeholder={t('subjectPlaceholder')}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="message">{t('message')}</Label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder={t('messagePlaceholder')}
+                    rows={5}
+                    className={errors.message ? 'border-red-500' : ''}
+                  />
+                  {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {t('sendMessageButton')}
+                </Button>
+              </form>
             </div>
           </div>
         </div>
