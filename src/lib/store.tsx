@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
 import { toast } from 'sonner';
@@ -37,8 +37,9 @@ interface StoreContextType {
 
   // Contact
   contactMessages: ContactMessage[];
-  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => void;
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<void>;
   deleteContactMessage: (messageId: string) => void;
+  fetchContactMessages: () => Promise<void>;
 
   // Admin
   isAdmin: boolean;
@@ -76,7 +77,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     fetchContactMessages();
   }, []);
   
-  const fetchContactMessages = async () => {
+  const fetchContactMessages = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('contact_messages')
@@ -103,11 +104,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error fetching contact messages:', error);
     }
-  };
-  
-  useEffect(() => {
-    localStorage.setItem('smartplug-cart', JSON.stringify(cart));
-  }, [cart]);
+  }, []);
   
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
@@ -323,8 +320,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error saving contact message:', error);
-        toast.error('Failed to send message. Please try again.');
-        return;
+        throw new Error('Failed to send message');
       }
       
       const newMessage: ContactMessage = {
@@ -339,7 +335,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setContactMessages(prev => [newMessage, ...prev]);
     } catch (error) {
       console.error('Error saving contact message:', error);
-      toast.error('Failed to send message. Please try again.');
+      throw error;
     }
   };
   
@@ -403,6 +399,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     contactMessages,
     addContactMessage,
     deleteContactMessage,
+    fetchContactMessages,
     isAdmin,
     login,
     logout

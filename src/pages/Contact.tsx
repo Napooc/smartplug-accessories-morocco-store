@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send } from 'lucide-react';
@@ -27,6 +26,8 @@ const ContactPage = () => {
     message: ''
   });
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -43,7 +44,7 @@ const ContactPage = () => {
     }
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -62,18 +63,27 @@ const ContactPage = () => {
       return;
     }
     
-    // Submit the form
-    addContactMessage(formData);
+    setIsSubmitting(true);
     
-    toast.success(t('messageSent'));
-    
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      subject: '',
-      message: ''
-    });
+    try {
+      // Submit the form
+      await addContactMessage(formData);
+      
+      toast.success(t('messageSent'));
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error(t('messageFailed'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (

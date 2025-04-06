@@ -1,8 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Mail, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Mail, Trash2, RefreshCw } from 'lucide-react';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -18,9 +18,28 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/lib/languageContext';
 
 const AdminMessages = () => {
-  const { contactMessages, deleteContactMessage } = useStore();
+  const { contactMessages, deleteContactMessage, fetchContactMessages } = useStore();
   const { t } = useLanguage();
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Refresh messages when component mounts
+  useEffect(() => {
+    fetchContactMessages();
+  }, [fetchContactMessages]);
+  
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchContactMessages();
+      toast.success("Messages refreshed");
+    } catch (error) {
+      console.error("Error refreshing messages:", error);
+      toast.error("Failed to refresh messages");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   // Group messages by date
   const today = new Date().toISOString().split('T')[0];
@@ -146,6 +165,15 @@ const AdminMessages = () => {
           <p className="text-gray-500 mb-4">
             You haven't received any contact messages yet.
           </p>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh Messages
+          </Button>
         </div>
       </div>
     );
@@ -155,6 +183,16 @@ const AdminMessages = () => {
     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
       <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
         <h3 className="font-medium">Contact Messages ({contactMessages.length})</h3>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center"
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
       
       <div className="p-4">

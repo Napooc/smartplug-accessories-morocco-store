@@ -50,7 +50,7 @@ const Checkout = () => {
       setIsLoading(true);
       setCustomerInfo(formData);
       
-      // Place order and make sure we don't return before getting a response
+      // Place order and wait for the result
       const orderResult = await placeOrder();
       
       if (orderResult && orderResult.id) {
@@ -65,7 +65,7 @@ const Checkout = () => {
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      toast.error('Failed to place order. Please try again.');
+      toast.error(t('orderFailed'));
     } finally {
       setIsLoading(false);
     }
