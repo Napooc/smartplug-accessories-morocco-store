@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -57,7 +56,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
-  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('smartplug-cart');
     if (savedCart) {
@@ -74,11 +72,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
     }
 
-    // Fetch orders when component mounts
     fetchOrders();
   }, []);
   
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
@@ -174,7 +170,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
-  // Fetch orders from Supabase
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -187,7 +182,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       if (data) {
-        // Transform Supabase data to Order type
         const formattedOrders: Order[] = data.map(order => ({
           id: order.id,
           items: order.items as unknown as CartItem[],
@@ -208,7 +202,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!customerInfo || cart.length === 0) return undefined;
     
     try {
-      // Format the order data for Supabase
       const orderData = {
         customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
         items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
@@ -217,7 +210,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         date: new Date().toISOString()
       };
       
-      // Insert into Supabase
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
@@ -235,7 +227,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return undefined;
       }
 
-      // Transform the returned data to our Order type
       const newOrder: Order = {
         id: data.id,
         items: data.items as unknown as CartItem[],
@@ -260,7 +251,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
     try {
-      // Update in Supabase
       const { error } = await supabase
         .from('orders')
         .update({ status })
@@ -272,7 +262,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      // Update local state
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.id === orderId

@@ -2,36 +2,74 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/lib/languageContext';
 
 const slides = [
   {
-    image: 'https://images.unsplash.com/photo-1655826630513-6a9ad02f8ad9?q=80&w=1200&auto=format&fit=crop',
-    title: 'SmartPlug: Innovation Meets Excellence!',
-    subtitle: 'Premium Phone Accessories',
+    image: 'public/lovable-uploads/d43cee92-fe2b-4bf8-9f35-83c2b8988c7f.png',
+    title: {
+      en: 'SmartPlug: Phone Accessories',
+      fr: 'SmartPlug: Accessoires pour Téléphone',
+      ar: 'سمارت بلق: ملحقات الهاتف'
+    },
+    subtitle: {
+      en: 'Premium Quality Products',
+      fr: 'Produits de Qualité Premium',
+      ar: 'منتجات ذات جودة عالية'
+    },
     price: '199.00 DH',
-    cta: 'Shop Products Now',
+    cta: {
+      en: 'Shop Products Now',
+      fr: 'Acheter Maintenant',
+      ar: 'تسوق المنتجات الآن'
+    },
     link: '/shop'
   },
   {
-    image: 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?q=80&w=1200&auto=format&fit=crop',
-    title: 'Premium Headphones',
-    subtitle: 'Experience Sound Like Never Before',
+    image: 'public/lovable-uploads/8f83e58f-4fff-46a3-887d-a6d4e7a15f52.png',
+    title: {
+      en: 'Kitchen Accessories',
+      fr: 'Accessoires de Cuisine',
+      ar: 'مستلزمات المطبخ'
+    },
+    subtitle: {
+      en: 'Experience Cooking Like Never Before',
+      fr: 'Découvrez la Cuisine Comme Jamais Auparavant',
+      ar: 'تجربة الطبخ كما لم يسبق لها مثيل'
+    },
     price: '499.00 DH',
-    cta: 'View Product',
+    cta: {
+      en: 'View Products',
+      fr: 'Voir les Produits',
+      ar: 'عرض المنتجات'
+    },
     link: '/product/3'
   },
   {
-    image: 'https://images.unsplash.com/photo-1587652880114-a47d4e48701f?q=80&w=1200&auto=format&fit=crop',
-    title: 'Fast Charging',
-    subtitle: 'Power Up Your Devices Quickly',
-    price: '149.00 DH',
-    cta: 'Shop Chargers',
-    link: '/categories/chargers'
+    image: 'public/lovable-uploads/0047597a-c6de-41a3-a1fd-f78d056c5147.png',
+    title: {
+      en: 'Outdoor Furniture',
+      fr: 'Mobilier d\'Extérieur',
+      ar: 'أثاث خارجي'
+    },
+    subtitle: {
+      en: 'Relax in Style and Comfort',
+      fr: 'Détendez-vous avec Style et Confort',
+      ar: 'استرخ بأناقة وراحة'
+    },
+    price: '1499.00 DH',
+    cta: {
+      en: 'Shop Collection',
+      fr: 'Voir la Collection',
+      ar: 'تصفح المجموعة'
+    },
+    link: '/categories/furniture'
   }
 ];
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { language } = useLanguage();
   
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -48,7 +86,7 @@ export default function Hero() {
   }, []);
   
   return (
-    <div className="relative bg-black h-[500px] overflow-hidden">
+    <div className="relative bg-black h-[600px] overflow-hidden">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
@@ -60,19 +98,19 @@ export default function Hero() {
           <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent z-10"></div>
           <img
             src={slide.image}
-            alt={slide.title}
+            alt={slide.title[language]}
             className="w-full h-full object-cover object-center"
           />
           <div className="container mx-auto px-4 h-full flex items-center relative z-20">
             <div className="max-w-lg text-white">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">{slide.title}</h1>
-              <p className="text-xl mb-2">{slide.subtitle}</p>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">{slide.title[language]}</h1>
+              <p className="text-xl mb-2">{slide.subtitle[language]}</p>
               <p className="text-2xl font-bold text-smartplug-blue mb-6">{slide.price}</p>
               <Link
                 to={slide.link}
                 className="inline-block bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-3 px-8 rounded-md transition-colors"
               >
-                {slide.cta}
+                {slide.cta[language]}
               </Link>
             </div>
           </div>

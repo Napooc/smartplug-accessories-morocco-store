@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cities } from '@/lib/data';
 import { toast } from 'sonner';
 import { CustomerInfo } from '@/lib/types';
+import { useLanguage } from '@/lib/languageContext';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, setCustomerInfo, placeOrder } = useStore();
+  const { t, language, direction } = useLanguage();
   
   const [formData, setFormData] = useState<CustomerInfo>({
     name: '',
@@ -48,13 +50,14 @@ const Checkout = () => {
       setIsLoading(true);
       setCustomerInfo(formData);
       
-      const order = await placeOrder();
+      // Make sure placeOrder returns a value, not a promise
+      const orderResult = await placeOrder();
       
-      if (order) {
+      if (orderResult) {
         navigate('/confirmation', { 
           state: { 
-            orderId: order.id, 
-            orderTotal: order.total 
+            orderId: orderResult.id, 
+            orderTotal: orderResult.total 
           } 
         });
       } else {
@@ -72,10 +75,10 @@ const Checkout = () => {
     return (
       <Layout>
         <div className="container mx-auto py-10">
-          <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+          <h1 className="text-2xl font-bold mb-6">{t('cart')}</h1>
           <div className="text-center py-8">
             <p className="mb-4">Your cart is empty. Add some products before checkout.</p>
-            <Button onClick={() => navigate('/shop')}>Back to Shop</Button>
+            <Button onClick={() => navigate('/shop')}>{t('shop')}</Button>
           </div>
         </div>
       </Layout>
@@ -84,26 +87,26 @@ const Checkout = () => {
   
   return (
     <Layout>
-      <div className="container mx-auto py-10">
-        <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+      <div className="container mx-auto py-10" dir={direction}>
+        <h1 className="text-2xl font-bold mb-6">{t('cart')}</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('shippingInfo')}</h2>
               
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-1">
-                      Full Name*
+                      {t('fullName')}*
                     </label>
                     <Input
                       id="name"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Enter your name"
+                      placeholder={t('fullName')}
                       required
                       className="w-full"
                     />
@@ -125,14 +128,14 @@ const Checkout = () => {
                   
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium mb-1">
-                      Phone Number*
+                      {t('phone')}*
                     </label>
                     <Input
                       id="phone"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="Enter your phone number"
+                      placeholder={t('phone')}
                       required
                       className="w-full"
                     />
@@ -140,7 +143,7 @@ const Checkout = () => {
                   
                   <div>
                     <label htmlFor="city" className="block text-sm font-medium mb-1">
-                      City*
+                      {t('city')}*
                     </label>
                     <Select 
                       value={formData.city} 
@@ -166,7 +169,7 @@ const Checkout = () => {
                       className="w-full" 
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Processing...' : 'Place Order'}
+                      {isLoading ? 'Processing...' : t('placeOrder')}
                     </Button>
                   </div>
                 </div>
@@ -176,7 +179,7 @@ const Checkout = () => {
           
           <div>
             <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('orderSummary')}</h2>
               
               <div className="divide-y">
                 {cart.map((item) => (
@@ -194,7 +197,7 @@ const Checkout = () => {
                 ))}
                 
                 <div className="py-3 flex font-bold">
-                  <div className="flex-1">Total</div>
+                  <div className="flex-1">{t('total')}</div>
                   <div>{cartTotal.toFixed(2)} DH</div>
                 </div>
               </div>

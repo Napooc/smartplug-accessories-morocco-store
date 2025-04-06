@@ -5,9 +5,12 @@ import { ShoppingCart, Search, Menu, X, User, LogOut } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Product } from '@/lib/types';
+import LanguageSelector from './LanguageSelector';
+import { useLanguage } from '@/lib/languageContext';
 
 export default function Navbar() {
   const { cart, isAdmin, logout, searchProducts } = useStore();
+  const { t } = useLanguage();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,33 +76,33 @@ export default function Navbar() {
           {!isMobile && (
             <nav className="flex space-x-6">
               <Link to="/" className="text-gray-700 hover:text-smartplug-blue">
-                Home
+                {t('home')}
               </Link>
               <Link to="/shop" className="text-gray-700 hover:text-smartplug-blue">
-                Shop
+                {t('shop')}
               </Link>
               <Link to="/about" className="text-gray-700 hover:text-smartplug-blue">
-                About
+                {t('about')}
               </Link>
               <Link to="/contact" className="text-gray-700 hover:text-smartplug-blue">
-                Contact
+                {t('contact')}
               </Link>
               {isAdmin && (
                 <Link to="/admin" className="text-gray-700 hover:text-smartplug-blue">
-                  Admin
+                  {t('admin')}
                 </Link>
               )}
             </nav>
           )}
           
-          {/* Search and Cart */}
+          {/* Search, Language and Cart */}
           <div className="flex items-center space-x-4" ref={searchRef}>
             {/* Search */}
             <div className="relative">
               <form onSubmit={handleSearchSubmit} className="flex items-center">
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={t('search')}
                   className="bg-gray-100 px-3 py-2 rounded-md w-40 md:w-60 focus:outline-none focus:ring-2 focus:ring-smartplug-blue"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -142,6 +145,9 @@ export default function Navbar() {
               )}
             </div>
             
+            {/* Language Selector */}
+            <LanguageSelector />
+            
             {/* Admin or Cart */}
             {isAdmin ? (
               <button 
@@ -149,7 +155,7 @@ export default function Navbar() {
                 className="text-gray-700 hover:text-red-500 flex items-center"
               >
                 <LogOut size={20} />
-                <span className="ml-1 hidden md:inline">Logout</span>
+                <span className="ml-1 hidden md:inline">{t('logout')}</span>
               </button>
             ) : (
               <Link to="/cart" className="text-gray-700 hover:text-smartplug-blue relative">
@@ -184,7 +190,7 @@ export default function Navbar() {
                   className="block py-2 text-gray-700 hover:text-smartplug-blue"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Home
+                  {t('home')}
                 </Link>
               </li>
               <li>
@@ -193,7 +199,7 @@ export default function Navbar() {
                   className="block py-2 text-gray-700 hover:text-smartplug-blue"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Shop
+                  {t('shop')}
                 </Link>
               </li>
               <li>
@@ -202,7 +208,7 @@ export default function Navbar() {
                   className="block py-2 text-gray-700 hover:text-smartplug-blue"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  About
+                  {t('about')}
                 </Link>
               </li>
               <li>
@@ -211,7 +217,7 @@ export default function Navbar() {
                   className="block py-2 text-gray-700 hover:text-smartplug-blue"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Contact
+                  {t('contact')}
                 </Link>
               </li>
               {isAdmin && (
@@ -221,7 +227,7 @@ export default function Navbar() {
                     className="block py-2 text-gray-700 hover:text-smartplug-blue"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Admin
+                    {t('admin')}
                   </Link>
                 </li>
               )}
