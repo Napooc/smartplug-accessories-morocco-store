@@ -94,6 +94,227 @@ export const translations: Translations = {
     en: 'Logout',
     fr: 'Déconnexion',
     ar: 'تسجيل الخروج'
+  },
+  // Add more translations for the rest of the website
+  yourCart: {
+    en: 'Your cart is empty',
+    fr: 'Votre panier est vide',
+    ar: 'عربة التسوق فارغة'
+  },
+  noItemsAdded: {
+    en: 'Looks like you haven\'t added any items to your cart yet.',
+    fr: 'Il semble que vous n\'ayez pas encore ajouté d\'articles à votre panier.',
+    ar: 'يبدو أنك لم تضف أي منتجات إلى عربة التسوق بعد.'
+  },
+  continueShopping: {
+    en: 'Continue Shopping',
+    fr: 'Continuer vos achats',
+    ar: 'مواصلة التسوق'
+  },
+  shoppingCart: {
+    en: 'Shopping Cart',
+    fr: 'Panier d\'achat',
+    ar: 'عربة التسوق'
+  },
+  product: {
+    en: 'Product',
+    fr: 'Produit',
+    ar: 'المنتج'
+  },
+  price: {
+    en: 'Price',
+    fr: 'Prix',
+    ar: 'السعر'
+  },
+  quantity: {
+    en: 'Quantity',
+    fr: 'Quantité',
+    ar: 'الكمية'
+  },
+  cartSummary: {
+    en: 'Cart Summary',
+    fr: 'Résumé du panier',
+    ar: 'ملخص عربة التسوق'
+  },
+  subtotal: {
+    en: 'Subtotal',
+    fr: 'Sous-total',
+    ar: 'المجموع الفرعي'
+  },
+  shipping: {
+    en: 'Shipping',
+    fr: 'Livraison',
+    ar: 'الشحن'
+  },
+  free: {
+    en: 'Free',
+    fr: 'Gratuit',
+    ar: 'مجاني'
+  },
+  proceedToCheckout: {
+    en: 'Proceed to Checkout',
+    fr: 'Passer à la caisse',
+    ar: 'المتابعة إلى الدفع'
+  },
+  weAccept: {
+    en: 'We Accept',
+    fr: 'Nous acceptons',
+    ar: 'نحن نقبل'
+  },
+  cashOnDelivery: {
+    en: 'Cash on Delivery',
+    fr: 'Paiement à la livraison',
+    ar: 'الدفع عند الاستلام'
+  },
+  applyDiscount: {
+    en: 'Apply Coupon',
+    fr: 'Appliquer un coupon',
+    ar: 'تطبيق الكوبون'
+  },
+  discountCode: {
+    en: 'Coupon code',
+    fr: 'Code de coupon',
+    ar: 'رمز الكوبون'
+  },
+  nickname: {
+    en: 'Nickname (Optional)',
+    fr: 'Pseudo (Optionnel)',
+    ar: 'اللقب (اختياري)'
+  },
+  enterNickname: {
+    en: 'Enter a nickname (for delivery person)',
+    fr: 'Entrez un pseudo (pour le livreur)',
+    ar: 'أدخل لقبًا (للشخص الذي يقوم بالتوصيل)'
+  },
+  processing: {
+    en: 'Processing...',
+    fr: 'Traitement en cours...',
+    ar: 'جاري المعالجة...'
+  },
+  emptyCart: {
+    en: 'Your cart is empty. Add some products before checkout.',
+    fr: 'Votre panier est vide. Ajoutez des produits avant de passer à la caisse.',
+    ar: 'عربة التسوق فارغة. أضف بعض المنتجات قبل الدفع.'
+  },
+  thankYou: {
+    en: 'Thank You!',
+    fr: 'Merci!',
+    ar: 'شكرًا لك!'
+  },
+  orderPlaced: {
+    en: 'Your order has been placed successfully.',
+    fr: 'Votre commande a été passée avec succès.',
+    ar: 'تم تقديم طلبك بنجاح.'
+  },
+  orderId: {
+    en: 'Order ID:',
+    fr: 'Numéro de commande:',
+    ar: 'رقم الطلب:'
+  },
+  orderDetails: {
+    en: 'Order Details',
+    fr: 'Détails de la commande',
+    ar: 'تفاصيل الطلب'
+  },
+  orderReceived: {
+    en: 'Your order has been received and is now being processed. You will receive a confirmation call shortly.',
+    fr: 'Votre commande a été reçue et est en cours de traitement. Vous recevrez un appel de confirmation sous peu.',
+    ar: 'تم استلام طلبك وهو قيد المعالجة الآن. ستتلقى مكالمة تأكيد قريبًا.'
+  },
+  paymentMethod: {
+    en: 'Payment method:',
+    fr: 'Méthode de paiement:',
+    ar: 'طريقة الدفع:'
+  },
+  backToHomepage: {
+    en: 'Back to Homepage',
+    fr: 'Retour à l\'accueil',
+    ar: 'العودة إلى الصفحة الرئيسية'
+  },
+  getInTouch: {
+    en: 'Get In Touch',
+    fr: 'Contactez-nous',
+    ar: 'تواصل معنا'
+  },
+  contactIntro: {
+    en: 'Have questions about our products or services? We\'re here to help! Reach out to us using any of the methods below.',
+    fr: 'Vous avez des questions sur nos produits ou services? Nous sommes là pour vous aider! Contactez-nous en utilisant l\'une des méthodes ci-dessous.',
+    ar: 'هل لديك أسئلة حول منتجاتنا أو خدماتنا؟ نحن هنا للمساعدة! تواصل معنا باستخدام أي من الطرق أدناه.'
+  },
+  phoneTitle: {
+    en: 'Phone',
+    fr: 'Téléphone',
+    ar: 'الهاتف'
+  },
+  emailTitle: {
+    en: 'Email',
+    fr: 'Email',
+    ar: 'البريد الإلكتروني'
+  },
+  addressTitle: {
+    en: 'Address',
+    fr: 'Adresse',
+    ar: 'العنوان'
+  },
+  sendMessage: {
+    en: 'Send Us A Message',
+    fr: 'Envoyez-nous un message',
+    ar: 'أرسل لنا رسالة'
+  },
+  nameRequired: {
+    en: 'Name is required',
+    fr: 'Le nom est requis',
+    ar: 'الاسم مطلوب'
+  },
+  emailRequired: {
+    en: 'Email is required',
+    fr: 'L\'email est requis',
+    ar: 'البريد الإلكتروني مطلوب'
+  },
+  validEmail: {
+    en: 'Please enter a valid email',
+    fr: 'Veuillez entrer un email valide',
+    ar: 'يرجى إدخال بريد إلكتروني صحيح'
+  },
+  messageRequired: {
+    en: 'Message is required',
+    fr: 'Le message est requis',
+    ar: 'الرسالة مطلوبة'
+  },
+  yourName: {
+    en: 'Your name',
+    fr: 'Votre nom',
+    ar: 'اسمك'
+  },
+  yourEmail: {
+    en: 'Your email',
+    fr: 'Votre email',
+    ar: 'بريدك الإلكتروني'
+  },
+  subjectOptional: {
+    en: 'Subject (Optional)',
+    fr: 'Sujet (Optionnel)',
+    ar: 'الموضوع (اختياري)'
+  },
+  subjectPlaceholder: {
+    en: 'Subject of your message',
+    fr: 'Sujet de votre message',
+    ar: 'موضوع رسالتك'
+  },
+  messagePlaceholder: {
+    en: 'Your message',
+    fr: 'Votre message',
+    ar: 'رسالتك'
+  },
+  sendMessageButton: {
+    en: 'Send Message',
+    fr: 'Envoyer le message',
+    ar: 'إرسال الرسالة'
+  },
+  messageSent: {
+    en: 'Message sent successfully! We will get back to you soon.',
+    fr: 'Message envoyé avec succès! Nous vous répondrons bientôt.',
+    ar: 'تم إرسال الرسالة بنجاح! سنعاود الاتصال بك قريبًا.'
   }
 };
 

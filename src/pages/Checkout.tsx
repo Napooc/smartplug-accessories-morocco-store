@@ -37,12 +37,12 @@ const Checkout = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.phone || !formData.city) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('nameRequired'));
       return;
     }
     
     if (cart.length === 0) {
-      toast.error('Your cart is empty');
+      toast.error(t('emptyCart'));
       return;
     }
     
@@ -50,10 +50,10 @@ const Checkout = () => {
       setIsLoading(true);
       setCustomerInfo(formData);
       
-      // Make sure placeOrder returns a value, not a promise
+      // Place order and make sure we don't return before getting a response
       const orderResult = await placeOrder();
       
-      if (orderResult) {
+      if (orderResult && orderResult.id) {
         navigate('/confirmation', { 
           state: { 
             orderId: orderResult.id, 
@@ -61,11 +61,11 @@ const Checkout = () => {
           } 
         });
       } else {
-        toast.error('Failed to place order. Please try again.');
+        throw new Error('Failed to place order');
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      toast.error('An error occurred during checkout. Please try again.');
+      toast.error('Failed to place order. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +77,7 @@ const Checkout = () => {
         <div className="container mx-auto py-10">
           <h1 className="text-2xl font-bold mb-6">{t('cart')}</h1>
           <div className="text-center py-8">
-            <p className="mb-4">Your cart is empty. Add some products before checkout.</p>
+            <p className="mb-4">{t('emptyCart')}</p>
             <Button onClick={() => navigate('/shop')}>{t('shop')}</Button>
           </div>
         </div>
@@ -114,14 +114,14 @@ const Checkout = () => {
                   
                   <div>
                     <label htmlFor="nickname" className="block text-sm font-medium mb-1">
-                      Nickname (Optional)
+                      {t('nickname')}
                     </label>
                     <Input
                       id="nickname"
                       name="nickname"
                       value={formData.nickname || ''}
                       onChange={handleInputChange}
-                      placeholder="Enter a nickname (for delivery person)"
+                      placeholder={t('enterNickname')}
                       className="w-full"
                     />
                   </div>
@@ -151,7 +151,7 @@ const Checkout = () => {
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a city" />
+                        <SelectValue placeholder={`${t('city')}`} />
                       </SelectTrigger>
                       <SelectContent>
                         {cities.map((city) => (
@@ -169,7 +169,7 @@ const Checkout = () => {
                       className="w-full" 
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Processing...' : t('placeOrder')}
+                      {isLoading ? t('processing') : t('placeOrder')}
                     </Button>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ const Checkout = () => {
                   <div key={item.product.id} className="py-3 flex">
                     <div className="flex-1">
                       <p className="font-medium">{item.product.name}</p>
-                      <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                      <p className="text-gray-500 text-sm">{t('quantity')}: {item.quantity}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">
@@ -203,8 +203,8 @@ const Checkout = () => {
               </div>
               
               <div className="mt-4 text-sm text-gray-500">
-                <p>* Cash on delivery - Pay when you receive your order</p>
-                <p>* Free shipping for orders over 500 DH</p>
+                <p>* {t('cashOnDelivery')}</p>
+                <p>* {t('free')} {t('shipping')}</p>
               </div>
             </div>
           </div>

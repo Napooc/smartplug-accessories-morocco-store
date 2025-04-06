@@ -8,9 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useStore } from '@/lib/store';
+import { useLanguage } from '@/lib/languageContext';
 
 const ContactPage = () => {
   const { addContactMessage } = useStore();
+  const { t, direction } = useLanguage();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -45,11 +48,11 @@ const ContactPage = () => {
     
     // Validate form
     const newErrors = {
-      name: formData.name ? '' : 'Name is required',
+      name: formData.name ? '' : t('nameRequired'),
       email: formData.email ? (
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : 'Please enter a valid email'
-      ) : 'Email is required',
-      message: formData.message ? '' : 'Message is required'
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail')
+      ) : t('emailRequired'),
+      message: formData.message ? '' : t('messageRequired')
     };
     
     setErrors(newErrors);
@@ -62,7 +65,7 @@ const ContactPage = () => {
     // Submit the form
     addContactMessage(formData);
     
-    toast.success('Message sent successfully! We will get back to you soon.');
+    toast.success(t('messageSent'));
     
     // Reset form
     setFormData({
@@ -77,22 +80,22 @@ const ContactPage = () => {
     <Layout>
       <div className="bg-gray-100 py-6">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold">Contact Us</h1>
+          <h1 className="text-3xl font-bold">{t('contact')}</h1>
           <div className="flex items-center text-sm mt-2">
-            <a href="/" className="text-gray-500 hover:text-smartplug-blue">Home</a>
+            <a href="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</a>
             <span className="mx-2">/</span>
-            <span className="font-medium">Contact</span>
+            <span className="font-medium">{t('contact')}</span>
           </div>
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12" dir={direction}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Info */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold mb-6">Get In Touch</h2>
+            <h2 className="text-2xl font-bold mb-6">{t('getInTouch')}</h2>
             <p className="text-gray-600 mb-8">
-              Have questions about our products or services? We're here to help! Reach out to us using any of the methods below.
+              {t('contactIntro')}
             </p>
             
             <div className="space-y-6">
@@ -101,7 +104,7 @@ const ContactPage = () => {
                   <Phone className="h-5 w-5 text-smartplug-blue" />
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1">Phone</h3>
+                  <h3 className="font-medium mb-1">{t('phoneTitle')}</h3>
                   <p className="text-gray-600">+212-555-1234</p>
                 </div>
               </div>
@@ -111,7 +114,7 @@ const ContactPage = () => {
                   <Mail className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1">Email</h3>
+                  <h3 className="font-medium mb-1">{t('emailTitle')}</h3>
                   <p className="text-gray-600">info@smartplug.ma</p>
                 </div>
               </div>
@@ -121,7 +124,7 @@ const ContactPage = () => {
                   <MapPin className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium mb-1">Address</h3>
+                  <h3 className="font-medium mb-1">{t('addressTitle')}</h3>
                   <p className="text-gray-600">123 Techno Avenue</p>
                   <p className="text-gray-600">Casablanca, Morocco</p>
                 </div>
@@ -132,32 +135,32 @@ const ContactPage = () => {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-lg shadow-md border">
-              <h2 className="text-2xl font-bold mb-6">Send Us A Message</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('sendMessage')}</h2>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">{t('fullName')}</Label>
                     <Input
                       id="name"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="Your name"
+                      placeholder={t('yourName')}
                       className={errors.name ? 'border-red-500' : ''}
                     />
                     {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('emailTitle')}</Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="Your email"
+                      placeholder={t('yourEmail')}
                       className={errors.email ? 'border-red-500' : ''}
                     />
                     {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
@@ -165,24 +168,24 @@ const ContactPage = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Subject (Optional)</Label>
+                  <Label htmlFor="subject">{t('subjectOptional')}</Label>
                   <Input
                     id="subject"
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    placeholder="Subject of your message"
+                    placeholder={t('subjectPlaceholder')}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
+                  <Label htmlFor="message">{t('message')}</Label>
                   <Textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Your message"
+                    placeholder={t('messagePlaceholder')}
                     rows={5}
                     className={errors.message ? 'border-red-500' : ''}
                   />
@@ -194,7 +197,7 @@ const ContactPage = () => {
                   className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Send Message
+                  {t('sendMessageButton')}
                 </Button>
               </form>
             </div>

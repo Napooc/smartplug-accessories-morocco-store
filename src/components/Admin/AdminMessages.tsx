@@ -15,9 +15,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
+import { useLanguage } from '@/lib/languageContext';
 
 const AdminMessages = () => {
   const { contactMessages, deleteContactMessage } = useStore();
+  const { t } = useLanguage();
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
   
   // Group messages by date

@@ -73,7 +73,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     fetchOrders();
+    fetchContactMessages();
   }, []);
+  
+  const fetchContactMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .order('date', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching contact messages:', error);
+        return;
+      }
+      
+      if (data) {
+        const formattedMessages: ContactMessage[] = data.map(msg => ({
+          id: msg.id,
+          name: msg.name,
+          email: msg.email,
+          subject: msg.subject || '',
+          message: msg.message,
+          date: new Date(msg.date).toISOString().split('T')[0]
+        }));
+        
+        setContactMessages(formattedMessages);
+      }
+    } catch (error) {
+      console.error('Error fetching contact messages:', error);
+    }
+  };
   
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
@@ -174,7 +204,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*');
+        .select('*')
+        .order('date', { ascending: false });
       
       if (error) {
         console.error('Error fetching orders:', error);
@@ -218,13 +249,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error saving order:', error);
-        toast.error('Failed to place order. Please try again.');
-        return undefined;
+        throw new Error('Failed to place order. Please try again.');
       }
 
       if (!data) {
-        toast.error('Failed to place order. No data returned.');
-        return undefined;
+        throw new Error('Failed to place order. No data returned.');
       }
 
       const newOrder: Order = {
@@ -244,8 +273,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return newOrder;
     } catch (error) {
       console.error('Error placing order:', error);
-      toast.error('Failed to place order. Please try again.');
-      return undefined;
+      throw error;
     }
   };
   
@@ -277,18 +305,63 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const addContactMessage = (message: Omit<ContactMessage, 'id' | 'date'>) => {
-    const newMessage: ContactMessage = {
-      ...message,
-      id: `msg-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    setContactMessages(prev => [newMessage, ...prev]);
+  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>) => {
+    try {
+      const currentDate = new Date().toISOString();
+      
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: message.name,
+          email: message.email,
+          subject: message.subject || null,
+          message: message.message,
+          date: currentDate
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error saving contact message:', error);
+        toast.error('Failed to send message. Please try again.');
+        return;
+      }
+      
+      const newMessage: ContactMessage = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        subject: data.subject || '',
+        message: data.message,
+        date: new Date(data.date).toISOString().split('T')[0]
+      };
+      
+      setContactMessages(prev => [newMessage, ...prev]);
+    } catch (error) {
+      console.error('Error saving contact message:', error);
+      toast.error('Failed to send message. Please try again.');
+    }
   };
   
-  const deleteContactMessage = (messageId: string) => {
-    setContactMessages(prev => prev.filter(message => message.id !== messageId));
+  const deleteContactMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', messageId);
+      
+      if (error) {
+        console.error('Error deleting contact message:', error);
+        toast.error('Failed to delete message');
+        return;
+      }
+      
+      setContactMessages(prev => prev.filter(message => message.id !== messageId));
+      toast.success('Message deleted successfully');
+    } catch (error) {
+      console.error('Error deleting contact message:', error);
+      toast.error('Failed to delete message');
+    }
   };
   
   const login = (username: string, password: string) => {
