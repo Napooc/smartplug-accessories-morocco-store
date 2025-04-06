@@ -1,4 +1,3 @@
-
 import { Product, Category, City, Order } from './types';
 
 export const products: Product[] = [
@@ -114,16 +113,31 @@ export const categories: Category[] = [
 ];
 
 export const cities: City[] = [
-  { id: "casablanca", name: "Casablanca" },
-  { id: "rabat", name: "Rabat" },
-  { id: "marrakech", name: "Marrakech" },
-  { id: "agadir", name: "Agadir" },
-  { id: "tangier", name: "Tangier" },
-  { id: "fez", name: "Fez" },
-  { id: "meknes", name: "Meknes" },
-  { id: "oujda", name: "Oujda" },
-  { id: "kenitra", name: "Kenitra" },
-  { id: "tetouan", name: "Tetouan" }
+  { id: 'casa', name: 'Casablanca' },
+  { id: 'rabat', name: 'Rabat' },
+  { id: 'marrakech', name: 'Marrakech' },
+  { id: 'fes', name: 'Fès' },
+  { id: 'tangier', name: 'Tanger' },
+  { id: 'agadir', name: 'Agadir' },
+  { id: 'meknes', name: 'Meknès' },
+  { id: 'oujda', name: 'Oujda' },
+  { id: 'kenitra', name: 'Kénitra' },
+  { id: 'tetouan', name: 'Tétouan' },
+  { id: 'safi', name: 'Safi' },
+  { id: 'mohammedia', name: 'Mohammedia' },
+  { id: 'eljadida', name: 'El Jadida' },
+  { id: 'beniMellal', name: 'Béni Mellal' },
+  { id: 'taza', name: 'Taza' },
+  { id: 'khemisset', name: 'Khémisset' },
+  { id: 'taroudant', name: 'Taroudant' },
+  { id: 'essaouira', name: 'Essaouira' },
+  { id: 'nador', name: 'Nador' },
+  { id: 'khouribga', name: 'Khouribga' },
+  { id: 'ouarzazate', name: 'Ouarzazate' },
+  { id: 'settat', name: 'Settat' },
+  { id: 'berrechid', name: 'Berrechid' },
+  { id: 'larache', name: 'Larache' },
+  { id: 'khenifra', name: 'Khénifra' }
 ];
 
 export const mockOrders: Order[] = [
