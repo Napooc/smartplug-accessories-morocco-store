@@ -94,6 +94,57 @@ export const translations: Translations = {
     en: 'Logout',
     fr: 'Déconnexion',
     ar: 'تسجيل الخروج'
+  },
+  // Additional translations for Checkout page
+  nickname: {
+    en: 'Nickname (Optional)',
+    fr: 'Surnom (Optionnel)',
+    ar: 'اللقب (اختياري)'
+  },
+  enterNickname: {
+    en: 'Enter a nickname (for delivery person)',
+    fr: 'Entrez un surnom (pour le livreur)',
+    ar: 'أدخل لقبًا (لعامل التوصيل)'
+  },
+  processing: {
+    en: 'Processing...',
+    fr: 'Traitement en cours...',
+    ar: 'جاري المعالجة...'
+  },
+  quantity: {
+    en: 'Qty',
+    fr: 'Qté',
+    ar: 'الكمية'
+  },
+  cashOnDelivery: {
+    en: '* Cash on delivery - Pay when you receive your order',
+    fr: '* Paiement à la livraison - Payez à la réception de votre commande',
+    ar: '* الدفع عند الاستلام - ادفع عند استلام طلبك'
+  },
+  freeShipping: {
+    en: '* Free shipping for orders over 500 DH',
+    fr: '* Livraison gratuite pour les commandes de plus de 500 DH',
+    ar: '* شحن مجاني للطلبات التي تزيد عن 500 درهم'
+  },
+  fillAllFields: {
+    en: 'Please fill in all required fields',
+    fr: 'Veuillez remplir tous les champs obligatoires',
+    ar: 'يرجى ملء جميع الحقول المطلوبة'
+  },
+  emptyCart: {
+    en: 'Your cart is empty. Add some products before checkout.',
+    fr: 'Votre panier est vide. Ajoutez des produits avant de passer à la caisse.',
+    ar: 'سلة التسوق فارغة. أضف بعض المنتجات قبل الدفع.'
+  },
+  orderError: {
+    en: 'An error occurred during checkout. Please try again.',
+    fr: 'Une erreur s\'est produite lors du paiement. Veuillez réessayer.',
+    ar: 'حدث خطأ أثناء الدفع. حاول مرة اخرى.'
+  },
+  selectCity: {
+    en: 'Select a city',
+    fr: 'Sélectionnez une ville',
+    ar: 'اختر مدينة'
   }
 };
 
@@ -130,6 +181,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     document.documentElement.setAttribute('dir', direction);
     document.documentElement.setAttribute('lang', language);
+    
+    // Apply RTL-specific styles if needed
+    if (direction === 'rtl') {
+      document.body.classList.add('rtl');
+    } else {
+      document.body.classList.remove('rtl');
+    }
+    
     localStorage.setItem('smartplug-language', language);
   }, [language, direction]);
   

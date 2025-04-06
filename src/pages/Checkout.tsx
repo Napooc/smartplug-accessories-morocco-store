@@ -37,20 +37,23 @@ const Checkout = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.phone || !formData.city) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('fillAllFields') || 'Please fill in all required fields');
       return;
     }
     
     if (cart.length === 0) {
-      toast.error('Your cart is empty');
+      toast.error(t('emptyCart') || 'Your cart is empty');
       return;
+    }
+    
+    if (isLoading) {
+      return; // Prevent multiple submissions
     }
     
     try {
       setIsLoading(true);
       setCustomerInfo(formData);
       
-      // Make sure placeOrder returns a value, not a promise
       const orderResult = await placeOrder();
       
       if (orderResult) {
@@ -61,11 +64,11 @@ const Checkout = () => {
           } 
         });
       } else {
-        toast.error('Failed to place order. Please try again.');
+        throw new Error('Failed to place order');
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      toast.error('An error occurred during checkout. Please try again.');
+      toast.error(t('orderError') || 'An error occurred during checkout. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +80,7 @@ const Checkout = () => {
         <div className="container mx-auto py-10">
           <h1 className="text-2xl font-bold mb-6">{t('cart')}</h1>
           <div className="text-center py-8">
-            <p className="mb-4">Your cart is empty. Add some products before checkout.</p>
+            <p className="mb-4">{t('emptyCart') || 'Your cart is empty. Add some products before checkout.'}</p>
             <Button onClick={() => navigate('/shop')}>{t('shop')}</Button>
           </div>
         </div>
@@ -114,14 +117,14 @@ const Checkout = () => {
                   
                   <div>
                     <label htmlFor="nickname" className="block text-sm font-medium mb-1">
-                      Nickname (Optional)
+                      {t('nickname') || 'Nickname (Optional)'}
                     </label>
                     <Input
                       id="nickname"
                       name="nickname"
                       value={formData.nickname || ''}
                       onChange={handleInputChange}
-                      placeholder="Enter a nickname (for delivery person)"
+                      placeholder={t('enterNickname') || 'Enter a nickname (for delivery person)'}
                       className="w-full"
                     />
                   </div>
@@ -151,7 +154,7 @@ const Checkout = () => {
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a city" />
+                        <SelectValue placeholder={t('selectCity') || 'Select a city'} />
                       </SelectTrigger>
                       <SelectContent>
                         {cities.map((city) => (
@@ -169,7 +172,7 @@ const Checkout = () => {
                       className="w-full" 
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Processing...' : t('placeOrder')}
+                      {isLoading ? (t('processing') || 'Processing...') : t('placeOrder')}
                     </Button>
                   </div>
                 </div>
@@ -186,7 +189,7 @@ const Checkout = () => {
                   <div key={item.product.id} className="py-3 flex">
                     <div className="flex-1">
                       <p className="font-medium">{item.product.name}</p>
-                      <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                      <p className="text-gray-500 text-sm">{t('quantity') || 'Qty'}: {item.quantity}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">
@@ -203,8 +206,8 @@ const Checkout = () => {
               </div>
               
               <div className="mt-4 text-sm text-gray-500">
-                <p>* Cash on delivery - Pay when you receive your order</p>
-                <p>* Free shipping for orders over 500 DH</p>
+                <p>{t('cashOnDelivery') || '* Cash on delivery - Pay when you receive your order'}</p>
+                <p>{t('freeShipping') || '* Free shipping for orders over 500 DH'}</p>
               </div>
             </div>
           </div>

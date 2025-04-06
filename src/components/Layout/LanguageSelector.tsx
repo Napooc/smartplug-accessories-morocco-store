@@ -18,17 +18,23 @@ const LanguageSelector: React.FC = () => {
     { code: 'ar', label: 'العربية' }
   ];
   
+  const handleLanguageChange = (langCode: Language) => {
+    setLanguage(langCode);
+    // Force page refresh to apply all translations
+    window.location.reload();
+  };
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-1 text-gray-700 hover:text-smartplug-blue">
         <Globe size={20} />
         <span className="ml-1 hidden md:inline uppercase">{language}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-white">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code as Language)}
+            onClick={() => handleLanguageChange(lang.code as Language)}
             className={`cursor-pointer ${language === lang.code ? 'bg-muted' : ''}`}
           >
             {lang.label}
