@@ -4,6 +4,30 @@ import Layout from '@/components/Layout/Layout';
 import ProductGrid from '@/components/Products/ProductGrid';
 import { useStore } from '@/lib/store';
 import { categories } from '@/lib/data';
+import { 
+  Home, 
+  Headphones,
+  Tool, 
+  Droplet,
+  Flower,
+  PaintBucket,
+  Bath,
+  Thermometer,
+  ArrowLeft
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+// Map category IDs to their respective icons
+const categoryIcons: Record<string, JSX.Element> = {
+  'home-kitchen': <Home className="h-6 w-6" />,
+  'electronics': <Headphones className="h-6 w-6" />,
+  'tools-lighting': <Tool className="h-6 w-6" />,
+  'plumbing': <Droplet className="h-6 w-6" />,
+  'garden-terrace': <Flower className="h-6 w-6" />,
+  'paint-hardware': <PaintBucket className="h-6 w-6" />,
+  'bathroom-toilet': <Bath className="h-6 w-6" />,
+  'heating-ac': <Thermometer className="h-6 w-6" />
+};
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -14,29 +38,56 @@ const CategoryPage = () => {
   
   return (
     <Layout>
-      <div className="bg-gray-100 py-6">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 py-10">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold capitalize">{category?.name || 'Category'}</h1>
-          <div className="flex items-center text-sm mt-2">
-            <a href="/" className="text-gray-500 hover:text-smartplug-blue">Home</a>
-            <span className="mx-2">/</span>
-            <a href="/shop" className="text-gray-500 hover:text-smartplug-blue">Shop</a>
-            <span className="mx-2">/</span>
-            <span className="font-medium capitalize">{category?.name || categoryId}</span>
+          <div className="mb-4">
+            <Link to="/shop" className="flex items-center text-smartplug-blue hover:text-smartplug-lightblue transition-colors">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              <span className="text-sm">Back to Shop</span>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-white rounded-full shadow-sm">
+              {categoryIcons[categoryId || ''] || <Home className="h-8 w-8" />}
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 capitalize">{category?.name || 'Category'}</h1>
+              <div className="flex items-center text-sm mt-2 text-gray-600">
+                <Link to="/" className="hover:text-smartplug-blue">Home</Link>
+                <span className="mx-2">/</span>
+                <Link to="/shop" className="hover:text-smartplug-blue">Shop</Link>
+                <span className="mx-2">/</span>
+                <span className="font-medium text-gray-800 capitalize">{category?.name || categoryId}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-10">
         {products.length === 0 ? (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-2">No products found</h2>
-            <p className="text-gray-600">
+          <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+            <h2 className="text-2xl font-bold mb-2 text-gray-800">No products found</h2>
+            <p className="text-gray-600 mb-6">
               There are no products in this category at the moment.
             </p>
+            <Link 
+              to="/shop" 
+              className="inline-block bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-2 px-6 rounded-md transition-colors"
+            >
+              Back to Shop
+            </Link>
           </div>
         ) : (
-          <ProductGrid products={products} />
+          <>
+            <div className="mb-8">
+              <p className="text-gray-600">
+                Showing {products.length} products in {category?.name || 'this category'}
+              </p>
+            </div>
+            <ProductGrid products={products} />
+          </>
         )}
       </div>
     </Layout>

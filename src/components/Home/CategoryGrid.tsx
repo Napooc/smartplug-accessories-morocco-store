@@ -1,62 +1,51 @@
 
 import { Link } from 'react-router-dom';
 import { 
-  Headphones, 
-  Smartphone, 
-  Battery,
-  Cable, 
-  Speaker, 
-  Plug
+  Home, 
+  Headphones,
+  Tool, 
+  Droplet,
+  Flower,
+  PaintBucket,
+  Bath,
+  Thermometer
 } from 'lucide-react';
+import { categories } from '@/lib/data';
 
-const categories = [
-  { 
-    name: 'Earbuds', 
-    icon: <Headphones className="h-8 w-8 text-gray-700" />,
-    link: '/categories/earbuds'
-  },
-  { 
-    name: 'Phone Cases', 
-    icon: <Smartphone className="h-8 w-8 text-gray-700" />,
-    link: '/categories/cases'
-  },
-  { 
-    name: 'Chargers', 
-    icon: <Battery className="h-8 w-8 text-gray-700" />,
-    link: '/categories/chargers'
-  },
-  { 
-    name: 'Cables', 
-    icon: <Cable className="h-8 w-8 text-gray-700" />,
-    link: '/categories/cables'
-  },
-  { 
-    name: 'Speakers', 
-    icon: <Speaker className="h-8 w-8 text-gray-700" />,
-    link: '/categories/speakers'
-  },
-  { 
-    name: 'Accessories', 
-    icon: <Plug className="h-8 w-8 text-gray-700" />,
-    link: '/categories/accessories'
-  }
-];
+// Map category IDs to their respective icons
+const categoryIcons: Record<string, JSX.Element> = {
+  'home-kitchen': <Home className="h-6 w-6 text-smartplug-blue" />,
+  'electronics': <Headphones className="h-6 w-6 text-smartplug-blue" />,
+  'tools-lighting': <Tool className="h-6 w-6 text-smartplug-blue" />,
+  'plumbing': <Droplet className="h-6 w-6 text-smartplug-blue" />,
+  'garden-terrace': <Flower className="h-6 w-6 text-smartplug-blue" />,
+  'paint-hardware': <PaintBucket className="h-6 w-6 text-smartplug-blue" />,
+  'bathroom-toilet': <Bath className="h-6 w-6 text-smartplug-blue" />,
+  'heating-ac': <Thermometer className="h-6 w-6 text-smartplug-blue" />
+};
 
 export default function CategoryGrid() {
   return (
-    <section className="py-12">
+    <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Shop By Category</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">Explore our wide range of products across different categories to find exactly what you need for your home</p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {categories.map((category) => (
             <Link 
-              key={category.name}
-              to={category.link}
-              className="flex flex-col items-center bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100"
+              key={category.id}
+              to={`/categories/${category.id}`}
+              className="group"
             >
-              <div className="mb-3">
-                {category.icon}
+              <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 h-full transform hover:-translate-y-1">
+                <div className="mb-4 p-3 bg-gray-50 rounded-full group-hover:bg-smartplug-blue/10 transition-colors">
+                  {categoryIcons[category.id]}
+                </div>
+                <h3 className="text-center font-medium text-gray-800 group-hover:text-smartplug-blue transition-colors">{category.name}</h3>
               </div>
-              <h3 className="text-center font-medium">{category.name}</h3>
             </Link>
           ))}
         </div>
