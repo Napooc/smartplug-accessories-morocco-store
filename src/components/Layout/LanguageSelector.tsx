@@ -2,6 +2,7 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
 import { useLanguage, Language } from '@/lib/languageContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +12,23 @@ import {
 
 const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const languages = [
     { code: 'en', label: 'English' },
     { code: 'fr', label: 'Français' },
     { code: 'ar', label: 'العربية' }
   ];
+  
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+    
+    // Update URL with language parameter without full page reload
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('lang', lang);
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+  };
   
   return (
     <DropdownMenu>
@@ -28,7 +40,7 @@ const LanguageSelector: React.FC = () => {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code as Language)}
+            onClick={() => handleLanguageChange(lang.code as Language)}
             className={`cursor-pointer ${language === lang.code ? 'bg-muted' : ''}`}
           >
             {lang.label}

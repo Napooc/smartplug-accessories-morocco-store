@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -331,9 +330,6 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 // Provider component
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
   // Initialize with browser language or default to English
   const [language, setLanguage] = useState<Language>(() => {
     const savedLang = localStorage.getItem('smartplug-language');
@@ -355,11 +351,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const updateLanguage = (newLanguage: Language) => {
     setLanguage(newLanguage);
     localStorage.setItem('smartplug-language', newLanguage);
-    
-    // Update URL with language parameter without full page reload
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('lang', newLanguage);
-    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
   
   // Update document direction and save language to localStorage
@@ -368,16 +359,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.setAttribute('lang', language);
     localStorage.setItem('smartplug-language', language);
   }, [language, direction]);
-  
-  // Check URL for language parameter on initial load and navigation
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const urlLang = searchParams.get('lang');
-    
-    if (urlLang && ['en', 'fr', 'ar'].includes(urlLang) && urlLang !== language) {
-      setLanguage(urlLang as Language);
-    }
-  }, [location.search]);
   
   // Translation function
   const t = (key: string): string => {
