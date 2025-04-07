@@ -7,7 +7,7 @@ import { categories } from '@/lib/data';
 import { 
   Home, 
   Headphones,
-  Tool, 
+  Wrench, 
   Droplet,
   Flower,
   PaintBucket,
@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 const categoryIcons: Record<string, JSX.Element> = {
   'home-kitchen': <Home className="h-6 w-6" />,
   'electronics': <Headphones className="h-6 w-6" />,
-  'tools-lighting': <Tool className="h-6 w-6" />,
+  'tools-lighting': <Wrench className="h-6 w-6" />,
   'plumbing': <Droplet className="h-6 w-6" />,
   'garden-terrace': <Flower className="h-6 w-6" />,
   'paint-hardware': <PaintBucket className="h-6 w-6" />,
