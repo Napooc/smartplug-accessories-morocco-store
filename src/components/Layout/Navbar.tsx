@@ -1,240 +1,314 @@
-
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, Menu, X, User, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { 
+  Menu, 
+  X, 
+  ShoppingCart, 
+  Search, 
+  ChevronDown, 
+  Home, 
+  ShoppingBag, 
+  Phone, 
+  LogIn,
+  MessageCircle
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Product } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '@/lib/languageContext';
+import useMobile from '@/hooks/use-mobile';
+import Logo from './Logo';
 
-export default function Navbar() {
-  const { cart, isAdmin, logout, searchProducts } = useStore();
-  const { t } = useLanguage();
-  const isMobile = useIsMobile();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const Navbar = () => {
+  const { isMobile } = useMobile();
+  const { t, direction } = useLanguage();
+  const { cart, isAdmin } = useStore();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
-  
-  // Handle search query changes
+  const [isScrolled, setIsScrolled] = useState(false);
+
   useEffect(() => {
-    if (searchQuery.trim().length > 0) {
-      const results = searchProducts(searchQuery);
-      setSearchResults(results);
-      setShowSearchResults(true);
-    } else {
-      setSearchResults([]);
-      setShowSearchResults(false);
-    }
-  }, [searchQuery, searchProducts]);
-  
-  // Handle clicks outside of search results
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSearchResults(false);
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
       }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
     };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
-  // Handle search selection
-  const handleSearchSelect = (productId: string) => {
-    setSearchQuery('');
-    setShowSearchResults(false);
-    navigate(`/product/${productId}`);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
-  
-  // Handle search form submission
-  const handleSearchSubmit = (e: React.FormEvent) => {
+
+  const toggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+    if (!isSearchOpen) {
+      // Focus the search input when it opens
+      setTimeout(() => {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.focus();
+      }, 100);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      setShowSearchResults(false);
-      navigate(`/shop?search=${encodeURIComponent(searchQuery)}`);
+      setIsSearchOpen(false);
+      window.location.href = `/shop?q=${encodeURIComponent(searchQuery)}`;
     }
   };
-  
+
+  const navbarClass = isScrolled 
+    ? 'bg-white shadow-md' 
+    : 'bg-transparent';
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <nav 
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${navbarClass}`}
+      dir={direction}
+    >
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-smartplug-blue">
-            SmartPlug
-          </Link>
-          
-          {/* Desktop Navigation */}
-          {!isMobile && (
-            <nav className="flex space-x-6">
-              <Link to="/" className="text-gray-700 hover:text-smartplug-blue">
-                {t('home')}
-              </Link>
-              <Link to="/shop" className="text-gray-700 hover:text-smartplug-blue">
-                {t('shop')}
-              </Link>
-              <Link to="/about" className="text-gray-700 hover:text-smartplug-blue">
-                {t('about')}
-              </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-smartplug-blue">
-                {t('contact')}
-              </Link>
-              {isAdmin && (
-                <Link to="/admin" className="text-gray-700 hover:text-smartplug-blue">
-                  {t('admin')}
-                </Link>
+          <div className="flex-shrink-0">
+            <Logo size="medium" withText={true} />
+          </div>
+
+          {/* Navigation - Desktop */}
+          <div className="hidden md:flex md:items-center space-x-8">
+            <Link to="/" className="text-gray-700 hover:text-smartplug-blue transition-colors">
+              {t('home')}
+            </Link>
+            <Link to="/shop" className="text-gray-700 hover:text-smartplug-blue transition-colors">
+              {t('shop')}
+            </Link>
+            <div className="relative group">
+              <button className="flex items-center text-gray-700 hover:text-smartplug-blue focus:outline-none transition-colors">
+                {t('categories')}
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden transform origin-top scale-0 group-hover:scale-100 transition-transform z-50">
+                <div className="py-2">
+                  <Link to="/categories/home-kitchen" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    {t('homeKitchen')}
+                  </Link>
+                  <Link to="/categories/electronics" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    {t('electronics')}
+                  </Link>
+                  <Link to="/categories/tools-lighting" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    {t('toolsLighting')}
+                  </Link>
+                  <Link to="/categories/plumbing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    {t('plumbing')}
+                  </Link>
+                  <Link to="/categories/garden-terrace" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    {t('gardenTerrace')}
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <Link to="/about" className="text-gray-700 hover:text-smartplug-blue transition-colors">
+              {t('about')}
+            </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-smartplug-blue transition-colors">
+              {t('contact')}
+            </Link>
+          </div>
+
+          {/* Right Side - Actions */}
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={toggleSearch}
+              className="text-gray-700 hover:text-smartplug-blue p-1 rounded-full focus:outline-none"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+            
+            <Link 
+              to="/cart" 
+              className="text-gray-700 hover:text-smartplug-blue p-1 rounded-full focus:outline-none relative"
+              aria-label="Cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-smartplug-blue text-white text-xs h-5 w-5 flex items-center justify-center rounded-full">
+                  {cart.length}
+                </span>
               )}
-            </nav>
-          )}
-          
-          {/* Search, Language and Cart */}
-          <div className="flex items-center space-x-4" ref={searchRef}>
-            {/* Search */}
-            <div className="relative">
-              <form onSubmit={handleSearchSubmit} className="flex items-center">
-                <input
+            </Link>
+            
+            <LanguageSelector />
+            
+            {isAdmin ? (
+              <Link to="/admin">
+                <Button variant="outline" size="sm" className="hidden sm:flex">
+                  {t('adminDashboard')}
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/admin/login">
+                <Button variant="outline" size="sm" className="hidden sm:flex items-center">
+                  <LogIn className="mr-1 h-4 w-4" />
+                  {t('login')}
+                </Button>
+              </Link>
+            )}
+            
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden p-1 rounded-md text-gray-700 hover:text-smartplug-blue focus:outline-none"
+              aria-label="Menu"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Search Overlay */}
+      {isSearchOpen && (
+        <div className="absolute inset-0 w-full h-screen bg-white bg-opacity-95 z-40 flex items-start justify-center pt-20">
+          <div className="container px-4 relative">
+            <button 
+              onClick={toggleSearch}
+              className="absolute top-0 right-4 p-2 text-gray-600 hover:text-gray-900"
+              aria-label="Close"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <form onSubmit={handleSearch} className="mx-auto max-w-2xl">
+              <h2 className="text-2xl font-bold mb-4 text-center">{t('searchProducts')}</h2>
+              <div className="flex">
+                <Input
+                  id="search-input"
                   type="text"
-                  placeholder={t('search')}
-                  className="bg-gray-100 px-3 py-2 rounded-md w-40 md:w-60 focus:outline-none focus:ring-2 focus:ring-smartplug-blue"
+                  placeholder={t('searchPlaceholder')}
+                  className="flex-1"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button 
-                  type="submit"
-                  className="ml-2 text-gray-600 hover:text-smartplug-blue"
+                <Button type="submit" className="ml-2 bg-smartplug-blue hover:bg-smartplug-lightblue">
+                  <Search className="h-5 w-5" />
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-t shadow-lg">
+          <div className="container mx-auto px-4 py-3 space-y-3">
+            <Link 
+              to="/" 
+              className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Home className="h-5 w-5 mr-3 text-smartplug-blue" />
+              {t('home')}
+            </Link>
+            <Link 
+              to="/shop" 
+              className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <ShoppingBag className="h-5 w-5 mr-3 text-smartplug-blue" />
+              {t('shop')}
+            </Link>
+            <details className="group">
+              <summary className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 cursor-pointer list-none">
+                <ChevronDown className="h-5 w-5 mr-3 text-smartplug-blue transform group-open:rotate-180 transition-transform" />
+                {t('categories')}
+              </summary>
+              <div className="ml-8 mt-2 space-y-1">
+                <Link 
+                  to="/categories/home-kitchen" 
+                  className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  <Search size={20} />
-                </button>
-              </form>
-              
-              {/* Search Results Dropdown */}
-              {showSearchResults && searchResults.length > 0 && (
-                <div className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto">
-                  {searchResults.map((product) => (
-                    <div 
-                      key={product.id}
-                      className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                      onClick={() => handleSearchSelect(product.id)}
-                    >
-                      <img 
-                        src={product.images[0]} 
-                        alt={product.name}
-                        className="w-10 h-10 object-cover rounded mr-2"
-                      />
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-gray-600">{product.price} DH</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {showSearchResults && searchQuery.trim() && searchResults.length === 0 && (
-                <div className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 p-3">
-                  <p className="text-gray-600">No products found</p>
-                </div>
-              )}
-            </div>
+                  {t('homeKitchen')}
+                </Link>
+                <Link 
+                  to="/categories/electronics" 
+                  className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t('electronics')}
+                </Link>
+                <Link 
+                  to="/categories/tools-lighting" 
+                  className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t('toolsLighting')}
+                </Link>
+                <Link 
+                  to="/categories/plumbing" 
+                  className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t('plumbing')}
+                </Link>
+                <Link 
+                  to="/categories/garden-terrace" 
+                  className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t('gardenTerrace')}
+                </Link>
+              </div>
+            </details>
+            <Link 
+              to="/about" 
+              className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <MessageCircle className="h-5 w-5 mr-3 text-smartplug-blue" />
+              {t('about')}
+            </Link>
+            <Link 
+              to="/contact" 
+              className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Phone className="h-5 w-5 mr-3 text-smartplug-blue" />
+              {t('contact')}
+            </Link>
             
-            {/* Language Selector */}
-            <LanguageSelector />
-            
-            {/* Admin or Cart */}
             {isAdmin ? (
-              <button 
-                onClick={logout}
-                className="text-gray-700 hover:text-red-500 flex items-center"
+              <Link 
+                to="/admin" 
+                className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+                onClick={() => setIsMenuOpen(false)}
               >
-                <LogOut size={20} />
-                <span className="ml-1 hidden md:inline">{t('logout')}</span>
-              </button>
-            ) : (
-              <Link to="/cart" className="text-gray-700 hover:text-smartplug-blue relative">
-                <ShoppingCart size={24} />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-smartplug-blue text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartItemCount}
-                  </span>
-                )}
+                <LogIn className="h-5 w-5 mr-3 text-smartplug-blue" />
+                {t('adminDashboard')}
               </Link>
-            )}
-            
-            {/* Mobile Menu Toggle */}
-            {isMobile && (
-              <button 
-                className="text-gray-700"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            ) : (
+              <Link 
+                to="/admin/login" 
+                className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+                onClick={() => setIsMenuOpen(false)}
               >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+                <LogIn className="h-5 w-5 mr-3 text-smartplug-blue" />
+                {t('login')}
+              </Link>
             )}
           </div>
         </div>
-        
-        {/* Mobile Menu */}
-        {isMobile && mobileMenuOpen && (
-          <nav className="py-4 border-t">
-            <ul className="space-y-3">
-              <li>
-                <Link 
-                  to="/" 
-                  className="block py-2 text-gray-700 hover:text-smartplug-blue"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('home')}
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/shop" 
-                  className="block py-2 text-gray-700 hover:text-smartplug-blue"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('shop')}
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/about" 
-                  className="block py-2 text-gray-700 hover:text-smartplug-blue"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('about')}
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/contact" 
-                  className="block py-2 text-gray-700 hover:text-smartplug-blue"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('contact')}
-                </Link>
-              </li>
-              {isAdmin && (
-                <li>
-                  <Link 
-                    to="/admin" 
-                    className="block py-2 text-gray-700 hover:text-smartplug-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {t('admin')}
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </nav>
-        )}
-      </div>
-    </header>
+      )}
+    </nav>
   );
-}
+};
+
+export default Navbar;

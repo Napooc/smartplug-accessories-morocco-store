@@ -58,16 +58,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
   useEffect(() => {
-    const savedCart = localStorage.getItem('smartplug-cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        setCart(parsedCart);
-      } catch (e) {
-        console.error("Failed to parse cart from localStorage:", e);
-      }
-    }
-    
     const adminLoggedIn = localStorage.getItem('smartplug-admin');
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
@@ -76,6 +66,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     fetchOrders();
     fetchContactMessages();
   }, []);
+  
+  useEffect(() => {
+    localStorage.setItem('smartplug-cart', JSON.stringify(cart));
+  }, [cart]);
   
   const fetchContactMessages = useCallback(async () => {
     try {

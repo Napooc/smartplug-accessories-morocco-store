@@ -1,28 +1,29 @@
-
 import { ShoppingCart, Package, TrendingUp, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminMessages from '@/components/Admin/AdminMessages';
 import { useStore } from '@/lib/store';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEffect, useState } from 'react';
 
 const AdminDashboard = () => {
-  const { orders, products, contactMessages, fetchOrders } = useStore();
+  const { orders, products, contactMessages, fetchOrders, fetchContactMessages } = useStore();
   const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
   
-  // Fetch orders on component mount
+  // Fetch orders and messages on component mount
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+    fetchContactMessages();
+  }, [fetchOrders, fetchContactMessages]);
   
   // Switch to messages tab if coming from contact page with messages
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tab') === 'messages') {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('tab') === 'messages') {
       setActiveTab('messages');
     }
-  }, []);
+  }, [location]);
   
   // Calculate statistics
   const totalOrders = orders.length;
@@ -193,7 +194,7 @@ const AdminDashboard = () => {
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div
                         className="bg-yellow-400 h-2.5 rounded-full"
-                        style={{ width: `${(pendingOrders / totalOrders) * 100}%` }}
+                        style={{ width: `${totalOrders ? (pendingOrders / totalOrders) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
@@ -208,7 +209,7 @@ const AdminDashboard = () => {
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div
                         className="bg-blue-500 h-2.5 rounded-full"
-                        style={{ width: `${(orders.filter(order => order.status === 'shipped').length / totalOrders) * 100}%` }}
+                        style={{ width: `${totalOrders ? (orders.filter(order => order.status === 'shipped').length / totalOrders) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
@@ -223,7 +224,7 @@ const AdminDashboard = () => {
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div
                         className="bg-green-500 h-2.5 rounded-full"
-                        style={{ width: `${(orders.filter(order => order.status === 'delivered').length / totalOrders) * 100}%` }}
+                        style={{ width: `${totalOrders ? (orders.filter(order => order.status === 'delivered').length / totalOrders) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
@@ -238,7 +239,7 @@ const AdminDashboard = () => {
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div
                         className="bg-red-500 h-2.5 rounded-full"
-                        style={{ width: `${(orders.filter(order => order.status === 'cancelled').length / totalOrders) * 100}%` }}
+                        style={{ width: `${totalOrders ? (orders.filter(order => order.status === 'cancelled').length / totalOrders) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
