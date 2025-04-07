@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Available languages
 export type Language = 'en' | 'fr' | 'ar';
@@ -330,6 +331,9 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 // Provider component
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   // Initialize with browser language or default to English
   const [language, setLanguage] = useState<Language>(() => {
     const savedLang = localStorage.getItem('smartplug-language');
@@ -347,12 +351,33 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Update direction based on language
   const direction = language === 'ar' ? 'rtl' : 'ltr';
   
+  // Handle language change
+  const updateLanguage = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    localStorage.setItem('smartplug-language', newLanguage);
+    
+    // Update URL with language parameter without full page reload
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('lang', newLanguage);
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+  };
+  
   // Update document direction and save language to localStorage
   useEffect(() => {
     document.documentElement.setAttribute('dir', direction);
     document.documentElement.setAttribute('lang', language);
     localStorage.setItem('smartplug-language', language);
   }, [language, direction]);
+  
+  // Check URL for language parameter on initial load and navigation
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const urlLang = searchParams.get('lang');
+    
+    if (urlLang && ['en', 'fr', 'ar'].includes(urlLang) && urlLang !== language) {
+      setLanguage(urlLang as Language);
+    }
+  }, [location.search]);
   
   // Translation function
   const t = (key: string): string => {
@@ -378,7 +403,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
   
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, direction }}>
+    <LanguageContext.Provider value={{ language, setLanguage: updateLanguage, t, direction }}>
       {children}
     </LanguageContext.Provider>
   );
