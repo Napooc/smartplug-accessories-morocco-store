@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { 
   Menu, 
@@ -17,11 +18,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '@/lib/languageContext';
-import useMobile from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Logo from './Logo';
 
 const Navbar = () => {
-  const { isMobile } = useMobile();
+  const isMobile = useIsMobile();
   const { t, direction } = useLanguage();
   const { cart, isAdmin } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
