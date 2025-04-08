@@ -16,6 +16,8 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Product } from '@/lib/types';
 
 // Map category IDs to their respective icons
 const categoryIcons: Record<string, JSX.Element> = {
@@ -31,10 +33,18 @@ const categoryIcons: Record<string, JSX.Element> = {
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const { getProductsByCategory } = useStore();
+  const { getProductsByCategory, products: allProducts } = useStore();
+  const [products, setProducts] = useState<Product[]>([]);
+  
+  // Make sure we get the products whenever they are available
+  useEffect(() => {
+    if (categoryId && allProducts.length > 0) {
+      const categoryProducts = getProductsByCategory(categoryId);
+      setProducts(categoryProducts);
+    }
+  }, [categoryId, allProducts, getProductsByCategory]);
   
   const category = categories.find((c) => c.id === categoryId);
-  const products = getProductsByCategory(categoryId || '');
   
   return (
     <Layout>

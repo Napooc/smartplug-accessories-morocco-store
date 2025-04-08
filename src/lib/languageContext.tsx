@@ -95,7 +95,6 @@ export const translations: Translations = {
     fr: 'Déconnexion',
     ar: 'تسجيل الخروج'
   },
-  // Add more translations for the rest of the website
   yourCart: {
     en: 'Your cart is empty',
     fr: 'Votre panier est vide',
@@ -159,7 +158,7 @@ export const translations: Translations = {
   weAccept: {
     en: 'We Accept',
     fr: 'Nous acceptons',
-    ar: 'نحن نقبل'
+    ar: 'Nous acceptons'
   },
   cashOnDelivery: {
     en: 'Cash on Delivery',
@@ -169,27 +168,27 @@ export const translations: Translations = {
   applyDiscount: {
     en: 'Apply Coupon',
     fr: 'Appliquer un coupon',
-    ar: 'تطبيق الكوبون'
+    ar: 'Appliquer un coupon'
   },
   discountCode: {
     en: 'Coupon code',
     fr: 'Code de coupon',
-    ar: 'رمز الكوبون'
+    ar: 'Code de coupon'
   },
   nickname: {
     en: 'Nickname (Optional)',
     fr: 'Pseudo (Optionnel)',
-    ar: 'اللقب (اختياري)'
+    ar: 'Ligue (Optionnel)'
   },
   enterNickname: {
     en: 'Enter a nickname (for delivery person)',
     fr: 'Entrez un pseudo (pour le livreur)',
-    ar: 'أدخل لقبًا (للشخص الذي يقوم بالتوصيل)'
+    ar: 'Entrez un nom de ligue (pour le livreur)'
   },
   processing: {
     en: 'Processing...',
     fr: 'Traitement en cours...',
-    ar: 'جاري المعالجة...'
+    ar: 'Génération en cours...'
   },
   emptyCart: {
     en: 'Your cart is empty. Add some products before checkout.',
@@ -199,7 +198,7 @@ export const translations: Translations = {
   thankYou: {
     en: 'Thank You!',
     fr: 'Merci!',
-    ar: 'شكرًا لك!'
+    ar: 'شكراً لك!'
   },
   orderPlaced: {
     en: 'Your order has been placed successfully.',
@@ -315,6 +314,11 @@ export const translations: Translations = {
     en: 'Message sent successfully! We will get back to you soon.',
     fr: 'Message envoyé avec succès! Nous vous répondrons bientôt.',
     ar: 'تم إرسال الرسالة بنجاح! سنعاود الاتصال بك قريبًا.'
+  },
+  freeShipping: {
+    en: "Free shipping on all orders! No minimum purchase required.",
+    fr: "Livraison gratuite sur toutes les commandes ! Aucun achat minimum requis.",
+    ar: "شحن مجاني على جميع الطلبات! لا يشترط حد أدنى للشراء."
   }
 };
 

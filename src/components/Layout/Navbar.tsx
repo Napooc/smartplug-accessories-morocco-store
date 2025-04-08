@@ -4,6 +4,7 @@ import { ShoppingCart, User, ChevronDown, Menu, Search } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import AnimatedLogo from './AnimatedLogo';
 import { useIsMobile } from '@/hooks/use-mobile';
+import LanguageSelector from './LanguageSelector';
 
 const Navbar = () => {
   const { cart } = useStore();
@@ -91,6 +92,9 @@ const Navbar = () => {
                 <Menu size={24} />
               </Link>
             )}
+            
+            {/* Language selector */}
+            <LanguageSelector />
             
             {/* User icon */}
             <Link to="/profile" className="hover:text-smartplug-blue transition-colors">

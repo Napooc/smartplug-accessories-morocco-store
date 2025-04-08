@@ -1,9 +1,11 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { v4 as uuidv4 } from 'uuid';
 
 interface StoreContextType {
   // Products
@@ -110,9 +112,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         
         setProducts(formattedProducts);
       } else {
-        initialProducts.forEach(product => {
-          addProductToSupabase(product);
+        // Only add products if they don't exist
+        const productPromises = initialProducts.map(product => {
+          return addProductToSupabase({
+            ...product,
+            // Replace string IDs with proper UUIDs
+            id: uuidv4()
+          });
         });
+        
+        Promise.all(productPromises)
+          .then(() => fetchProducts())
+          .catch(error => console.error('Error adding initial products:', error));
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -207,7 +218,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const addProduct = async (product: Omit<Product, 'id'>) => {
     try {
+      // Generate a proper UUID for the new product
+      const newId = uuidv4();
+      
       const productToAdd = {
+        id: newId,
         name: product.name,
         description: product.description,
         price: product.price,
@@ -221,11 +236,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         sku: product.sku || `SKU-${Date.now()}`
       };
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('products')
-        .insert(productToAdd)
-        .select()
-        .single();
+        .insert(productToAdd);
       
       if (error) {
         console.error('Error adding product to Supabase:', error);
@@ -233,25 +246,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      if (data) {
-        const newProduct: Product = {
-          id: data.id,
-          name: data.name,
-          description: data.description,
-          price: Number(data.price),
-          oldPrice: data.old_price ? Number(data.old_price) : 0,
-          images: data.images,
-          category: data.category,
-          featured: data.featured,
-          onSale: data.on_sale,
-          rating: data.rating,
-          stock: data.stock,
-          sku: data.sku
-        };
-        
-        setProducts(prevProducts => [...prevProducts, newProduct]);
-        toast.success(`${product.name} added to products`);
-      }
+      // Add new product to state with the generated UUID
+      const newProduct: Product = {
+        id: newId,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        oldPrice: product.oldPrice || 0,
+        images: product.images,
+        category: product.category,
+        featured: product.featured || false,
+        onSale: product.onSale || false,
+        rating: product.rating || 0,
+        stock: product.stock || 0,
+        sku: product.sku || `SKU-${Date.now()}`
+      };
+      
+      setProducts(prevProducts => [...prevProducts, newProduct]);
+      toast.success(`${product.name} added to products`);
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error('Failed to add product');
@@ -390,7 +402,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!customerInfo || cart.length === 0) return undefined;
     
     try {
+      const orderId = uuidv4();
       const orderData = {
+        id: orderId,
         customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
         items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
         status: 'pending' as OrderStatus,
@@ -398,28 +412,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         date: new Date().toISOString()
       };
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('orders')
-        .insert(orderData)
-        .select()
-        .single();
+        .insert(orderData);
       
       if (error) {
         console.error('Error saving order:', error);
         throw new Error('Failed to place order. Please try again.');
       }
 
-      if (!data) {
-        throw new Error('Failed to place order. No data returned.');
-      }
-
       const newOrder: Order = {
-        id: data.id,
-        items: data.items as unknown as CartItem[],
-        status: data.status as OrderStatus,
-        customer: data.customer_info as unknown as CustomerInfo,
-        date: new Date(data.date).toISOString().split('T')[0],
-        total: data.total
+        id: orderId,
+        items: cart,
+        status: 'pending',
+        customer: customerInfo,
+        date: new Date().toISOString().split('T')[0],
+        total: cartTotal
       };
       
       setOrders(prevOrders => [...prevOrders, newOrder]);
@@ -464,19 +472,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>) => {
     try {
+      const messageId = uuidv4();
       const currentDate = new Date().toISOString();
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('contact_messages')
         .insert({
+          id: messageId,
           name: message.name,
           email: message.email,
           subject: message.subject || null,
           message: message.message,
           date: currentDate
-        })
-        .select()
-        .single();
+        });
       
       if (error) {
         console.error('Error saving contact message:', error);
@@ -484,12 +492,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       const newMessage: ContactMessage = {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        subject: data.subject || '',
-        message: data.message,
-        date: new Date(data.date).toISOString().split('T')[0]
+        id: messageId,
+        name: message.name,
+        email: message.email,
+        subject: message.subject || '',
+        message: message.message,
+        date: new Date(currentDate).toISOString().split('T')[0]
       };
       
       setContactMessages(prev => [newMessage, ...prev]);
