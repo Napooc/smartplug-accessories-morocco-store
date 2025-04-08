@@ -16,6 +16,7 @@ export type Translations = {
 
 // Common translations used across the app
 export const translations: Translations = {
+  // Header section
   home: {
     en: 'Home',
     fr: 'Accueil',
@@ -36,11 +37,57 @@ export const translations: Translations = {
     fr: 'Contact',
     ar: 'اتصل بنا'
   },
+  
+  // Service features translations
+  fastFreeShipping: {
+    en: 'Fast & Free Shipping',
+    fr: 'Livraison rapide et gratuite',
+    ar: 'شحن سريع ومجاني'
+  },
+  shippingDescription: {
+    en: 'To all Moroccan cities in 24-48 hours.',
+    fr: 'Vers toutes les villes marocaines en 24h-48h.',
+    ar: 'إلى جميع المدن المغربية في 24-48 ساعة.'
+  },
+  tryBeforePay: {
+    en: 'Try Before You Pay',
+    fr: 'Essayer avant de payer',
+    ar: 'جرب قبل أن تدفع'
+  },
+  tryBeforePayDesc: {
+    en: 'Try them, pay only if you are satisfied.',
+    fr: 'Essayez-les, Payez seulement si vous êtes satisfait.',
+    ar: 'جربها، وادفع فقط إذا كنت راضيًا.'
+  },
+  customerSupport: {
+    en: 'Customer Support',
+    fr: 'Support Clientèle',
+    ar: 'دعم العملاء'
+  },
+  customerSupportDesc: {
+    en: 'Available to answer all your questions.',
+    fr: 'Disponible pour répondre à toutes vos questions.',
+    ar: 'متاح للإجابة على جميع أسئلتك.'
+  },
+  
+  // Search related
   search: {
     en: 'Search products...',
     fr: 'Rechercher des produits...',
     ar: 'البحث عن المنتجات...'
   },
+  searchProducts: {
+    en: 'Search Products',
+    fr: 'Rechercher des produits',
+    ar: 'البحث عن المنتجات'
+  },
+  searchPlaceholder: {
+    en: 'What are you looking for?',
+    fr: 'Que cherchez-vous ?',
+    ar: 'عما تبحث؟'
+  },
+  
+  // Cart related
   placeOrder: {
     en: 'Place Order',
     fr: 'Passer la commande',
@@ -81,6 +128,8 @@ export const translations: Translations = {
     fr: 'Ville',
     ar: 'المدينة'
   },
+  
+  // Admin related
   admin: {
     en: 'Admin',
     fr: 'Admin',
@@ -96,6 +145,8 @@ export const translations: Translations = {
     fr: 'Déconnexion',
     ar: 'تسجيل الخروج'
   },
+  
+  // Cart page
   yourCart: {
     en: 'Your cart is empty',
     fr: 'Votre panier est vide',
@@ -175,13 +226,6 @@ export const translations: Translations = {
     en: 'Coupon code',
     fr: 'Code de coupon',
     ar: 'رمز الكوبون'
-  },
-  
-  // Promotional message
-  promotionalMessage: {
-    en: 'Save up to 30% on Smart Home Products! Limited Time Offer!',
-    fr: 'Économisez jusqu\'à 30% sur les produits de maison intelligente! Offre à durée limitée!',
-    ar: 'وفر حتى 30٪ على منتجات المنزل الذكي! عرض محدود الوقت!'
   },
   
   // Featured Section
@@ -287,17 +331,7 @@ export const translations: Translations = {
     ar: 'التدفئة والتكييف'
   },
   
-  // Search
-  searchProducts: {
-    en: 'Search Products',
-    fr: 'Rechercher des produits',
-    ar: 'البحث عن المنتجات'
-  },
-  searchPlaceholder: {
-    en: 'What are you looking for?',
-    fr: 'Que cherchez-vous ?',
-    ar: 'عما تبحث؟'
-  },
+  // Checkout page
   nickname: {
     en: 'Nickname (Optional)',
     fr: 'Pseudo (Optionnel)',
@@ -318,6 +352,8 @@ export const translations: Translations = {
     fr: 'Votre panier est vide. Ajoutez des produits avant de passer à la caisse.',
     ar: 'عربة التسوق فارغة. أضف بعض المنتجات قبل الدفع.'
   },
+  
+  // Order confirmation
   thankYou: {
     en: 'Thank You!',
     fr: 'Merci!',
@@ -353,6 +389,8 @@ export const translations: Translations = {
     fr: 'Retour à l\'accueil',
     ar: 'العودة إلى الصفحة الرئيسية'
   },
+  
+  // Contact page
   getInTouch: {
     en: 'Get In Touch',
     fr: 'Contactez-nous',
@@ -437,6 +475,80 @@ export const translations: Translations = {
     en: 'Message sent successfully! We will get back to you soon.',
     fr: 'Message envoyé avec succès! Nous vous répondrons bientôt.',
     ar: 'تم إرسال الرسالة بنجاح! سنعاود الاتصال بك قريبًا.'
+  },
+  
+  // Footer
+  footerDescription: {
+    en: 'At SmartPlug, we\'re dedicated to providing you with the best in phone accessories. Explore our wide range of products, from earbuds to chargers and much more.',
+    fr: 'Chez SmartPlug, nous nous consacrons à vous fournir le meilleur en accessoires de téléphone. Explorez notre large gamme de produits, des écouteurs aux chargeurs et bien plus encore.',
+    ar: 'في سمارت بلاج، نحن ملتزمون بتوفير أفضل إكسسوارات الهاتف. استكشف مجموعتنا الواسعة من المنتجات، من سماعات الأذن إلى الشواحن والكثير غير ذلك.'
+  },
+  usefulLinks: {
+    en: 'Useful Links',
+    fr: 'Liens utiles',
+    ar: 'روابط مفيدة'
+  },
+  quickLinks: {
+    en: 'Quick Links',
+    fr: 'Liens rapides',
+    ar: 'روابط سريعة'
+  },
+  newsletter: {
+    en: 'Newsletter',
+    fr: 'Bulletin d\'information',
+    ar: 'النشرة الإخبارية'
+  },
+  newsletterText: {
+    en: 'Subscribe to our newsletter to get updates on our latest offers!',
+    fr: 'Abonnez-vous à notre newsletter pour recevoir des mises à jour sur nos dernières offres!',
+    ar: 'اشترك في نشرتنا الإخبارية للحصول على تحديثات حول أحدث عروضنا!'
+  },
+  enterEmail: {
+    en: 'Enter your email',
+    fr: 'Entrez votre email',
+    ar: 'أدخل بريدك الإلكتروني'
+  },
+  subscribe: {
+    en: 'Subscribe',
+    fr: 'S\'abonner',
+    ar: 'اشترك'
+  },
+  allRightsReserved: {
+    en: 'All rights reserved.',
+    fr: 'Tous droits réservés.',
+    ar: 'جميع الحقوق محفوظة.'
+  },
+  privacyPolicy: {
+    en: 'Privacy Policy',
+    fr: 'Politique de confidentialité',
+    ar: 'سياسة الخصوصية'
+  },
+  
+  // Innovation showcase
+  innovationHub: {
+    en: 'Innovation Hub',
+    fr: 'Hub d\'innovation',
+    ar: 'مركز الابتكار'
+  },
+  nextGenPowerSolutions: {
+    en: 'Next-Gen Power Solutions',
+    fr: 'Solutions d\'alimentation de nouvelle génération',
+    ar: 'حلول الطاقة من الجيل التالي'
+  },
+  powerSolutionsDesc: {
+    en: 'Experience the future of charging with our innovative power solutions that charge your devices faster and smarter than ever before.',
+    fr: 'Découvrez l\'avenir de la charge avec nos solutions d\'alimentation innovantes qui chargent vos appareils plus rapidement et plus intelligemment que jamais.',
+    ar: 'اختبر مستقبل الشحن مع حلول الطاقة المبتكرة لدينا التي تشحن أجهزتك بشكل أسرع وأذكى من أي وقت مضى.'
+  },
+  explorePowerSolutions: {
+    en: 'Explore Power Solutions',
+    fr: 'Explorer les solutions d\'alimentation',
+    ar: 'استكشف حلول الطاقة'
+  },
+  ultraFastCharging: {
+    en: 'Ultra-Fast Charging',
+    fr: 'Charge ultra rapide',
+    ar: 'شحن فائق السرعة'
   }
 };
 
