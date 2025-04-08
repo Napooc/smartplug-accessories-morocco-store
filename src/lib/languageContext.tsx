@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -95,7 +96,6 @@ export const translations: Translations = {
     fr: 'Déconnexion',
     ar: 'تسجيل الخروج'
   },
-  // Add more translations for the rest of the website
   yourCart: {
     en: 'Your cart is empty',
     fr: 'Votre panier est vide',
@@ -175,6 +175,128 @@ export const translations: Translations = {
     en: 'Coupon code',
     fr: 'Code de coupon',
     ar: 'رمز الكوبون'
+  },
+  
+  // Promotional message
+  promotionalMessage: {
+    en: 'Save up to 30% on Smart Home Products! Limited Time Offer!',
+    fr: 'Économisez jusqu\'à 30% sur les produits de maison intelligente! Offre à durée limitée!',
+    ar: 'وفر حتى 30٪ على منتجات المنزل الذكي! عرض محدود الوقت!'
+  },
+  
+  // Featured Section
+  featured: {
+    en: 'Featured',
+    fr: 'En vedette',
+    ar: 'مميز'
+  },
+  viewAllProducts: {
+    en: 'View All Products',
+    fr: 'Voir tous les produits',
+    ar: 'عرض جميع المنتجات'
+  },
+  
+  // Category Grid
+  shopByCategory: {
+    en: 'Shop By Category',
+    fr: 'Acheter par catégorie',
+    ar: 'تسوق حسب الفئة'
+  },
+  shopByCategoryDesc: {
+    en: 'Explore our wide range of products across different categories to find exactly what you need for your home',
+    fr: 'Explorez notre large gamme de produits dans différentes catégories pour trouver exactement ce dont vous avez besoin pour votre maison',
+    ar: 'استكشف مجموعتنا الواسعة من المنتجات عبر فئات مختلفة للعثور على ما تحتاجه بالضبط لمنزلك'
+  },
+  
+  // Category page
+  backToShop: {
+    en: 'Back to Shop',
+    fr: 'Retour à la boutique',
+    ar: 'العودة إلى المتجر'
+  },
+  category: {
+    en: 'Category',
+    fr: 'Catégorie',
+    ar: 'فئة'
+  },
+  thisCategory: {
+    en: 'this category',
+    fr: 'cette catégorie',
+    ar: 'هذه الفئة'
+  },
+  noProductsFound: {
+    en: 'No products found',
+    fr: 'Aucun produit trouvé',
+    ar: 'لم يتم العثور على منتجات'
+  },
+  noProductsInCategory: {
+    en: 'There are no products in this category at the moment.',
+    fr: 'Il n\'y a pas de produits dans cette catégorie pour le moment.',
+    ar: 'لا توجد منتجات في هذه الفئة في الوقت الحالي.'
+  },
+  showingProducts: {
+    en: 'Showing {{count}} products in {{category}}',
+    fr: 'Affichage de {{count}} produits dans {{category}}',
+    ar: 'عرض {{count}} منتجات في {{category}}'
+  },
+  
+  // Categories
+  categories: {
+    en: 'Categories',
+    fr: 'Catégories',
+    ar: 'فئات'
+  },
+  homeKitchen: {
+    en: 'Home & Kitchen',
+    fr: 'Maison & Cuisine',
+    ar: 'المنزل والمطبخ'
+  },
+  electronics: {
+    en: 'Electronics',
+    fr: 'Électronique',
+    ar: 'الإلكترونيات'
+  },
+  toolsLighting: {
+    en: 'Tools & Lighting',
+    fr: 'Outils & Éclairage',
+    ar: 'أدوات وإضاءة'
+  },
+  plumbing: {
+    en: 'Plumbing',
+    fr: 'Plomberie',
+    ar: 'السباكة'
+  },
+  gardenTerrace: {
+    en: 'Garden & Terrace',
+    fr: 'Jardin & Terrasse',
+    ar: 'الحديقة والشرفة'
+  },
+  paintHardware: {
+    en: 'Paint & Hardware',
+    fr: 'Peinture & Quincaillerie',
+    ar: 'الطلاء والأجهزة'
+  },
+  bathroomToilet: {
+    en: 'Bathroom & Toilet',
+    fr: 'Salle de bain & Toilette',
+    ar: 'الحمام والمرحاض'
+  },
+  heatingAc: {
+    en: 'Heating & AC',
+    fr: 'Chauffage & Climatisation',
+    ar: 'التدفئة والتكييف'
+  },
+  
+  // Search
+  searchProducts: {
+    en: 'Search Products',
+    fr: 'Rechercher des produits',
+    ar: 'البحث عن المنتجات'
+  },
+  searchPlaceholder: {
+    en: 'What are you looking for?',
+    fr: 'Que cherchez-vous ?',
+    ar: 'عما تبحث؟'
   },
   nickname: {
     en: 'Nickname (Optional)',
@@ -322,7 +444,7 @@ export const translations: Translations = {
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
   direction: 'ltr' | 'rtl';
 }
 
@@ -360,8 +482,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('smartplug-language', language);
   }, [language, direction]);
   
-  // Translation function
-  const t = (key: string): string => {
+  // Translation function with parameter support
+  const t = (key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
     let translation = translations;
     
@@ -377,7 +499,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     // Get the actual translation
     const finalKey = keys[keys.length - 1];
     if (translation[finalKey] && translation[finalKey][language]) {
-      return translation[finalKey][language];
+      let translatedText = translation[finalKey][language];
+      
+      // Replace parameters if provided
+      if (params) {
+        Object.keys(params).forEach(param => {
+          translatedText = translatedText.replace(`{{${param}}}`, String(params[param]));
+        });
+      }
+      
+      return translatedText;
     }
     
     return key; // Fallback to key

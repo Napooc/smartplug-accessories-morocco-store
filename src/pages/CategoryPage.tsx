@@ -16,6 +16,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/lib/languageContext';
 
 // Map category IDs to their respective icons
 const categoryIcons: Record<string, JSX.Element> = {
@@ -32,6 +33,7 @@ const categoryIcons: Record<string, JSX.Element> = {
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { getProductsByCategory } = useStore();
+  const { t } = useLanguage();
   
   const category = categories.find((c) => c.id === categoryId);
   const products = getProductsByCategory(categoryId || '');
@@ -43,7 +45,7 @@ const CategoryPage = () => {
           <div className="mb-4">
             <Link to="/shop" className="flex items-center text-smartplug-blue hover:text-smartplug-lightblue transition-colors">
               <ArrowLeft className="h-4 w-4 mr-1" />
-              <span className="text-sm">Back to Shop</span>
+              <span className="text-sm">{t('backToShop')}</span>
             </Link>
           </div>
           
@@ -52,11 +54,11 @@ const CategoryPage = () => {
               {categoryIcons[categoryId || ''] || <Home className="h-8 w-8" />}
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 capitalize">{category?.name || 'Category'}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 capitalize">{category?.name || t('category')}</h1>
               <div className="flex items-center text-sm mt-2 text-gray-600">
-                <Link to="/" className="hover:text-smartplug-blue">Home</Link>
+                <Link to="/" className="hover:text-smartplug-blue">{t('home')}</Link>
                 <span className="mx-2">/</span>
-                <Link to="/shop" className="hover:text-smartplug-blue">Shop</Link>
+                <Link to="/shop" className="hover:text-smartplug-blue">{t('shop')}</Link>
                 <span className="mx-2">/</span>
                 <span className="font-medium text-gray-800 capitalize">{category?.name || categoryId}</span>
               </div>
@@ -68,22 +70,22 @@ const CategoryPage = () => {
       <div className="container mx-auto px-4 py-10">
         {products.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-lg shadow-sm">
-            <h2 className="text-2xl font-bold mb-2 text-gray-800">No products found</h2>
+            <h2 className="text-2xl font-bold mb-2 text-gray-800">{t('noProductsFound')}</h2>
             <p className="text-gray-600 mb-6">
-              There are no products in this category at the moment.
+              {t('noProductsInCategory')}
             </p>
             <Link 
               to="/shop" 
               className="inline-block bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-2 px-6 rounded-md transition-colors"
             >
-              Back to Shop
+              {t('backToShop')}
             </Link>
           </div>
         ) : (
           <>
             <div className="mb-8">
               <p className="text-gray-600">
-                Showing {products.length} products in {category?.name || 'this category'}
+                {t('showingProducts', { count: products.length, category: category?.name || t('thisCategory') })}
               </p>
             </div>
             <ProductGrid products={products} />

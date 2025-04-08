@@ -11,6 +11,7 @@ import {
   Thermometer
 } from 'lucide-react';
 import { categories } from '@/lib/data';
+import { useLanguage } from '@/lib/languageContext';
 
 // Map category IDs to their respective icons
 const categoryIcons: Record<string, JSX.Element> = {
@@ -25,12 +26,14 @@ const categoryIcons: Record<string, JSX.Element> = {
 };
 
 export default function CategoryGrid() {
+  const { t } = useLanguage();
+  
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Shop By Category</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">Explore our wide range of products across different categories to find exactly what you need for your home</p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('shopByCategory')}</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">{t('shopByCategoryDesc')}</p>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">

@@ -5,9 +5,11 @@ import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/lib/languageContext';
 
 const Cart = () => {
   const { cart, removeFromCart, updateCartItemQuantity, cartTotal } = useStore();
+  const { t } = useLanguage();
   
   if (cart.length === 0) {
     return (
@@ -16,15 +18,15 @@ const Cart = () => {
           <div className="inline-block p-6 bg-gray-100 rounded-full mb-6">
             <ShoppingBag size={48} className="text-gray-400" />
           </div>
-          <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
+          <h2 className="text-2xl font-bold mb-4">{t('yourCart')}</h2>
           <p className="text-gray-600 mb-8">
-            Looks like you haven't added any items to your cart yet.
+            {t('noItemsAdded')}
           </p>
           <Link 
             to="/shop" 
             className="inline-flex items-center bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-3 px-8 rounded-md transition-colors"
           >
-            Continue Shopping
+            {t('continueShopping')}
           </Link>
         </div>
       </Layout>
@@ -35,13 +37,13 @@ const Cart = () => {
     <Layout>
       <div className="bg-gray-100 py-6">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold">Shopping Cart</h1>
+          <h1 className="text-3xl font-bold">{t('shoppingCart')}</h1>
           <div className="flex items-center text-sm mt-2">
-            <Link to="/" className="text-gray-500 hover:text-smartplug-blue">Home</Link>
+            <Link to="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</Link>
             <span className="mx-2">/</span>
-            <Link to="/shop" className="text-gray-500 hover:text-smartplug-blue">Shop</Link>
+            <Link to="/shop" className="text-gray-500 hover:text-smartplug-blue">{t('shop')}</Link>
             <span className="mx-2">/</span>
-            <span className="font-medium">Cart</span>
+            <span className="font-medium">{t('cart')}</span>
           </div>
         </div>
       </div>
@@ -54,10 +56,10 @@ const Cart = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="py-4 px-6">Product</th>
-                    <th className="py-4 px-6">Price</th>
-                    <th className="py-4 px-6">Quantity</th>
-                    <th className="py-4 px-6">Total</th>
+                    <th className="py-4 px-6">{t('product')}</th>
+                    <th className="py-4 px-6">{t('price')}</th>
+                    <th className="py-4 px-6">{t('quantity')}</th>
+                    <th className="py-4 px-6">{t('total')}</th>
                     <th className="py-4 px-6"></th>
                   </tr>
                 </thead>
@@ -117,16 +119,16 @@ const Cart = () => {
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <div className="flex space-x-2 mb-4 sm:mb-0">
                 <Input 
-                  placeholder="Coupon code" 
+                  placeholder={t('discountCode')} 
                   className="w-48"
                 />
-                <Button variant="outline">Apply Coupon</Button>
+                <Button variant="outline">{t('applyDiscount')}</Button>
               </div>
               
               <Link to="/shop">
                 <Button variant="outline" className="flex items-center">
                   <ArrowRight size={16} className="mr-2 rotate-180" />
-                  Continue Shopping
+                  {t('continueShopping')}
                 </Button>
               </Link>
             </div>
@@ -135,19 +137,19 @@ const Cart = () => {
           {/* Cart summary */}
           <div className="lg:w-1/3">
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h2 className="text-lg font-bold mb-4">Cart Summary</h2>
+              <h2 className="text-lg font-bold mb-4">{t('cartSummary')}</h2>
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-600">{t('subtotal')}</span>
                   <span className="font-medium">{cartTotal.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">Free</span>
+                  <span className="text-gray-600">{t('shipping')}</span>
+                  <span className="font-medium">{t('free')}</span>
                 </div>
                 <div className="border-t pt-3 mt-3 flex justify-between">
-                  <span className="font-bold">Total</span>
+                  <span className="font-bold">{t('total')}</span>
                   <span className="font-bold text-xl text-smartplug-blue">
                     {cartTotal.toFixed(2)} DH
                   </span>
@@ -156,15 +158,15 @@ const Cart = () => {
               
               <Link to="/checkout">
                 <Button className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue">
-                  Proceed to Checkout
+                  {t('proceedToCheckout')}
                 </Button>
               </Link>
               
               <div className="mt-6">
-                <h3 className="font-medium mb-2">We Accept</h3>
+                <h3 className="font-medium mb-2">{t('weAccept')}</h3>
                 <div className="flex items-center space-x-2">
                   <div className="p-2 border rounded">
-                    Cash on Delivery
+                    {t('cashOnDelivery')}
                   </div>
                 </div>
               </div>

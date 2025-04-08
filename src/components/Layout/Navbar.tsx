@@ -19,17 +19,15 @@ import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '@/lib/languageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Logo from './Logo';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Navbar = () => {
   const isMobile = useIsMobile();
   const { t, direction } = useLanguage();
-  const { cart } = useStore(); // Removed isAdmin from destructuring as it's no longer needed
+  const { cart } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showNotification, setShowNotification] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,16 +41,6 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Auto-hide the notification after 7 seconds
-  useEffect(() => {
-    if (showNotification) {
-      const timer = setTimeout(() => {
-        setShowNotification(false);
-      }, 7000);
-      return () => clearTimeout(timer);
-    }
-  }, [showNotification]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -83,27 +71,8 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Free Shipping Notification */}
-      {showNotification && (
-        <div className="sticky top-0 z-50 w-full">
-          <Alert className="rounded-none bg-smartplug-blue text-white border-none">
-            <AlertDescription className="flex justify-center items-center py-1 text-center">
-              {t('freeShipping')} 🚚✨
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="ml-2 p-1 h-6 text-white hover:bg-smartplug-lightblue/30" 
-                onClick={() => setShowNotification(false)}
-              >
-                <X size={14} />
-              </Button>
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
-      
       <nav 
-        className={`sticky ${showNotification ? 'top-[40px]' : 'top-0'} z-40 w-full transition-all duration-300 ${navbarClass}`}
+        className={`sticky top-0 z-40 w-full transition-all duration-300 ${navbarClass}`}
         dir={direction}
       >
         <div className="container mx-auto px-4">
