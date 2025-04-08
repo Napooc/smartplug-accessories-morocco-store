@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -399,7 +398,7 @@ export const translations: Translations = {
   contactIntro: {
     en: 'Have questions about our products or services? We\'re here to help! Reach out to us using any of the methods below.',
     fr: 'Vous avez des questions sur nos produits ou services? Nous sommes là pour vous aider! Contactez-nous en utilisant l\'une des méthodes ci-dessous.',
-    ar: 'هل لديك أسئلة حول منتجاتنا أو خدماتنا؟ نحن هنا للمساعدة! تواصل معنا باستخدام أي من الطرق أدناه.'
+    ar: 'هل لديك أسئلة حول منتجاتنا أو خدماتنا؟ Nous sommes là pour vous aider! تواصل معنا باستخدام أي من الطرق أدناه.'
   },
   phoneTitle: {
     en: 'Phone',
@@ -549,6 +548,38 @@ export const translations: Translations = {
     en: 'Ultra-Fast Charging',
     fr: 'Charge ultra rapide',
     ar: 'شحن فائق السرعة'
+  },
+  
+  // Product related translations
+  sale: {
+    en: 'Sale',
+    fr: 'Promo',
+    ar: 'تخفيض'
+  },
+  addToCart: {
+    en: 'Add to Cart',
+    fr: 'Ajouter au panier',
+    ar: 'أضف إلى السلة'
+  },
+  viewDetails: {
+    en: 'View Details',
+    fr: 'Voir les détails',
+    ar: 'عرض التفاصيل'
+  },
+  bestSellingProducts: {
+    en: 'Best-Selling Products',
+    fr: 'Produits les plus vendus',
+    ar: 'المنتجات الأكثر مبيعًا'
+  },
+  discoverBestProducts: {
+    en: 'Discover our most loved products with exceptional quality and customer satisfaction',
+    fr: 'Découvrez nos produits les plus appréciés avec une qualité exceptionnelle et la satisfaction des clients',
+    ar: 'اكتشف منتجاتنا الأكثر ش��بية بجودة استثنائية ورضا العملاء'
+  },
+  viewAll: {
+    en: 'View All',
+    fr: 'Voir tout',
+    ar: 'عرض الكل'
   }
 };
 

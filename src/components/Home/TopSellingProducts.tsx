@@ -2,9 +2,11 @@
 import { useStore } from "@/lib/store";
 import { Link } from "react-router-dom";
 import { Star, ArrowRight, Check } from "lucide-react";
+import { useLanguage } from "@/lib/languageContext";
 
 export default function TopSellingProducts() {
   const { products } = useStore();
+  const { t } = useLanguage();
   
   // Get the top 4 highest-rated products
   const topSellingProducts = [...products]
@@ -15,9 +17,9 @@ export default function TopSellingProducts() {
     <section className="py-10 bg-gray-50 rounded-lg overflow-hidden">
       <div className="container mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Best-Selling Products</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('bestSellingProducts', { default: 'Best-Selling Products' })}</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Discover our most loved products with exceptional quality and customer satisfaction
+            {t('discoverBestProducts', { default: 'Discover our most loved products with exceptional quality and customer satisfaction' })}
           </p>
         </div>
         
@@ -62,7 +64,7 @@ export default function TopSellingProducts() {
                     to={`/product/${product.id}`}
                     className="text-sm text-smartplug-blue hover:text-smartplug-lightblue flex items-center"
                   >
-                    View Details
+                    {t('viewDetails', { default: 'View Details' })}
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </Link>
                 </div>

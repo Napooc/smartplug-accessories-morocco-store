@@ -1,9 +1,9 @@
-
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import { Rating } from './Rating';
+import { useLanguage } from '@/lib/languageContext';
 
 interface ProductCardProps {
   product: Product;
@@ -70,6 +70,7 @@ const getUniqueProductImage = (productId: string, productName: string): string =
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useStore();
+  const { t } = useLanguage();
   
   // Get product image - either use the custom one or the first from the product
   const productImage = getUniqueProductImage(product.id, product.name) || product.images[0];
@@ -77,8 +78,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full">
       {product.onSale && (
-        <span className="bg-red-500 text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded">
-          Sale
+        <span className="bg-smartplug-blue text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded">
+          {t('sale', { default: 'Sale' })}
         </span>
       )}
       
@@ -118,7 +119,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="bg-smartplug-blue hover:bg-smartplug-lightblue text-white px-3 py-1.5 rounded text-sm flex items-center transition-colors"
           >
             <ShoppingCart size={16} className="mr-1" />
-            Add to Cart
+            {t('addToCart', { default: 'Add to Cart' })}
           </button>
           
           <div className="flex space-x-2">
