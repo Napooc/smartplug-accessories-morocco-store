@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useStore } from '@/lib/store';
@@ -46,7 +47,7 @@ const AdminAddProduct = () => {
   
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: 'image/*',
+    accept: {'image/*': []},
     multiple: true,
   });
   
@@ -94,7 +95,8 @@ const AdminAddProduct = () => {
         featured,
         onSale,
         stock: Number(stock),
-        sku: sku || `SKU-${Date.now()}`
+        sku: sku || `SKU-${Date.now()}`,
+        rating: 0 // Adding the missing rating property with a default value
       };
       
       await addProduct(productData);
