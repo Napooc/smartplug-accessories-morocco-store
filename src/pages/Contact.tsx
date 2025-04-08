@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
@@ -68,12 +69,7 @@ const ContactPage = () => {
     
     try {
       // Submit the form to Supabase through our store
-      await addContactMessage({
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message
-      });
+      await addContactMessage(formData);
       
       toast.success(t('messageSent'));
       

@@ -1,11 +1,9 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
-import { v4 as uuidv4 } from 'uuid';
 
 interface StoreContextType {
   // Products
@@ -60,21 +58,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   
   useEffect(() => {
-    const savedCart = localStorage.getItem('smartplug-cart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error('Error parsing saved cart', e);
-      }
-    }
-
     const adminLoggedIn = localStorage.getItem('smartplug-admin');
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
 
-    fetchProducts();
     fetchOrders();
     fetchContactMessages();
   }, []);
@@ -82,82 +70,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
-
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*');
-      
-      if (error) {
-        console.error('Error fetching products:', error);
-        return;
-      }
-      
-      if (data && data.length > 0) {
-        const formattedProducts: Product[] = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: Number(item.price),
-          oldPrice: item.old_price ? Number(item.old_price) : 0,
-          images: item.images,
-          category: item.category,
-          featured: item.featured,
-          onSale: item.on_sale,
-          rating: item.rating,
-          stock: item.stock,
-          sku: item.sku
-        }));
-        
-        setProducts(formattedProducts);
-      } else {
-        // Only add products if they don't exist
-        const productPromises = initialProducts.map(product => {
-          return addProductToSupabase({
-            ...product,
-            // Replace string IDs with proper UUIDs
-            id: uuidv4()
-          });
-        });
-        
-        Promise.all(productPromises)
-          .then(() => fetchProducts())
-          .catch(error => console.error('Error adding initial products:', error));
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-
-  const addProductToSupabase = async (product: Product) => {
-    try {
-      const { error } = await supabase
-        .from('products')
-        .insert({
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          old_price: product.oldPrice > 0 ? product.oldPrice : null,
-          images: product.images,
-          category: product.category,
-          featured: product.featured,
-          on_sale: product.onSale,
-          rating: product.rating,
-          stock: product.stock,
-          sku: product.sku || `SKU-${Date.now()}`
-        });
-      
-      if (error) {
-        console.error('Error adding product to Supabase:', error);
-        throw error;
-      }
-    } catch (error) {
-      console.error('Error adding product to Supabase:', error);
-      throw error;
-    }
-  };
   
   const fetchContactMessages = useCallback(async () => {
     try {
@@ -216,118 +128,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
-  const addProduct = async (product: Omit<Product, 'id'>) => {
-    try {
-      // Generate a proper UUID for the new product
-      const newId = uuidv4();
-      
-      const productToAdd = {
-        id: newId,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        old_price: product.oldPrice > 0 ? product.oldPrice : null,
-        images: product.images,
-        category: product.category,
-        featured: product.featured,
-        on_sale: product.onSale,
-        rating: product.rating || 0,
-        stock: product.stock || 0,
-        sku: product.sku || `SKU-${Date.now()}`
-      };
-      
-      const { error } = await supabase
-        .from('products')
-        .insert(productToAdd);
-      
-      if (error) {
-        console.error('Error adding product to Supabase:', error);
-        toast.error('Failed to add product');
-        return;
-      }
-      
-      // Add new product to state with the generated UUID
-      const newProduct: Product = {
-        id: newId,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        oldPrice: product.oldPrice || 0,
-        images: product.images,
-        category: product.category,
-        featured: product.featured || false,
-        onSale: product.onSale || false,
-        rating: product.rating || 0,
-        stock: product.stock || 0,
-        sku: product.sku || `SKU-${Date.now()}`
-      };
-      
-      setProducts(prevProducts => [...prevProducts, newProduct]);
-      toast.success(`${product.name} added to products`);
-    } catch (error) {
-      console.error('Error adding product:', error);
-      toast.error('Failed to add product');
-    }
+  const addProduct = (product: Omit<Product, 'id'>) => {
+    const newProduct: Product = {
+      ...product,
+      id: `prod-${Date.now()}`
+    };
+    
+    setProducts(prevProducts => [...prevProducts, newProduct]);
+    toast.success(`${product.name} added to products`);
   };
   
-  const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
-    try {
-      const supabaseUpdate: any = {
-        ...(productUpdate.name && { name: productUpdate.name }),
-        ...(productUpdate.description && { description: productUpdate.description }),
-        ...(productUpdate.price && { price: productUpdate.price }),
-        ...(productUpdate.oldPrice !== undefined && { old_price: productUpdate.oldPrice > 0 ? productUpdate.oldPrice : null }),
-        ...(productUpdate.images && { images: productUpdate.images }),
-        ...(productUpdate.category && { category: productUpdate.category }),
-        ...(productUpdate.featured !== undefined && { featured: productUpdate.featured }),
-        ...(productUpdate.onSale !== undefined && { on_sale: productUpdate.onSale }),
-        ...(productUpdate.rating !== undefined && { rating: productUpdate.rating }),
-        ...(productUpdate.stock !== undefined && { stock: productUpdate.stock }),
-        ...(productUpdate.sku && { sku: productUpdate.sku })
-      };
-      
-      const { error } = await supabase
-        .from('products')
-        .update(supabaseUpdate)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating product in Supabase:', error);
-        toast.error('Failed to update product');
-        return;
-      }
-      
-      setProducts(prevProducts => 
-        prevProducts.map(product => 
-          product.id === id ? { ...product, ...productUpdate } : product
-        )
-      );
-      toast.success('Product updated successfully');
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast.error('Failed to update product');
-    }
+  const updateProduct = (id: string, productUpdate: Partial<Product>) => {
+    setProducts(prevProducts => 
+      prevProducts.map(product => 
+        product.id === id ? { ...product, ...productUpdate } : product
+      )
+    );
+    toast.success('Product updated successfully');
   };
   
-  const deleteProduct = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting product from Supabase:', error);
-        toast.error('Failed to delete product');
-        return;
-      }
-      
-      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-      toast.success('Product deleted successfully');
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      toast.error('Failed to delete product');
-    }
+  const deleteProduct = (id: string) => {
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    toast.success('Product deleted successfully');
   };
   
   const addToCart = (product: Product, quantity: number = 1) => {
@@ -402,9 +224,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!customerInfo || cart.length === 0) return undefined;
     
     try {
-      const orderId = uuidv4();
       const orderData = {
-        id: orderId,
         customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
         items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
         status: 'pending' as OrderStatus,
@@ -412,22 +232,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         date: new Date().toISOString()
       };
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
-        .insert(orderData);
+        .insert(orderData)
+        .select()
+        .single();
       
       if (error) {
         console.error('Error saving order:', error);
         throw new Error('Failed to place order. Please try again.');
       }
 
+      if (!data) {
+        throw new Error('Failed to place order. No data returned.');
+      }
+
       const newOrder: Order = {
-        id: orderId,
-        items: cart,
-        status: 'pending',
-        customer: customerInfo,
-        date: new Date().toISOString().split('T')[0],
-        total: cartTotal
+        id: data.id,
+        items: data.items as unknown as CartItem[],
+        status: data.status as OrderStatus,
+        customer: data.customer_info as unknown as CustomerInfo,
+        date: new Date(data.date).toISOString().split('T')[0],
+        total: data.total
       };
       
       setOrders(prevOrders => [...prevOrders, newOrder]);
@@ -472,19 +298,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>) => {
     try {
-      const messageId = uuidv4();
       const currentDate = new Date().toISOString();
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('contact_messages')
         .insert({
-          id: messageId,
           name: message.name,
           email: message.email,
           subject: message.subject || null,
           message: message.message,
           date: currentDate
-        });
+        })
+        .select()
+        .single();
       
       if (error) {
         console.error('Error saving contact message:', error);
@@ -492,12 +318,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       const newMessage: ContactMessage = {
-        id: messageId,
-        name: message.name,
-        email: message.email,
-        subject: message.subject || '',
-        message: message.message,
-        date: new Date(currentDate).toISOString().split('T')[0]
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        subject: data.subject || '',
+        message: data.message,
+        date: new Date(data.date).toISOString().split('T')[0]
       };
       
       setContactMessages(prev => [newMessage, ...prev]);
