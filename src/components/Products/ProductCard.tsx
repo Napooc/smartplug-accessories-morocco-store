@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Product } from '@/lib/types';
@@ -40,9 +41,9 @@ const getUniqueProductImage = (productId: string, productName: string): string =
     'camera': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&auto=format&fit=crop&q=80',
     'security': 'https://images.unsplash.com/photo-1582931423747-f7207cab14e5?w=500&auto=format&fit=crop&q=80',
     
-    // Other gadgets
+    // Tech accessories
     'charger': 'https://images.unsplash.com/photo-1618842602192-2f9c0d57666f?w=500&auto=format&fit=crop&q=80',
-    'powerbank': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&auto=format&fit=crop&q=80',
+    'powerbank': 'https://images.unsplash.com/photo-1609091839311-d5365f8ff1c5?w=500&auto=format&fit=crop&q=80',
     'phone': 'https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=500&auto=format&fit=crop&q=80',
     'adapter': 'https://images.unsplash.com/photo-1662994581277-ba58862b43d2?w=500&auto=format&fit=crop&q=80',
     'hub': 'https://images.unsplash.com/photo-1649859394614-dc4646ad634c?w=500&auto=format&fit=crop&q=80',
@@ -50,6 +51,21 @@ const getUniqueProductImage = (productId: string, productName: string): string =
     'usb': 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80',
     'cable': 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80',
     'wireless': 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=500&auto=format&fit=crop&q=80',
+    
+    // Kitchen accessories
+    'kitchen': 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=500&auto=format&fit=crop&q=80',
+    'appliance': 'https://images.unsplash.com/photo-1585659722983-3a681b8a6b3d?w=500&auto=format&fit=crop&q=80',
+    'blender': 'https://images.unsplash.com/photo-1597226401851-87e8c91248de?w=500&auto=format&fit=crop&q=80',
+    'mixer': 'https://images.unsplash.com/photo-1594282486552-05a3b6fbff97?w=500&auto=format&fit=crop&q=80',
+    'cooker': 'https://images.unsplash.com/photo-1596886251705-2826ffa70eb0?w=500&auto=format&fit=crop&q=80',
+    
+    // Furniture
+    'chair': 'https://images.unsplash.com/photo-1551298370-9d3d53740c72?w=500&auto=format&fit=crop&q=80',
+    'table': 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=500&auto=format&fit=crop&q=80',
+    'sofa': 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&auto=format&fit=crop&q=80',
+    'furniture': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&auto=format&fit=crop&q=80',
+    'desk': 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=500&auto=format&fit=crop&q=80',
+    'outdoor': 'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=500&auto=format&fit=crop&q=80',
   };
   
   // Find the matching key in the uniqueImages object
