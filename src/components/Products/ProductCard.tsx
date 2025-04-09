@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Product } from '@/lib/types';
@@ -76,10 +75,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   // Get product image - either use the custom one or the first from the product
   const productImage = getUniqueProductImage(product.id, product.name) || product.images[0];
   
-  // Extract product information to be translated
-  const translatedName = t(`product_${product.id}_name`, { default: product.name });
-  const translatedDescription = t(`product_${product.id}_description`, { default: product.description });
-  
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full">
       {product.onSale && (
@@ -91,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-48">
         <img 
           src={productImage} 
-          alt={translatedName}
+          alt={product.name}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
       </Link>
@@ -103,12 +98,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <Link to={`/product/${product.id}`}>
           <h3 className="font-medium text-lg mb-1 hover:text-smartplug-blue transition-colors">
-            {translatedName}
+            {product.name}
           </h3>
         </Link>
         
         <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
-          {translatedDescription}
+          {product.description}
         </p>
         
         <div className="flex items-center mb-3">
