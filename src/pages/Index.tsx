@@ -11,7 +11,7 @@ import { useLanguage } from "@/lib/languageContext";
 
 const Index = () => {
   const { featuredProducts, fetchOrders } = useStore();
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
   
   // Fetch orders when the component mounts
   useEffect(() => {
@@ -22,7 +22,7 @@ const Index = () => {
     <Layout>
       <Hero />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" dir={direction}>
         <CategoryGrid />
         
         <div className="my-12">
