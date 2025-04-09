@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -398,7 +399,7 @@ export const translations: Translations = {
   contactIntro: {
     en: 'Have questions about our products or services? We\'re here to help! Reach out to us using any of the methods below.',
     fr: 'Vous avez des questions sur nos produits ou services? Nous sommes là pour vous aider! Contactez-nous en utilisant l\'une des méthodes ci-dessous.',
-    ar: 'هل لديك أسئلة حول منتجاتنا أو خدماتنا؟ Nous sommes là pour vous aider! تواصل معنا باستخدام أي من الطرق أدناه.'
+    ar: 'هل لديك أسئلة حول منتجاتنا أو خدماتنا؟ نحن هنا للمساعدة! تواصل معنا باستخدام أي من الطرق أدناه.'
   },
   phoneTitle: {
     en: 'Phone',
@@ -478,9 +479,9 @@ export const translations: Translations = {
   
   // Footer
   footerDescription: {
-    en: 'At SmartPlug, we\'re dedicated to providing you with the best in phone accessories. Explore our wide range of products, from earbuds to chargers and much more.',
-    fr: 'Chez SmartPlug, nous nous consacrons à vous fournir le meilleur en accessoires de téléphone. Explorez notre large gamme de produits, des écouteurs aux chargeurs et bien plus encore.',
-    ar: 'في سمارت بلاج، نحن ملتزمون بتوفير أفضل إكسسوارات الهاتف. استكشف مجموعتنا الواسعة من المنتجات، من سماعات الأذن إلى الشواحن والكثير غير ذلك.'
+    en: 'At Ma7alkom, we\'re dedicated to providing you with the best in home accessories. Explore our wide range of products, from electronics to kitchen appliances and much more.',
+    fr: 'Chez Ma7alkom, nous nous consacrons à vous fournir le meilleur en accessoires pour la maison. Explorez notre large gamme de produits, des appareils électroniques aux appareils de cuisine et bien plus encore.',
+    ar: 'في محلكم، نحن ملتزمون بتوفير أفضل إكسسوارات المنزل. استكشف مجموعتنا الواسعة من المنتجات، من الإلكترونيات إلى أجهزة المطبخ والكثير غير ذلك.'
   },
   usefulLinks: {
     en: 'Useful Links',
@@ -574,7 +575,7 @@ export const translations: Translations = {
   discoverBestProducts: {
     en: 'Discover our most loved products with exceptional quality and customer satisfaction',
     fr: 'Découvrez nos produits les plus appréciés avec une qualité exceptionnelle et la satisfaction des clients',
-    ar: 'اكتشف منتجاتنا الأكثر ش��بية بجودة استثنائية ورضا العملاء'
+    ar: 'اكتشف منتجاتنا الأكثر شعبية بجودة استثنائية ورضا العملاء'
   },
   viewAll: {
     en: 'View All',
@@ -597,7 +598,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with browser language or default to English
   const [language, setLanguage] = useState<Language>(() => {
-    const savedLang = localStorage.getItem('smartplug-language');
+    const savedLang = localStorage.getItem('ma7alkom-language');
     if (savedLang && ['en', 'fr', 'ar'].includes(savedLang)) {
       return savedLang as Language;
     }
@@ -615,14 +616,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Handle language change
   const updateLanguage = (newLanguage: Language) => {
     setLanguage(newLanguage);
-    localStorage.setItem('smartplug-language', newLanguage);
+    localStorage.setItem('ma7alkom-language', newLanguage);
   };
   
   // Update document direction and save language to localStorage
   useEffect(() => {
     document.documentElement.setAttribute('dir', direction);
     document.documentElement.setAttribute('lang', language);
-    localStorage.setItem('smartplug-language', language);
+    localStorage.setItem('ma7alkom-language', language);
   }, [language, direction]);
   
   // Translation function with parameter support
@@ -635,7 +636,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       if (translation[keys[i]]) {
         translation = translation[keys[i]] as unknown as Translations;
       } else {
-        return key; // Key not found
+        return params?.default as string || key; // Key not found, use default or key itself
       }
     }
     
@@ -647,14 +648,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       // Replace parameters if provided
       if (params) {
         Object.keys(params).forEach(param => {
-          translatedText = translatedText.replace(`{{${param}}}`, String(params[param]));
+          if (param !== 'default') {
+            translatedText = translatedText.replace(`{{${param}}}`, String(params[param]));
+          }
         });
       }
       
       return translatedText;
     }
     
-    return key; // Fallback to key
+    return params?.default as string || key; // Fallback to default or key
   };
   
   return (
