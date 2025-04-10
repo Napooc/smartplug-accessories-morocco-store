@@ -29,9 +29,7 @@ const Index = () => {
           <TopSellingProducts />
         </div>
         
-        <div className="my-12">
-          <ProductGrid products={featuredProducts} title={t('featured', { default: 'Featured Products' })} />
-        </div>
+        <ProductGrid products={featuredProducts} title={t('featured', { default: 'Featured Products' })} />
         
         <div className="my-12">
           <InnovationShowcase />
