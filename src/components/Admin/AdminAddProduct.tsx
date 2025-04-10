@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -45,6 +44,7 @@ const AdminAddProduct = () => {
   
   const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -99,8 +99,6 @@ const AdminAddProduct = () => {
     
     setIsUploading(true);
     
-    // In a real app, you would upload the file to a server here
-    // For now we'll just use FileReader to get a data URL
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       
@@ -122,7 +120,6 @@ const AdminAddProduct = () => {
       reader.readAsDataURL(file);
     });
     
-    // Clear the file input for future uploads
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -143,7 +140,7 @@ const AdminAddProduct = () => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors = {
@@ -160,29 +157,38 @@ const AdminAddProduct = () => {
       return;
     }
     
-    if (!product.sku) {
-      const randomSku = `SKU-${Math.floor(Math.random() * 10000)}`;
-      const productWithSku = {...product, sku: randomSku};
-      addProduct(productWithSku);
-    } else {
-      addProduct(product);
+    setIsSaving(true);
+    
+    try {
+      if (!product.sku) {
+        const randomSku = `SKU-${Math.floor(Math.random() * 10000)}`;
+        const productWithSku = {...product, sku: randomSku};
+        await addProduct(productWithSku);
+      } else {
+        await addProduct(product);
+      }
+      
+      setProduct({
+        name: '',
+        description: '',
+        price: 0,
+        oldPrice: 0,
+        category: '',
+        featured: false,
+        onSale: false,
+        stock: 0,
+        images: [],
+        rating: 0,
+        sku: ''
+      });
+      
+      toast.success("Product added successfully");
+    } catch (error) {
+      console.error("Error adding product:", error);
+      toast.error("Failed to add product");
+    } finally {
+      setIsSaving(false);
     }
-    
-    setProduct({
-      name: '',
-      description: '',
-      price: 0,
-      oldPrice: 0,
-      category: '',
-      featured: false,
-      onSale: false,
-      stock: 0,
-      images: [],
-      rating: 0,
-      sku: ''
-    });
-    
-    toast.success("Product added successfully");
   };
   
   return (
@@ -386,8 +392,19 @@ const AdminAddProduct = () => {
         <Button 
           type="submit" 
           className="bg-smartplug-blue hover:bg-smartplug-lightblue"
+          disabled={isSaving}
         >
-          Add Product
+          {isSaving ? (
+            <span className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Adding Product...
+            </span>
+          ) : (
+            "Add Product"
+          )}
         </Button>
       </form>
     </div>

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -31,6 +30,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   const [productData, setProductData] = useState<Product>({ ...product });
   const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const [errors, setErrors] = useState({
     name: '',
@@ -137,7 +137,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors = {
@@ -154,9 +154,18 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       return;
     }
     
-    updateProduct(product.id, productData);
-    onClose();
-    toast.success("Product updated successfully");
+    setIsSaving(true);
+    
+    try {
+      await updateProduct(product.id, productData);
+      onClose();
+      toast.success("Product updated successfully");
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error("Failed to update product");
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   return (
@@ -353,8 +362,19 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           <Button 
             type="submit" 
             className="bg-smartplug-blue hover:bg-smartplug-lightblue"
+            disabled={isSaving}
           >
-            Update Product
+            {isSaving ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </span>
+            ) : (
+              "Update Product"
+            )}
           </Button>
         </div>
       </form>
