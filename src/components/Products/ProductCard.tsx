@@ -41,9 +41,9 @@ const getUniqueProductImage = (productId: string, productName: string): string =
     'camera': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&auto=format&fit=crop&q=80',
     'security': 'https://images.unsplash.com/photo-1582931423747-f7207cab14e5?w=500&auto=format&fit=crop&q=80',
     
-    // Other gadgets
+    // Tech accessories
     'charger': 'https://images.unsplash.com/photo-1618842602192-2f9c0d57666f?w=500&auto=format&fit=crop&q=80',
-    'powerbank': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&auto=format&fit=crop&q=80',
+    'powerbank': 'https://images.unsplash.com/photo-1609091839311-d5365f8ff1c5?w=500&auto=format&fit=crop&q=80',
     'phone': 'https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=500&auto=format&fit=crop&q=80',
     'adapter': 'https://images.unsplash.com/photo-1662994581277-ba58862b43d2?w=500&auto=format&fit=crop&q=80',
     'hub': 'https://images.unsplash.com/photo-1649859394614-dc4646ad634c?w=500&auto=format&fit=crop&q=80',
@@ -51,6 +51,21 @@ const getUniqueProductImage = (productId: string, productName: string): string =
     'usb': 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80',
     'cable': 'https://images.unsplash.com/photo-1611754349119-0a60420137a4?w=500&auto=format&fit=crop&q=80',
     'wireless': 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=500&auto=format&fit=crop&q=80',
+    
+    // Kitchen accessories
+    'kitchen': 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=500&auto=format&fit=crop&q=80',
+    'appliance': 'https://images.unsplash.com/photo-1585659722983-3a681b8a6b3d?w=500&auto=format&fit=crop&q=80',
+    'blender': 'https://images.unsplash.com/photo-1597226401851-87e8c91248de?w=500&auto=format&fit=crop&q=80',
+    'mixer': 'https://images.unsplash.com/photo-1594282486552-05a3b6fbff97?w=500&auto=format&fit=crop&q=80',
+    'cooker': 'https://images.unsplash.com/photo-1596886251705-2826ffa70eb0?w=500&auto=format&fit=crop&q=80',
+    
+    // Furniture
+    'chair': 'https://images.unsplash.com/photo-1551298370-9d3d53740c72?w=500&auto=format&fit=crop&q=80',
+    'table': 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=500&auto=format&fit=crop&q=80',
+    'sofa': 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&auto=format&fit=crop&q=80',
+    'furniture': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&auto=format&fit=crop&q=80',
+    'desk': 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=500&auto=format&fit=crop&q=80',
+    'outdoor': 'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=500&auto=format&fit=crop&q=80',
   };
   
   // Find the matching key in the uniqueImages object
@@ -71,27 +86,33 @@ const getUniqueProductImage = (productId: string, productName: string): string =
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useStore();
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
   
   // Get product image - either use the custom one or the first from the product
   const productImage = getUniqueProductImage(product.id, product.name) || product.images[0];
   
-  // Extract product information to be translated
-  const translatedName = t(`product_${product.id}_name`, { default: product.name });
-  const translatedDescription = t(`product_${product.id}_description`, { default: product.description });
+  // Function to get translated product name and description
+  // For a real app, we would have translation keys for each product
+  // Here we're using the product data directly, but in a real implementation
+  // you would likely have translation keys for each product
+  const getTranslatedProductData = (field: 'name' | 'description') => {
+    // In a real app, you would fetch translations for each product
+    // For now, we'll just return the original text
+    return product[field];
+  };
   
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full">
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full" dir={direction}>
       {product.onSale && (
         <span className="bg-smartplug-blue text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded">
-          {t('sale', { default: 'Sale' })}
+          {t('sale')}
         </span>
       )}
       
       <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-48">
         <img 
           src={productImage} 
-          alt={translatedName}
+          alt={getTranslatedProductData('name')}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
       </Link>
@@ -103,12 +124,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <Link to={`/product/${product.id}`}>
           <h3 className="font-medium text-lg mb-1 hover:text-smartplug-blue transition-colors">
-            {translatedName}
+            {getTranslatedProductData('name')}
           </h3>
         </Link>
         
         <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
-          {translatedDescription}
+          {getTranslatedProductData('description')}
         </p>
         
         <div className="flex items-center mb-3">
@@ -124,7 +145,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="bg-smartplug-blue hover:bg-smartplug-lightblue text-white px-3 py-1.5 rounded text-sm flex items-center transition-colors"
           >
             <ShoppingCart size={16} className="mr-1" />
-            {t('addToCart', { default: 'Add to Cart' })}
+            {t('addToCart')}
           </button>
           
           <div className="flex space-x-2">

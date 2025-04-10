@@ -26,10 +26,22 @@ const categoryIcons: Record<string, JSX.Element> = {
 };
 
 export default function CategoryGrid() {
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
+  
+  // Map of category IDs to translation keys
+  const categoryTranslationKeys: Record<string, string> = {
+    'home-kitchen': 'homeKitchen',
+    'electronics': 'electronics',
+    'tools-lighting': 'toolsLighting',
+    'plumbing': 'plumbing',
+    'garden-terrace': 'gardenTerrace',
+    'paint-hardware': 'paintHardware',
+    'bathroom-toilet': 'bathroomToilet',
+    'heating-ac': 'heatingAc'
+  };
   
   return (
-    <section className="py-12 bg-gray-50">
+    <section className="py-12 bg-gray-50" dir={direction}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('shopByCategory')}</h2>
@@ -47,7 +59,9 @@ export default function CategoryGrid() {
                 <div className="mb-4 p-3 bg-gray-50 rounded-full group-hover:bg-smartplug-blue/10 transition-colors">
                   {categoryIcons[category.id]}
                 </div>
-                <h3 className="text-center font-medium text-gray-800 group-hover:text-smartplug-blue transition-colors">{category.name}</h3>
+                <h3 className="text-center font-medium text-gray-800 group-hover:text-smartplug-blue transition-colors">
+                  {t(categoryTranslationKeys[category.id] || category.id, { default: category.name })}
+                </h3>
               </div>
             </Link>
           ))}

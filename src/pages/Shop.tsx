@@ -14,12 +14,26 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useLanguage } from '@/lib/languageContext';
 
 const Shop = () => {
   const { products } = useStore();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [sortBy, setSortBy] = useState('default');
+  const { t, direction } = useLanguage();
+  
+  // Map of category IDs to translation keys
+  const categoryTranslationKeys: Record<string, string> = {
+    'home-kitchen': 'homeKitchen',
+    'electronics': 'electronics',
+    'tools-lighting': 'toolsLighting',
+    'plumbing': 'plumbing',
+    'garden-terrace': 'gardenTerrace',
+    'paint-hardware': 'paintHardware',
+    'bathroom-toilet': 'bathroomToilet',
+    'heating-ac': 'heatingAc'
+  };
   
   // Filter products
   const filteredProducts = products.filter((product) => {
@@ -66,22 +80,22 @@ const Shop = () => {
   return (
     <Layout>
       <div className="bg-gray-100 py-6">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold">Shop</h1>
+        <div className="container mx-auto px-4" dir={direction}>
+          <h1 className="text-3xl font-bold">{t('shop')}</h1>
           <div className="flex items-center text-sm mt-2">
-            <a href="/" className="text-gray-500 hover:text-smartplug-blue">Home</a>
+            <a href="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</a>
             <span className="mx-2">/</span>
-            <span className="font-medium">Shop</span>
+            <span className="font-medium">{t('shop')}</span>
           </div>
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" dir={direction}>
         <div className="flex flex-col md:flex-row">
           {/* Sidebar filters */}
           <div className="md:w-1/4 pr-8">
             <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium mb-4">Categories</h3>
+              <h3 className="text-lg font-medium mb-4">{t('categories')}</h3>
               <div className="space-y-2">
                 {categories.map((category) => (
                   <div key={category.id} className="flex items-center">
@@ -94,7 +108,7 @@ const Shop = () => {
                       htmlFor={category.id}
                       className="ml-2 capitalize cursor-pointer"
                     >
-                      {category.name}
+                      {t(categoryTranslationKeys[category.id] || category.id, { default: category.name })}
                     </Label>
                   </div>
                 ))}
@@ -102,7 +116,7 @@ const Shop = () => {
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
-              <h3 className="text-lg font-medium mb-4">Price Range</h3>
+              <h3 className="text-lg font-medium mb-4">{t('price', { default: 'Price Range' })}</h3>
               <div className="px-2">
                 <Slider
                   defaultValue={priceRange}
@@ -119,11 +133,11 @@ const Shop = () => {
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-medium mb-4">On Sale</h3>
+              <h3 className="text-lg font-medium mb-4">{t('sale', { default: 'On Sale' })}</h3>
               <div className="flex items-center">
                 <Checkbox id="on-sale" />
                 <Label htmlFor="on-sale" className="ml-2 cursor-pointer">
-                  Show only sale items
+                  {t('showOnlySaleItems', { default: 'Show only sale items' })}
                 </Label>
               </div>
             </div>
@@ -133,19 +147,19 @@ const Shop = () => {
           <div className="md:w-3/4 mt-8 md:mt-0">
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-600">
-                Showing <span className="font-medium">{sortedProducts.length}</span> products
+                {t('showing', { default: 'Showing' })} <span className="font-medium">{sortedProducts.length}</span> {t('products', { default: 'products' })}
               </p>
               
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder={t('sortBy', { default: 'Sort by' })} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                  <SelectItem value="name-asc">Name: A to Z</SelectItem>
-                  <SelectItem value="name-desc">Name: Z to A</SelectItem>
+                  <SelectItem value="default">{t('default', { default: 'Default' })}</SelectItem>
+                  <SelectItem value="price-asc">{t('priceLowToHigh', { default: 'Price: Low to High' })}</SelectItem>
+                  <SelectItem value="price-desc">{t('priceHighToLow', { default: 'Price: High to Low' })}</SelectItem>
+                  <SelectItem value="name-asc">{t('nameAtoZ', { default: 'Name: A to Z' })}</SelectItem>
+                  <SelectItem value="name-desc">{t('nameZtoA', { default: 'Name: Z to A' })}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
