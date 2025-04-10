@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
@@ -49,11 +48,11 @@ const ContactPage = () => {
     e.preventDefault();
     
     const newErrors = {
-      name: formData.name ? '' : t('nameRequired', { default: 'Name is required' }),
+      name: formData.name ? '' : t('nameRequired'),
       email: formData.email ? (
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail', { default: 'Please enter a valid email' })
-      ) : t('emailRequired', { default: 'Email is required' }),
-      message: formData.message ? '' : t('messageRequired', { default: 'Message is required' })
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail')
+      ) : t('emailRequired'),
+      message: formData.message ? '' : t('messageRequired')
     };
     
     setErrors(newErrors);
@@ -67,18 +66,12 @@ const ContactPage = () => {
     try {
       await addContactMessage(formData);
       
-      toast.success(t('messageSent', { default: 'Your message has been sent successfully!' }));
+      toast.success(t('messageSent'));
       
       setMessageSent(true);
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error(t('messageFailed', { default: 'Failed to send message. Please try again.' }));
+      toast.error(t('messageFailed'));
     } finally {
       setIsSubmitting(false);
     }

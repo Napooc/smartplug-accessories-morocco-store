@@ -63,49 +63,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
     }
 
-    const storedCart = localStorage.getItem('smartplug-cart');
-    if (storedCart) {
-      try {
-        setCart(JSON.parse(storedCart));
-      } catch (error) {
-        console.error('Error parsing cart from localStorage:', error);
-      }
-    }
-
-    const fetchProducts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*');
-        
-        if (error) {
-          console.error('Error fetching products:', error);
-          return;
-        }
-        
-        if (data && data.length > 0) {
-          const transformedProducts = data.map(item => ({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            price: Number(item.price),
-            oldPrice: item.old_price ? Number(item.old_price) : undefined,
-            images: item.images as string[],
-            category: item.category,
-            rating: Number(item.rating),
-            stock: item.stock,
-            sku: item.sku,
-            featured: item.featured,
-            onSale: item.on_sale
-          }));
-          setProducts(transformedProducts);
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
-
-    fetchProducts();
     fetchOrders();
     fetchContactMessages();
   }, []);
@@ -171,113 +128,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
-  const addProduct = async (product: Omit<Product, 'id'>) => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .insert({
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          old_price: product.oldPrice || null,
-          images: product.images,
-          category: product.category,
-          rating: product.rating || 0,
-          stock: product.stock || 0,
-          sku: product.sku || `SKU-${Date.now()}`,
-          featured: product.featured || false,
-          on_sale: product.onSale || false
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error adding product:', error);
-        toast.error('Failed to add product');
-        return;
-      }
-      
-      const newProduct: Product = {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        price: Number(data.price),
-        oldPrice: data.old_price ? Number(data.old_price) : undefined,
-        images: data.images as string[],
-        category: data.category,
-        rating: Number(data.rating),
-        stock: data.stock,
-        sku: data.sku,
-        featured: data.featured,
-        onSale: data.on_sale
-      };
-      
-      setProducts(prevProducts => [...prevProducts, newProduct]);
-      toast.success(`${product.name} added to products`);
-    } catch (error) {
-      console.error('Error adding product:', error);
-      toast.error('Failed to add product');
-    }
+  const addProduct = (product: Omit<Product, 'id'>) => {
+    const newProduct: Product = {
+      ...product,
+      id: `prod-${Date.now()}`
+    };
+    
+    setProducts(prevProducts => [...prevProducts, newProduct]);
+    toast.success(`${product.name} added to products`);
   };
   
-  const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
-    try {
-      const supabaseUpdate: any = {};
-      
-      if (productUpdate.name !== undefined) supabaseUpdate.name = productUpdate.name;
-      if (productUpdate.description !== undefined) supabaseUpdate.description = productUpdate.description;
-      if (productUpdate.price !== undefined) supabaseUpdate.price = productUpdate.price;
-      if (productUpdate.oldPrice !== undefined) supabaseUpdate.old_price = productUpdate.oldPrice;
-      if (productUpdate.images !== undefined) supabaseUpdate.images = productUpdate.images;
-      if (productUpdate.category !== undefined) supabaseUpdate.category = productUpdate.category;
-      if (productUpdate.rating !== undefined) supabaseUpdate.rating = productUpdate.rating;
-      if (productUpdate.stock !== undefined) supabaseUpdate.stock = productUpdate.stock;
-      if (productUpdate.sku !== undefined) supabaseUpdate.sku = productUpdate.sku;
-      if (productUpdate.featured !== undefined) supabaseUpdate.featured = productUpdate.featured;
-      if (productUpdate.onSale !== undefined) supabaseUpdate.on_sale = productUpdate.onSale;
-      
-      const { error } = await supabase
-        .from('products')
-        .update(supabaseUpdate)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating product:', error);
-        toast.error('Failed to update product');
-        return;
-      }
-      
-      setProducts(prevProducts => 
-        prevProducts.map(product => 
-          product.id === id ? { ...product, ...productUpdate } : product
-        )
-      );
-      toast.success('Product updated successfully');
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast.error('Failed to update product');
-    }
+  const updateProduct = (id: string, productUpdate: Partial<Product>) => {
+    setProducts(prevProducts => 
+      prevProducts.map(product => 
+        product.id === id ? { ...product, ...productUpdate } : product
+      )
+    );
+    toast.success('Product updated successfully');
   };
   
-  const deleteProduct = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting product:', error);
-        toast.error('Failed to delete product');
-        return;
-      }
-      
-      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-      toast.success('Product deleted successfully');
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      toast.error('Failed to delete product');
-    }
+  const deleteProduct = (id: string) => {
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    toast.success('Product deleted successfully');
   };
   
   const addToCart = (product: Product, quantity: number = 1) => {
@@ -455,7 +327,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       
       setContactMessages(prev => [newMessage, ...prev]);
-      return newMessage;
     } catch (error) {
       console.error('Error saving contact message:', error);
       throw error;

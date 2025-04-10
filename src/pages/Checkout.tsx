@@ -1,107 +1,73 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
-import { useLanguage } from '@/lib/languageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ShoppingBag, CreditCard, Truck, CheckCircle2 } from 'lucide-react';
+import { cities } from '@/lib/data';
 import { toast } from 'sonner';
-import { moroccanCities } from '@/lib/data';
+import { CustomerInfo } from '@/lib/types';
+import { useLanguage } from '@/lib/languageContext';
 
 const Checkout = () => {
-  const { cart, cartTotal, customerInfo, setCustomerInfo, placeOrder } = useStore();
-  const { t, direction } = useLanguage();
   const navigate = useNavigate();
+  const { cart, cartTotal, setCustomerInfo, placeOrder } = useStore();
+  const { t, language, direction } = useLanguage();
   
-  const [formData, setFormData] = useState({
-    name: customerInfo?.name || '',
-    nickname: customerInfo?.nickname || '',
-    phone: customerInfo?.phone || '',
-    city: customerInfo?.city || ''
-  });
-  
-  const [errors, setErrors] = useState({
+  const [formData, setFormData] = useState<CustomerInfo>({
     name: '',
     phone: '',
-    city: ''
+    city: 'Casablanca',
   });
   
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
-  useEffect(() => {
-    if (cart.length === 0) {
-      navigate('/cart');
-    }
-  }, [cart, navigate]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
   
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      city: value
-    }));
-    
-    if (errors.city) {
-      setErrors(prev => ({
-        ...prev,
-        city: ''
-      }));
-    }
+  const handleCityChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, city: value }));
   };
   
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newErrors = {
-      name: formData.name ? '' : t('nameRequired', { default: 'Full name is required' }),
-      phone: formData.phone 
-        ? (/^(\+\d{1,3})?\d{9,10}$/.test(formData.phone.trim()) 
-            ? '' 
-            : t('validPhone', { default: 'Please enter a valid phone number' }))
-        : t('phoneRequired', { default: 'Phone number is required' }),
-      city: formData.city ? '' : t('cityRequired', { default: 'Please select a city' })
-    };
-    
-    setErrors(newErrors);
-    
-    if (newErrors.name || newErrors.phone || newErrors.city) {
+    if (!formData.name || !formData.phone || !formData.city) {
+      toast.error(t('nameRequired'));
       return;
     }
     
-    setIsProcessing(true);
+    if (cart.length === 0) {
+      toast.error(t('emptyCart'));
+      return;
+    }
     
     try {
+      setIsLoading(true);
       setCustomerInfo(formData);
       
-      const order = await placeOrder();
+      // Place order and wait for the result
+      const orderResult = await placeOrder();
       
-      if (order) {
-        navigate(`/order-confirmation/${order.id}`);
+      if (orderResult && orderResult.id) {
+        navigate('/confirmation', { 
+          state: { 
+            orderId: orderResult.id, 
+            orderTotal: orderResult.total 
+          } 
+        });
       } else {
-        toast.error(t('orderError', { default: 'Failed to place order. Please try again.' }));
+        throw new Error('Failed to place order');
       }
     } catch (error) {
-      console.error('Error placing order:', error);
-      toast.error(t('orderError', { default: 'Failed to place order. Please try again.' }));
+      console.error('Error during checkout:', error);
+      toast.error(t('orderFailed'));
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
   
@@ -121,88 +87,91 @@ const Checkout = () => {
   
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8" dir={direction}>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">{t('personalInfo', { default: 'Personal Information' })}</h2>
+      <div className="container mx-auto py-10" dir={direction}>
+        <h1 className="text-2xl font-bold mb-6">{t('cart')}</h1>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2">
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <h2 className="text-xl font-semibold mb-4">{t('shippingInfo')}</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">{t('fullName', { default: 'Full Name' })}</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder={t('yourName', { default: 'Your full name' })}
-                    className={errors.name ? 'border-red-500' : ''}
-                  />
-                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="nickname">{t('nickname', { default: 'Nickname (Optional)' })}</Label>
-                  <Input
-                    id="nickname"
-                    name="nickname"
-                    value={formData.nickname}
-                    onChange={handleChange}
-                    placeholder={t('yourNickname', { default: 'How you prefer to be called' })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t('phone', { default: 'Phone Number' })}</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder={t('yourPhone', { default: 'Your phone number' })}
-                    className={errors.phone ? 'border-red-500' : ''}
-                  />
-                  {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="city">{t('city', { default: 'City' })}</Label>
-                  <Select value={formData.city} onValueChange={handleSelectChange}>
-                    <SelectTrigger className={errors.city ? 'border-red-500' : ''}>
-                      <SelectValue placeholder={t('selectCity', { default: 'Select your city' })} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {moroccanCities.map((city) => (
-                        <SelectItem key={city.id} value={city.id}>
-                          {t(`cities.${city.id}`, { default: city.name })}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
-                </div>
-                
-                <div className="pt-4">
-                  <Button 
-                    type="submit" 
-                    className="w-full mt-6 bg-smartplug-blue hover:bg-smartplug-lightblue"
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {t('processing', { default: 'Processing...' })}
-                      </span>
-                    ) : (
-                      <span className="flex items-center">
-                        <CreditCard className="mr-2 h-5 w-5" />
-                        {t('placeOrder', { default: 'Place Order' })}
-                      </span>
-                    )}
-                  </Button>
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium mb-1">
+                      {t('fullName')}*
+                    </label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder={t('fullName')}
+                      required
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="nickname" className="block text-sm font-medium mb-1">
+                      {t('nickname')}
+                    </label>
+                    <Input
+                      id="nickname"
+                      name="nickname"
+                      value={formData.nickname || ''}
+                      onChange={handleInputChange}
+                      placeholder={t('enterNickname')}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium mb-1">
+                      {t('phone')}*
+                    </label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder={t('phone')}
+                      required
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium mb-1">
+                      {t('city')}*
+                    </label>
+                    <Select 
+                      value={formData.city} 
+                      onValueChange={handleCityChange}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={`${t('city')}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((city) => (
+                          <SelectItem key={city.id} value={city.name}>
+                            {city.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t('processing') : t('placeOrder')}
+                    </Button>
+                  </div>
                 </div>
               </form>
             </div>
