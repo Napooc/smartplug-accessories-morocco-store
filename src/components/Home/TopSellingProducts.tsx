@@ -6,7 +6,7 @@ import { useLanguage } from "@/lib/languageContext";
 
 export default function TopSellingProducts() {
   const { products } = useStore();
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
   
   // Get the top 4 highest-rated products
   const topSellingProducts = [...products]
@@ -14,7 +14,7 @@ export default function TopSellingProducts() {
     .slice(0, 4);
   
   return (
-    <section className="py-10 bg-gray-50 rounded-lg overflow-hidden">
+    <section className="py-10 bg-gray-50 rounded-lg overflow-hidden" dir={direction}>
       <div className="container mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('bestSellingProducts', { default: 'Best-Selling Products' })}</h2>
