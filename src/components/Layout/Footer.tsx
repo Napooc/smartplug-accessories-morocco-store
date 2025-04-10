@@ -16,7 +16,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Headphones className="h-6 w-6 text-smartplug-blue" />
-              <span className="text-xl font-bold text-gray-900">Ma7alkom</span>
+              <span className="text-xl font-bold text-gray-900">SmartPlug</span>
             </div>
             <p className="text-gray-600">
               {t('footerDescription')}
@@ -27,7 +27,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center space-x-2">
               <Mail size={16} className="text-gray-600" />
-              <span className="text-gray-600">contact@ma7alkom.com</span>
+              <span className="text-gray-600">contact@smartplug.com</span>
             </div>
           </div>
           
@@ -77,7 +77,7 @@ export default function Footer() {
         
         <div className="border-t mt-12 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600">© {currentYear} Ma7alkom. {t('allRightsReserved')}</p>
+            <p className="text-gray-600">© {currentYear} SmartPlug. {t('allRightsReserved')}</p>
             <p className="text-gray-600 mt-2 md:mt-0">
               <Link to="/privacy" className="hover:text-smartplug-blue">{t('privacyPolicy')}</Link>
             </p>

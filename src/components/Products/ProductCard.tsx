@@ -86,33 +86,23 @@ const getUniqueProductImage = (productId: string, productName: string): string =
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useStore();
-  const { t, direction } = useLanguage();
+  const { t } = useLanguage();
   
   // Get product image - either use the custom one or the first from the product
   const productImage = getUniqueProductImage(product.id, product.name) || product.images[0];
   
-  // Function to get translated product name and description
-  // For a real app, we would have translation keys for each product
-  // Here we're using the product data directly, but in a real implementation
-  // you would likely have translation keys for each product
-  const getTranslatedProductData = (field: 'name' | 'description') => {
-    // In a real app, you would fetch translations for each product
-    // For now, we'll just return the original text
-    return product[field];
-  };
-  
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full" dir={direction}>
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full">
       {product.onSale && (
         <span className="bg-smartplug-blue text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded">
-          {t('sale')}
+          {t('sale', { default: 'Sale' })}
         </span>
       )}
       
       <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-48">
         <img 
           src={productImage} 
-          alt={getTranslatedProductData('name')}
+          alt={product.name}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
       </Link>
@@ -124,12 +114,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <Link to={`/product/${product.id}`}>
           <h3 className="font-medium text-lg mb-1 hover:text-smartplug-blue transition-colors">
-            {getTranslatedProductData('name')}
+            {product.name}
           </h3>
         </Link>
         
         <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
-          {getTranslatedProductData('description')}
+          {product.description}
         </p>
         
         <div className="flex items-center mb-3">
@@ -145,7 +135,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="bg-smartplug-blue hover:bg-smartplug-lightblue text-white px-3 py-1.5 rounded text-sm flex items-center transition-colors"
           >
             <ShoppingCart size={16} className="mr-1" />
-            {t('addToCart')}
+            {t('addToCart', { default: 'Add to Cart' })}
           </button>
           
           <div className="flex space-x-2">

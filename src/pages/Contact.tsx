@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
@@ -36,6 +37,7 @@ const ContactPage = () => {
       [name]: value
     }));
     
+    // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -47,6 +49,7 @@ const ContactPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate form
     const newErrors = {
       name: formData.name ? '' : t('nameRequired'),
       email: formData.email ? (
@@ -57,6 +60,7 @@ const ContactPage = () => {
     
     setErrors(newErrors);
     
+    // If there are errors, don't submit
     if (newErrors.name || newErrors.email || newErrors.message) {
       return;
     }
@@ -64,10 +68,12 @@ const ContactPage = () => {
     setIsSubmitting(true);
     
     try {
+      // Submit the form to Supabase through our store
       await addContactMessage(formData);
       
       toast.success(t('messageSent'));
       
+      // Show thank you message
       setMessageSent(true);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -92,6 +98,7 @@ const ContactPage = () => {
       
       <div className="container mx-auto px-4 py-12" dir={direction}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Contact Info */}
           <div className="lg:col-span-1">
             <h2 className="text-2xl font-bold mb-6">{t('getInTouch')}</h2>
             <p className="text-gray-600 mb-8">
@@ -115,7 +122,7 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">{t('emailTitle')}</h3>
-                  <p className="text-gray-600">info@ma7alkom.ma</p>
+                  <p className="text-gray-600">info@smartplug.ma</p>
                 </div>
               </div>
               
@@ -132,6 +139,7 @@ const ContactPage = () => {
             </div>
           </div>
           
+          {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-lg shadow-md border">
               {messageSent ? (
@@ -141,7 +149,7 @@ const ContactPage = () => {
                   </div>
                   <h2 className="text-2xl font-bold mb-4">{t('thankYou')}</h2>
                   <p className="text-gray-600 mb-6">
-                    {t('messageSent')}
+                    {t('messageReceived')}
                   </p>
                   <Button 
                     onClick={() => {
@@ -155,7 +163,7 @@ const ContactPage = () => {
                     }}
                     className="bg-smartplug-blue hover:bg-smartplug-lightblue"
                   >
-                    {t('sendAnotherMessage', { default: 'Send Another Message' })}
+                    {t('sendAnotherMessage')}
                   </Button>
                 </div>
               ) : (
@@ -204,7 +212,7 @@ const ContactPage = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="message">{t('message', { default: 'Message' })}</Label>
+                      <Label htmlFor="message">{t('message')}</Label>
                       <Textarea
                         id="message"
                         name="message"
@@ -223,7 +231,7 @@ const ContactPage = () => {
                       className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
                     >
                       {isSubmitting ? (
-                        <span className="animate-pulse">{t('processing', { default: 'Sending...' })}</span>
+                        <span className="animate-pulse">Sending...</span>
                       ) : (
                         <>
                           <Send className="h-4 w-4 mr-2" />
