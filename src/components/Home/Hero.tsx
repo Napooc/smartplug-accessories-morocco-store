@@ -6,7 +6,7 @@ import { useLanguage } from '@/lib/languageContext';
 
 const slides = [
   {
-    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1500&auto=format&fit=crop&q=80',
+    image: 'public/lovable-uploads/d43cee92-fe2b-4bf8-9f35-83c2b8988c7f.png',
     title: {
       en: 'SmartPlug: Phone Accessories',
       fr: 'SmartPlug: Accessoires pour Téléphone',
@@ -26,7 +26,7 @@ const slides = [
     link: '/shop'
   },
   {
-    image: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1500&auto=format&fit=crop&q=80',
+    image: 'public/lovable-uploads/8f83e58f-4fff-46a3-887d-a6d4e7a15f52.png',
     title: {
       en: 'Kitchen Accessories',
       fr: 'Accessoires de Cuisine',
@@ -46,7 +46,7 @@ const slides = [
     link: '/product/3'
   },
   {
-    image: 'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=1500&auto=format&fit=crop&q=80',
+    image: 'public/lovable-uploads/0047597a-c6de-41a3-a1fd-f78d056c5147.png',
     title: {
       en: 'Outdoor Furniture',
       fr: 'Mobilier d\'Extérieur',

@@ -9,12 +9,11 @@ import {
   ChevronRight,
   Menu,
   X,
-  Home,
+  Headphones,
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import Logo from '@/components/Layout/Logo';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -61,8 +60,8 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
       <div className="lg:hidden">
         <div className="flex items-center justify-between p-4 bg-white border-b">
           <Link to="/admin" className="flex items-center">
-            <Logo size="small" withText={false} />
-            <span className="font-bold text-xl ml-2">Ma7alkom Admin</span>
+            <Headphones className="h-6 w-6 text-smartplug-blue mr-2" />
+            <span className="font-bold text-xl">SmartPlug Admin</span>
           </Link>
           
           <Sheet>
@@ -75,8 +74,8 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <Link to="/admin" className="flex items-center">
-                    <Logo size="small" withText={false} />
-                    <span className="font-bold text-lg ml-2">Ma7alkom Admin</span>
+                    <Headphones className="h-6 w-6 text-smartplug-blue mr-2" />
+                    <span className="font-bold text-lg">SmartPlug Admin</span>
                   </Link>
                 </div>
                 
@@ -117,8 +116,8 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         <aside className="hidden lg:block w-64 bg-white border-r h-screen overflow-y-auto fixed">
           <div className="p-6">
             <Link to="/admin" className="flex items-center">
-              <Logo size="small" withText={false} />
-              <span className="font-bold text-xl ml-2">Ma7alkom Admin</span>
+              <Headphones className="h-6 w-6 text-smartplug-blue mr-2" />
+              <span className="font-bold text-xl">SmartPlug Admin</span>
             </Link>
           </div>
           

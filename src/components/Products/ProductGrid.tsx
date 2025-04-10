@@ -15,7 +15,7 @@ export default function ProductGrid({ products, title }: ProductGridProps) {
     <div className="py-8">
       {title && (
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">{t(title.toLowerCase().replace(/\s/g, ''), { default: title })}</h2>
+          <h2 className="text-2xl font-bold">{t(title, { default: title })}</h2>
           <a href="/shop" className="text-smartplug-blue hover:underline">{t('viewAll', { default: 'View All' })}</a>
         </div>
       )}
