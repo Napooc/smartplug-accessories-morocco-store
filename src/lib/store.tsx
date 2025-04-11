@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -328,6 +327,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       
       setContactMessages(prev => [newMessage, ...prev]);
+      
+      return newMessage;
     } catch (error) {
       console.error('Error saving contact message:', error);
       throw error;
