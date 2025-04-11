@@ -1,3 +1,4 @@
+
 import { ShoppingCart, Package, TrendingUp, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminMessages from '@/components/Admin/AdminMessages';
@@ -33,12 +34,12 @@ const AdminDashboard = () => {
   const unreadMessages = contactMessages.length;
   
   return (
-    <AdminLayout title="Dashboard">
+    <AdminLayout title="Tableau de bord">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">Total Orders</p>
+              <p className="text-gray-500 mb-1">Total Commandes</p>
               <h3 className="text-3xl font-bold">{totalOrders}</h3>
             </div>
             <div className="p-2 bg-blue-100 rounded-md">
@@ -47,7 +48,7 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-4">
             <Link to="/admin/orders" className="text-sm text-smartplug-blue hover:underline">
-              View all orders
+              Voir toutes les commandes
             </Link>
           </div>
         </div>
@@ -55,7 +56,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">Total Products</p>
+              <p className="text-gray-500 mb-1">Total Produits</p>
               <h3 className="text-3xl font-bold">{totalProducts}</h3>
             </div>
             <div className="p-2 bg-green-100 rounded-md">
@@ -64,7 +65,7 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-4">
             <Link to="/admin/products" className="text-sm text-smartplug-blue hover:underline">
-              View all products
+              Voir tous les produits
             </Link>
           </div>
         </div>
@@ -72,7 +73,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">Total Revenue</p>
+              <p className="text-gray-500 mb-1">Revenus Totaux</p>
               <h3 className="text-3xl font-bold">{totalRevenue.toFixed(2)} DH</h3>
             </div>
             <div className="p-2 bg-purple-100 rounded-md">
@@ -81,7 +82,7 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-4">
             <Link to="/admin/orders" className="text-sm text-smartplug-blue hover:underline">
-              View details
+              Voir détails
             </Link>
           </div>
         </div>
@@ -101,7 +102,7 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab('messages')}
               className="text-sm text-smartplug-blue hover:underline"
             >
-              View messages
+              Voir messages
             </button>
           </div>
         </div>
@@ -109,7 +110,7 @@ const AdminDashboard = () => {
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="overview">Aperçu</TabsTrigger>
           <TabsTrigger value="messages" className="relative">
             Messages
             {unreadMessages > 0 && (
@@ -124,23 +125,23 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-bold">Recent Orders</h3>
+                <h3 className="text-lg font-bold">Commandes Récentes</h3>
               </div>
               
               <div className="p-0">
                 {orders.length === 0 ? (
                   <div className="p-6 text-center text-gray-500">
-                    No orders yet
+                    Pas encore de commandes
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-gray-50 text-left text-gray-600 text-sm">
                         <tr>
-                          <th className="p-4">Order ID</th>
-                          <th className="p-4">Customer</th>
+                          <th className="p-4">ID Commande</th>
+                          <th className="p-4">Client</th>
                           <th className="p-4">Date</th>
-                          <th className="p-4">Status</th>
+                          <th className="p-4">Statut</th>
                           <th className="p-4">Total</th>
                         </tr>
                       </thead>
@@ -160,7 +161,10 @@ const AdminDashboard = () => {
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-gray-100 text-gray-800'
                               }`}>
-                                {order.status}
+                                {order.status === 'pending' ? 'En attente' : 
+                                 order.status === 'shipped' ? 'Expédié' : 
+                                 order.status === 'delivered' ? 'Livré' : 
+                                 order.status === 'cancelled' ? 'Annulé' : order.status}
                               </span>
                             </td>
                             <td className="p-4 font-medium">{order.total.toFixed(2)} DH</td>
@@ -174,21 +178,21 @@ const AdminDashboard = () => {
               
               <div className="p-4 border-t">
                 <Link to="/admin/orders" className="text-smartplug-blue hover:underline text-sm">
-                  View all orders
+                  Voir toutes les commandes
                 </Link>
               </div>
             </div>
             
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-bold">Order Status</h3>
+                <h3 className="text-lg font-bold">Statut des Commandes</h3>
               </div>
               
               <div className="p-6">
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Pending Orders</span>
+                      <span className="text-sm font-medium">Commandes En Attente</span>
                       <span className="text-sm font-medium text-gray-500">{pendingOrders}/{totalOrders}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -201,7 +205,7 @@ const AdminDashboard = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Shipped Orders</span>
+                      <span className="text-sm font-medium">Commandes Expédiées</span>
                       <span className="text-sm font-medium text-gray-500">
                         {orders.filter(order => order.status === 'shipped').length}/{totalOrders}
                       </span>
@@ -216,7 +220,7 @@ const AdminDashboard = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Delivered Orders</span>
+                      <span className="text-sm font-medium">Commandes Livrées</span>
                       <span className="text-sm font-medium text-gray-500">
                         {orders.filter(order => order.status === 'delivered').length}/{totalOrders}
                       </span>
@@ -231,7 +235,7 @@ const AdminDashboard = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Cancelled Orders</span>
+                      <span className="text-sm font-medium">Commandes Annulées</span>
                       <span className="text-sm font-medium text-gray-500">
                         {orders.filter(order => order.status === 'cancelled').length}/{totalOrders}
                       </span>

@@ -85,13 +85,13 @@ const AdminProducts = () => {
   };
   
   return (
-    <AdminLayout title="Products">
+    <AdminLayout title="Produits">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <Input
             type="text"
-            placeholder="Search products..."
+            placeholder="Rechercher produits..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 w-full sm:w-80"
@@ -111,14 +111,14 @@ const AdminProducts = () => {
           className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
         >
           <Plus size={18} className="mr-1" />
-          Add Product
+          Ajouter Produit
         </Button>
       </div>
       
       {showAddProduct && (
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Add New Product</h2>
+            <h2 className="text-xl font-bold">Ajouter Nouveau Produit</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -139,24 +139,24 @@ const AdminProducts = () => {
                 <th className="px-6 py-3">Image</th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('name')}>
                   <div className="flex items-center">
-                    Product Name
+                    Nom du Produit
                     {getSortIcon('name')}
                   </div>
                 </th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('category')}>
                   <div className="flex items-center">
-                    Category
+                    Catégorie
                     {getSortIcon('category')}
                   </div>
                 </th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('price')}>
                   <div className="flex items-center">
-                    Price
+                    Prix
                     {getSortIcon('price')}
                   </div>
                 </th>
                 <th className="px-6 py-3">Stock</th>
-                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3">Statut</th>
                 <th className="px-6 py-3">Actions</th>
               </tr>
             </thead>
@@ -190,12 +190,12 @@ const AdminProducts = () => {
                       <div className="flex space-x-2">
                         {product.featured && (
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                            Featured
+                            Mis en avant
                           </span>
                         )}
                         {product.onSale && (
                           <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
-                            Sale
+                            En solde
                           </span>
                         )}
                       </div>
@@ -215,9 +215,9 @@ const AdminProducts = () => {
                           </SheetTrigger>
                           <SheetContent side="right" className="w-[400px] sm:w-[600px] overflow-y-auto">
                             <SheetHeader>
-                              <SheetTitle>Edit Product</SheetTitle>
+                              <SheetTitle>Modifier Produit</SheetTitle>
                               <SheetDescription>
-                                Make changes to the product here.
+                                Modifier les détails du produit ici.
                               </SheetDescription>
                             </SheetHeader>
                             <div className="py-4">
@@ -243,18 +243,18 @@ const AdminProducts = () => {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                              <AlertDialogTitle>Supprimer Produit</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this product? This action cannot be undone.
+                                Êtes-vous sûr de vouloir supprimer ce produit? Cette action ne peut pas être annulée.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-red-500 hover:bg-red-600"
                                 onClick={() => deleteProduct(product.id)}
                               >
-                                Delete
+                                Supprimer
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -266,7 +266,7 @@ const AdminProducts = () => {
               ) : (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                    No products found
+                    Aucun produit trouvé
                   </td>
                 </tr>
               )}

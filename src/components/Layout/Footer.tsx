@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Headphones, Phone, Mail, Facebook, Instagram, Twitter } from 'lucide-react';
+import { Headphones, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/lib/languageContext';
@@ -27,7 +27,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center space-x-2">
               <Mail size={16} className="text-gray-600" />
-              <span className="text-gray-600">contact@ma7alkom.com</span>
+              <span className="text-gray-600">Bouzraranwar@gmail.com</span>
             </div>
           </div>
           
@@ -59,18 +59,6 @@ export default function Footer() {
             <div className="flex space-x-2">
               <Input type="email" placeholder={t('enterEmail')} className="bg-gray-100" />
               <Button>{t('subscribe')}</Button>
-            </div>
-            
-            <div className="flex space-x-4 mt-6">
-              <a href="#" className="text-gray-600 hover:text-smartplug-blue">
-                <Facebook size={20} />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-smartplug-blue">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-smartplug-blue">
-                <Twitter size={20} />
-              </a>
             </div>
           </div>
         </div>

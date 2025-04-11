@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -12,9 +13,9 @@ interface StoreContextType {
   saleProducts: Product[];
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  updateProduct: (id: string, product: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   searchProducts: (query: string) => Product[];
   
   // Cart
@@ -50,26 +51,103 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
+  // Load cart from localStorage
   useEffect(() => {
+    const savedCart = localStorage.getItem('smartplug-cart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('Error parsing cart from localStorage:', error);
+      }
+    }
+
     const adminLoggedIn = localStorage.getItem('smartplug-admin');
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
 
+    // Fetch products from Supabase
+    fetchProducts().then(() => {
+      setIsLoading(false);
+    });
+    
     fetchOrders();
     fetchContactMessages();
   }, []);
   
+  // Save cart to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
+
+  // Fetch products from Supabase
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching products:', error);
+        setProducts(initialProducts); // Fall back to initial products
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        const formattedProducts: Product[] = data.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          oldPrice: product.old_price || 0,
+          category: product.category,
+          images: product.images,
+          featured: product.featured,
+          onSale: product.on_sale,
+          stock: product.stock,
+          rating: product.rating || 0,
+          sku: product.sku
+        }));
+        
+        setProducts(formattedProducts);
+      } else {
+        // If no products in database, use initial products and add them to database
+        setProducts(initialProducts);
+        
+        // Add initial products to Supabase
+        for (const product of initialProducts) {
+          await supabase
+            .from('products')
+            .insert({
+              id: product.id,
+              name: product.name,
+              description: product.description,
+              price: product.price,
+              old_price: product.oldPrice,
+              category: product.category,
+              images: product.images,
+              featured: product.featured,
+              on_sale: product.onSale,
+              stock: product.stock,
+              rating: product.rating,
+              sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts(initialProducts); // Fall back to initial products
+    }
+  };
   
   const fetchContactMessages = useCallback(async () => {
     try {
@@ -128,28 +206,116 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
-  const addProduct = (product: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...product,
-      id: `prod-${Date.now()}`
-    };
-    
-    setProducts(prevProducts => [...prevProducts, newProduct]);
-    toast.success(`${product.name} added to products`);
+  const addProduct = async (product: Omit<Product, 'id'>) => {
+    try {
+      const newProduct = {
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        old_price: product.oldPrice,
+        category: product.category,
+        images: product.images,
+        featured: product.featured,
+        on_sale: product.onSale,
+        stock: product.stock,
+        rating: product.rating || 0,
+        sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
+      };
+      
+      const { data, error } = await supabase
+        .from('products')
+        .insert(newProduct)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error adding product:', error);
+        toast.error("Erreur lors de l'ajout du produit");
+        throw error;
+      }
+      
+      const formattedProduct: Product = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        oldPrice: data.old_price || 0,
+        category: data.category,
+        images: data.images,
+        featured: data.featured,
+        onSale: data.on_sale,
+        stock: data.stock,
+        rating: data.rating || 0,
+        sku: data.sku
+      };
+      
+      setProducts(prevProducts => [...prevProducts, formattedProduct]);
+      toast.success(`${product.name} ajouté aux produits`);
+    } catch (error) {
+      console.error('Error adding product:', error);
+      throw error;
+    }
   };
   
-  const updateProduct = (id: string, productUpdate: Partial<Product>) => {
-    setProducts(prevProducts => 
-      prevProducts.map(product => 
-        product.id === id ? { ...product, ...productUpdate } : product
-      )
-    );
-    toast.success('Product updated successfully');
+  const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
+    try {
+      // Convert from frontend model to database model
+      const dbUpdate: any = {};
+      
+      if (productUpdate.name !== undefined) dbUpdate.name = productUpdate.name;
+      if (productUpdate.description !== undefined) dbUpdate.description = productUpdate.description;
+      if (productUpdate.price !== undefined) dbUpdate.price = productUpdate.price;
+      if (productUpdate.oldPrice !== undefined) dbUpdate.old_price = productUpdate.oldPrice;
+      if (productUpdate.category !== undefined) dbUpdate.category = productUpdate.category;
+      if (productUpdate.images !== undefined) dbUpdate.images = productUpdate.images;
+      if (productUpdate.featured !== undefined) dbUpdate.featured = productUpdate.featured;
+      if (productUpdate.onSale !== undefined) dbUpdate.on_sale = productUpdate.onSale;
+      if (productUpdate.stock !== undefined) dbUpdate.stock = productUpdate.stock;
+      if (productUpdate.rating !== undefined) dbUpdate.rating = productUpdate.rating;
+      if (productUpdate.sku !== undefined) dbUpdate.sku = productUpdate.sku;
+      
+      const { error } = await supabase
+        .from('products')
+        .update(dbUpdate)
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error updating product:', error);
+        toast.error("Erreur lors de la mise à jour du produit");
+        throw error;
+      }
+      
+      setProducts(prevProducts => 
+        prevProducts.map(product => 
+          product.id === id ? { ...product, ...productUpdate } : product
+        )
+      );
+      toast.success('Produit mis à jour avec succès');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
   };
   
-  const deleteProduct = (id: string) => {
-    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-    toast.success('Product deleted successfully');
+  const deleteProduct = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting product:', error);
+        toast.error("Erreur lors de la suppression du produit");
+        throw error;
+      }
+      
+      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+      toast.success('Produit supprimé avec succès');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
   };
   
   const addToCart = (product: Product, quantity: number = 1) => {
@@ -167,12 +333,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     });
     
-    toast.success(`${product.name} added to cart`);
+    toast.success(`${product.name} ajouté au panier`);
   };
   
   const removeFromCart = (productId: string) => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
-    toast.info("Item removed from cart");
+    toast.info("Article retiré du panier");
   };
   
   const updateCartItemQuantity = (productId: string, quantity: number) => {
@@ -260,7 +426,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       clearCart();
       setCustomerInfo(null);
       
-      toast.success("Order placed successfully!");
+      toast.success("Commande passée avec succès!");
       return newOrder;
     } catch (error) {
       console.error('Error placing order:', error);
@@ -277,7 +443,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error updating order status:', error);
-        toast.error('Failed to update order status');
+        toast.error('Échec de la mise à jour du statut de la commande');
         return;
       }
       
@@ -289,10 +455,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         )
       );
       
-      toast.success(`Order ${orderId} updated to ${status}`);
+      toast.success(`Commande ${orderId} mise à jour en ${status}`);
     } catch (error) {
       console.error('Error updating order status:', error);
-      toast.error('Failed to update order status');
+      toast.error('Échec de la mise à jour du statut de la commande');
     }
   };
   
@@ -344,15 +510,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error deleting contact message:', error);
-        toast.error('Failed to delete message');
+        toast.error('Échec de la suppression du message');
         return;
       }
       
       setContactMessages(prev => prev.filter(message => message.id !== messageId));
-      toast.success('Message deleted successfully');
+      toast.success('Message supprimé avec succès');
     } catch (error) {
       console.error('Error deleting contact message:', error);
-      toast.error('Failed to delete message');
+      toast.error('Échec de la suppression du message');
     }
   };
   
@@ -403,7 +569,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   return (
     <StoreContext.Provider value={value}>
-      {children}
+      {isLoading ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-smartplug-blue"></div>
+        </div>
+      ) : (
+        children
+      )}
     </StoreContext.Provider>
   );
 }

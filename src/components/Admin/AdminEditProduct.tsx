@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   const [productData, setProductData] = useState<Product>({ ...product });
   const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [errors, setErrors] = useState({
     name: '',
@@ -109,7 +110,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       };
       
       reader.onerror = () => {
-        toast.error("Failed to read the image file");
+        toast.error("Échec de lecture du fichier image");
         setIsUploading(false);
       };
       
@@ -126,7 +127,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     if (productData.images.length <= 1 && index === 0) {
       setErrors(prev => ({
         ...prev,
-        images: 'Product must have at least one image'
+        images: 'Le produit doit avoir au moins une image'
       }));
       return;
     }
@@ -137,15 +138,15 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors = {
-      name: productData.name ? '' : 'Name is required',
-      description: productData.description ? '' : 'Description is required',
-      price: productData.price > 0 ? '' : 'Price must be greater than 0',
-      category: productData.category ? '' : 'Category is required',
-      images: productData.images.length > 0 ? '' : 'Product must have at least one image'
+      name: productData.name ? '' : 'Le nom est requis',
+      description: productData.description ? '' : 'La description est requise',
+      price: productData.price > 0 ? '' : 'Le prix doit être supérieur à 0',
+      category: productData.category ? '' : 'La catégorie est requise',
+      images: productData.images.length > 0 ? '' : 'Le produit doit avoir au moins une image'
     };
     
     setErrors(newErrors);
@@ -154,9 +155,17 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       return;
     }
     
-    updateProduct(product.id, productData);
-    onClose();
-    toast.success("Product updated successfully");
+    try {
+      setIsSubmitting(true);
+      await updateProduct(product.id, productData);
+      onClose();
+      toast.success("Produit mis à jour avec succès");
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error("Erreur lors de la mise à jour du produit");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -164,23 +173,23 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Product Name</Label>
+            <Label htmlFor="name">Nom du Produit</Label>
             <Input
               id="name"
               name="name"
               value={productData.name}
               onChange={handleChange}
-              placeholder="Enter product name"
+              placeholder="Entrer le nom du produit"
               className={errors.name ? 'border-red-500' : ''}
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">Catégorie</Label>
             <Select value={productData.category} onValueChange={handleCategoryChange}>
               <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Sélectionner une catégorie" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -201,7 +210,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             name="description"
             value={productData.description}
             onChange={handleChange}
-            placeholder="Enter product description"
+            placeholder="Entrer la description du produit"
             rows={4}
             className={errors.description ? 'border-red-500' : ''}
           />
@@ -210,7 +219,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="price">Price (DH)</Label>
+            <Label htmlFor="price">Prix (DH)</Label>
             <Input
               id="price"
               name="price"
@@ -226,7 +235,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="oldPrice">Old Price (DH)</Label>
+            <Label htmlFor="oldPrice">Ancien Prix (DH)</Label>
             <Input
               id="oldPrice"
               name="oldPrice"
@@ -240,7 +249,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="stock">Stock Quantity</Label>
+            <Label htmlFor="stock">Quantité en Stock</Label>
             <Input
               id="stock"
               name="stock"
@@ -260,7 +269,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               checked={productData.featured || false}
               onCheckedChange={(checked) => handleCheckboxChange('featured', checked as boolean)}
             />
-            <Label htmlFor="featured">Featured Product</Label>
+            <Label htmlFor="featured">Produit Mis en Avant</Label>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -269,19 +278,19 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               checked={productData.onSale || false}
               onCheckedChange={(checked) => handleCheckboxChange('onSale', checked as boolean)}
             />
-            <Label htmlFor="onSale">On Sale</Label>
+            <Label htmlFor="onSale">En Solde</Label>
           </div>
         </div>
         
         <div className="space-y-4">
-          <Label>Product Images</Label>
+          <Label>Images du Produit</Label>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex">
               <Input
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Enter image URL"
+                placeholder="Entrer l'URL de l'image"
                 className="rounded-r-none"
               />
               <Button 
@@ -289,7 +298,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
                 onClick={addImage}
                 className="rounded-l-none"
               >
-                Add
+                Ajouter
               </Button>
             </div>
             
@@ -310,7 +319,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
                 disabled={isUploading}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? "Uploading..." : "Upload from device"}
+                {isUploading ? "Téléchargement..." : "Télécharger depuis l'appareil"}
               </Button>
             </div>
           </div>
@@ -322,7 +331,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               <div key={index} className="relative group">
                 <img 
                   src={image} 
-                  alt={`Product ${index+1}`} 
+                  alt={`Produit ${index+1}`} 
                   className="w-full h-32 object-cover rounded-md border"
                 />
                 <button
@@ -339,7 +348,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               <div className="border border-dashed rounded-md flex items-center justify-center h-32 bg-gray-50">
                 <div className="text-center text-gray-500">
                   <Plus size={24} className="mx-auto mb-1" />
-                  <p className="text-xs">No images yet</p>
+                  <p className="text-xs">Pas encore d'images</p>
                 </div>
               </div>
             )}
@@ -348,13 +357,14 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         
         <div className="flex space-x-3 justify-end pt-4">
           <SheetClose asChild>
-            <Button type="button" variant="outline">Cancel</Button>
+            <Button type="button" variant="outline">Annuler</Button>
           </SheetClose>
           <Button 
             type="submit" 
             className="bg-smartplug-blue hover:bg-smartplug-lightblue"
+            disabled={isSubmitting}
           >
-            Update Product
+            {isSubmitting ? "Mise à jour..." : "Mettre à Jour le Produit"}
           </Button>
         </div>
       </form>
