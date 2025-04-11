@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -37,7 +38,7 @@ interface StoreContextType {
 
   // Contact
   contactMessages: ContactMessage[];
-  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<void>;
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<ContactMessage>;
   deleteContactMessage: (messageId: string) => void;
   fetchContactMessages: () => Promise<void>;
 

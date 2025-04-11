@@ -64,7 +64,8 @@ const ContactPage = () => {
     setIsSubmitting(true);
     
     try {
-      await addContactMessage(formData);
+      const newMessage = await addContactMessage(formData);
+      console.log('Message sent successfully:', newMessage);
       
       toast.success(t('messageSent'));
       
