@@ -41,17 +41,17 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   
   const navItems = [
     {
-      title: 'Tableau de bord',
+      title: 'Dashboard',
       path: '/admin',
       icon: <LayoutDashboard size={20} />
     },
     {
-      title: 'Commandes',
+      title: 'Orders',
       path: '/admin/orders',
       icon: <ShoppingBag size={20} />
     },
     {
-      title: 'Produits',
+      title: 'Products',
       path: '/admin/products',
       icon: <Package size={20} />
     },
@@ -108,7 +108,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
               className="flex items-center justify-center w-full"
             >
               <LogOut size={16} className="mr-2" />
-              <span>Déconnexion</span>
+              <span>Logout</span>
             </Button>
           </div>
         </div>
@@ -133,7 +133,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
               size="sm"
             >
               <LogOut size={16} className="mr-2" />
-              <span className="hidden md:inline">Déconnexion</span>
+              <span className="hidden md:inline">Logout</span>
             </Button>
           </div>
         </div>

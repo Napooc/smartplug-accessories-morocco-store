@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
@@ -74,10 +75,10 @@ const AdminProducts = () => {
     setIsRefreshing(true);
     try {
       await fetchProducts();
-      toast.success("Produits rafraîchis avec succès");
+      toast.success("Products refreshed successfully");
     } catch (error) {
       console.error("Error refreshing products:", error);
-      toast.error("Échec du rafraîchissement des produits");
+      toast.error("Failed to refresh products");
     } finally {
       setIsRefreshing(false);
     }
@@ -138,10 +139,10 @@ const AdminProducts = () => {
       setIsDeleting(productId);
       console.log("Deleting product:", productId);
       await deleteProduct(productId);
-      toast.success("Produit supprimé avec succès");
+      toast.success("Product deleted successfully");
     } catch (error) {
       console.error("Error deleting product:", error);
-      toast.error("Échec de la suppression du produit");
+      toast.error("Failed to delete product");
     } finally {
       setIsDeleting(null);
     }
@@ -182,25 +183,25 @@ const AdminProducts = () => {
         await deleteProduct(productId);
       }
       
-      toast.success(`${selectedProductsForDeletion.length} produits supprimés avec succès`);
+      toast.success(`${selectedProductsForDeletion.length} products deleted successfully`);
       setSelectedProductsForDeletion([]);
       setShowBulkDeleteConfirm(false);
     } catch (error) {
       console.error("Error bulk deleting products:", error);
-      toast.error("Erreur lors de la suppression groupée");
+      toast.error("Error during bulk delete");
     } finally {
       setIsBulkDeleting(false);
     }
   };
   
   return (
-    <AdminLayout title="Produits">
+    <AdminLayout title="Products">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <Input
             type="text"
-            placeholder="Rechercher produits..."
+            placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 w-full sm:w-80"
@@ -227,7 +228,7 @@ const AdminProducts = () => {
             ) : (
               <RefreshCw className="mr-1 h-4 w-4" />
             )}
-            Rafraîchir
+            Refresh
           </Button>
           
           <Button
@@ -235,7 +236,7 @@ const AdminProducts = () => {
             className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
           >
             <Plus size={18} className="mr-1" />
-            Ajouter Produit
+            Add Product
           </Button>
         </div>
       </div>
@@ -243,7 +244,7 @@ const AdminProducts = () => {
       {showAddProduct && (
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Ajouter Nouveau Produit</h2>
+            <h2 className="text-xl font-bold">Add New Product</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -259,7 +260,7 @@ const AdminProducts = () => {
       {selectedProductsForDeletion.length > 0 && (
         <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg mb-4">
           <div className="font-medium text-blue-800">
-            {selectedProductsForDeletion.length} produits sélectionnés
+            {selectedProductsForDeletion.length} products selected
           </div>
           <div className="flex space-x-2">
             <Button 
@@ -267,14 +268,14 @@ const AdminProducts = () => {
               size="sm"
               onClick={() => setSelectedProductsForDeletion([])}
             >
-              Annuler
+              Cancel
             </Button>
             <Button
               variant="destructive"
               size="sm"
               onClick={() => setShowBulkDeleteConfirm(true)}
             >
-              Supprimer la sélection
+              Delete Selected
             </Button>
           </div>
         </div>
@@ -284,9 +285,9 @@ const AdminProducts = () => {
       <Dialog open={showBulkDeleteConfirm} onOpenChange={setShowBulkDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer Produits</DialogTitle>
+            <DialogTitle>Delete Products</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer {selectedProductsForDeletion.length} produits? Cette action ne peut pas être annulée.
+              Are you sure you want to delete {selectedProductsForDeletion.length} products? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -295,7 +296,7 @@ const AdminProducts = () => {
               onClick={() => setShowBulkDeleteConfirm(false)}
               disabled={isBulkDeleting}
             >
-              Annuler
+              Cancel
             </Button>
             <Button
               variant="destructive"
@@ -305,10 +306,10 @@ const AdminProducts = () => {
               {isBulkDeleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Suppression...
+                  Deleting...
                 </>
               ) : (
-                "Confirmer la Suppression"
+                "Confirm Delete"
               )}
             </Button>
           </DialogFooter>
@@ -336,24 +337,24 @@ const AdminProducts = () => {
                 <th className="px-6 py-3">Image</th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('name')}>
                   <div className="flex items-center">
-                    Nom du Produit
+                    Product Name
                     {getSortIcon('name')}
                   </div>
                 </th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('category')}>
                   <div className="flex items-center">
-                    Catégorie
+                    Category
                     {getSortIcon('category')}
                   </div>
                 </th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('price')}>
                   <div className="flex items-center">
-                    Prix
+                    Price
                     {getSortIcon('price')}
                   </div>
                 </th>
                 <th className="px-6 py-3">Stock</th>
-                <th className="px-6 py-3">Statut</th>
+                <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Actions</th>
               </tr>
             </thead>
@@ -401,12 +402,12 @@ const AdminProducts = () => {
                       <div className="flex space-x-2">
                         {product.featured && (
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                            Mis en avant
+                            Featured
                           </span>
                         )}
                         {product.onSale && (
                           <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
-                            En solde
+                            On Sale
                           </span>
                         )}
                       </div>
@@ -426,9 +427,9 @@ const AdminProducts = () => {
                           </SheetTrigger>
                           <SheetContent side="right" className="w-[400px] sm:w-[600px] overflow-y-auto">
                             <SheetHeader>
-                              <SheetTitle>Modifier Produit</SheetTitle>
+                              <SheetTitle>Edit Product</SheetTitle>
                               <SheetDescription>
-                                Modifier les détails du produit ici.
+                                Make changes to the product details here.
                               </SheetDescription>
                             </SheetHeader>
                             <div className="py-4">
@@ -459,18 +460,18 @@ const AdminProducts = () => {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Supprimer Produit</AlertDialogTitle>
+                              <AlertDialogTitle>Delete Product</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer ce produit? Cette action ne peut pas être annulée.
+                                Are you sure you want to delete this product? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-red-500 hover:bg-red-600"
                                 onClick={() => handleDeleteProduct(product.id)}
                               >
-                                {isDeleting === product.id ? 'Suppression...' : 'Supprimer'}
+                                {isDeleting === product.id ? 'Deleting...' : 'Delete'}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -482,7 +483,7 @@ const AdminProducts = () => {
               ) : (
                 <tr>
                   <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                    {searchTerm ? 'Aucun produit trouvé avec les critères de recherche' : 'Aucun produit trouvé'}
+                    {searchTerm ? 'No products found matching your search criteria' : 'No products found'}
                   </td>
                 </tr>
               )}
