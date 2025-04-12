@@ -25,7 +25,19 @@ const AdminMessages = () => {
   
   // Refresh messages when component mounts
   useEffect(() => {
-    fetchContactMessages();
+    const getMessages = async () => {
+      setIsRefreshing(true);
+      try {
+        await fetchContactMessages();
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        toast.error("Échec du chargement des messages");
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+    
+    getMessages();
   }, [fetchContactMessages]);
   
   const handleRefresh = async () => {

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useStore } from '@/lib/store';
 import { useLanguage } from '@/lib/languageContext';
-import { useEffect } from 'react';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const ContactPage = () => {
   const { addContactMessage } = useStore();
   const { t, direction } = useLanguage();
+  useScrollToTop(); // Use the scroll to top hook
   
   const [formData, setFormData] = useState({
     name: '',
@@ -30,11 +31,6 @@ const ContactPage = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
-  
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -78,8 +74,17 @@ const ContactPage = () => {
         message: formData.message
       });
       
-      toast.success(t('messageSent'));
       setMessageSent(true);
+      toast.success(t('messageSent'));
+      
+      // Reset form after successful submission
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+      
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error(t('messageFailed'));
@@ -157,16 +162,10 @@ const ContactPage = () => {
                   <Button 
                     onClick={() => {
                       setMessageSent(false);
-                      setFormData({
-                        name: '',
-                        email: '',
-                        subject: '',
-                        message: ''
-                      });
                     }}
                     className="bg-smartplug-blue hover:bg-smartplug-lightblue"
                   >
-                    {t('sendAnotherMessage', { default: 'Send Another Message' })}
+                    {t('sendAnotherMessage', { default: 'Envoyer un autre message' })}
                   </Button>
                 </div>
               ) : (
@@ -234,7 +233,7 @@ const ContactPage = () => {
                       className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
                     >
                       {isSubmitting ? (
-                        <span className="animate-pulse">{t('processing', { default: 'Sending...' })}</span>
+                        <span className="animate-pulse">{t('processing', { default: 'Envoi en cours...' })}</span>
                       ) : (
                         <>
                           <Send className="h-4 w-4 mr-2" />
