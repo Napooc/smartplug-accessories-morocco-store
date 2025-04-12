@@ -460,7 +460,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<void> => {
     try {
       console.log("Adding contact message:", message);
-      const currentDate = new Date().toISOString();
       
       const { data, error } = await supabase
         .from('contact_messages')
@@ -469,18 +468,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           email: message.email,
           subject: message.subject || null,
           message: message.message,
-          date: currentDate
-        });
+          date: new Date().toISOString()
+        })
+        .select()
+        .single();
       
       if (error) {
         console.error('Error saving contact message:', error);
         throw new Error('Failed to send message');
       }
       
-      console.log("Contact message added successfully");
+      console.log("Contact message added successfully, data:", data);
       
-      // Refresh the messages
-      await fetchContactMessages();
+      // Immediately add the new message to state to avoid needing a separate fetch
+      if (data) {
+        const formattedMessage: ContactMessage = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          subject: data.subject || '',
+          message: data.message,
+          date: new Date(data.date).toISOString().split('T')[0]
+        };
+        
+        setContactMessages(prev => [formattedMessage, ...prev]);
+      }
+      
+      // Also refresh messages to ensure everything is in sync
+      fetchContactMessages();
     } catch (error) {
       console.error('Error saving contact message:', error);
       throw error;

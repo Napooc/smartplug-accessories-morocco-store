@@ -71,6 +71,8 @@ const ContactPage = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("Submitting contact form:", formData);
+      
       await addContactMessage({
         name: formData.name,
         email: formData.email,
