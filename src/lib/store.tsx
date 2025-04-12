@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -16,6 +17,7 @@ interface StoreContextType {
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   searchProducts: (query: string) => Product[];
+  fetchProducts: () => Promise<void>; // Added this line to expose the fetchProducts method
   
   // Cart
   cart: CartItem[];
