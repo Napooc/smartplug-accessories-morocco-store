@@ -67,6 +67,7 @@ const ContactPage = () => {
     setIsSubmitting(true);
     
     try {
+      // Call the store function to add the contact message
       await addContactMessage({
         name: formData.name,
         email: formData.email,

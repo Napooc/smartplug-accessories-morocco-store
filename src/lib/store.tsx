@@ -144,6 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const fetchContactMessages = useCallback(async () => {
     try {
+      console.log("Fetching contact messages...");
       const { data, error } = await supabase
         .from('contact_messages')
         .select('*')
@@ -155,6 +156,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       if (data) {
+        console.log("Contact messages fetched:", data);
         const formattedMessages: ContactMessage[] = data.map(msg => ({
           id: msg.id,
           name: msg.name,
@@ -205,11 +207,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         name: product.name,
         description: product.description,
         price: product.price,
-        old_price: product.oldPrice,
+        oldPrice: product.oldPrice,
         category: product.category,
         images: product.images,
         featured: product.featured,
-        on_sale: product.onSale,
+        onSale: product.onSale,
         stock: product.stock,
         rating: product.rating || 0,
         sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
@@ -456,6 +458,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<ContactMessage> => {
     try {
+      console.log("Adding contact message:", message);
       const currentDate = new Date().toISOString();
       
       const { data, error } = await supabase
@@ -475,6 +478,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw new Error('Failed to send message');
       }
       
+      if (!data) {
+        console.error('No data returned from insert operation');
+        throw new Error('Failed to send message: No data returned');
+      }
+      
+      console.log("Contact message added successfully:", data);
       const newMessage: ContactMessage = {
         id: data.id,
         name: data.name,
@@ -495,6 +504,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const deleteContactMessage = async (messageId: string) => {
     try {
+      console.log("Deleting contact message:", messageId);
       const { error } = await supabase
         .from('contact_messages')
         .delete()

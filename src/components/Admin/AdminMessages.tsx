@@ -28,7 +28,9 @@ const AdminMessages = () => {
     const getMessages = async () => {
       setIsRefreshing(true);
       try {
+        console.log("AdminMessages: Fetching contact messages on mount");
         await fetchContactMessages();
+        console.log("AdminMessages: Fetched messages:", contactMessages);
       } catch (error) {
         console.error("Error fetching messages:", error);
         toast.error("Échec du chargement des messages");
@@ -43,7 +45,9 @@ const AdminMessages = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
+      console.log("AdminMessages: Manually refreshing messages");
       await fetchContactMessages();
+      console.log("AdminMessages: Refreshed messages:", contactMessages);
       toast.success("Messages rafraîchis");
     } catch (error) {
       console.error("Error refreshing messages:", error);
@@ -128,7 +132,6 @@ const AdminMessages = () => {
                           className="bg-red-500 hover:bg-red-600"
                           onClick={() => {
                             deleteContactMessage(message.id);
-                            toast.success("Message supprimé avec succès");
                           }}
                         >
                           Supprimer
