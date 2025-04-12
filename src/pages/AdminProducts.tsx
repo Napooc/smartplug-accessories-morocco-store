@@ -13,7 +13,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet';
 import { Product } from '@/lib/types';
 import {
@@ -27,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const AdminProducts = () => {
   const { products, deleteProduct } = useStore();
@@ -35,6 +35,9 @@ const AdminProducts = () => {
   const [sortBy, setSortBy] = useState<string>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // Use scroll to top hook
+  useScrollToTop();
   
   // Filter and sort products
   const filteredProducts = products
@@ -82,6 +85,14 @@ const AdminProducts = () => {
   
   const handleCloseEditSheet = () => {
     setSelectedProduct(null);
+  };
+  
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteProduct(productId);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
   };
   
   return (
@@ -203,16 +214,6 @@ const AdminProducts = () => {
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
                         <Sheet>
-                          <SheetTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleEditProduct(product)}
-                            >
-                              <Edit size={16} />
-                            </Button>
-                          </SheetTrigger>
                           <SheetContent side="right" className="w-[400px] sm:w-[600px] overflow-y-auto">
                             <SheetHeader>
                               <SheetTitle>Modifier Produit</SheetTitle>
@@ -229,6 +230,15 @@ const AdminProducts = () => {
                               )}
                             </div>
                           </SheetContent>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleEditProduct(product)}
+                          >
+                            <Edit size={16} />
+                          </Button>
                         </Sheet>
                         
                         <AlertDialog>
@@ -252,7 +262,7 @@ const AdminProducts = () => {
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-red-500 hover:bg-red-600"
-                                onClick={() => deleteProduct(product.id)}
+                                onClick={() => handleDeleteProduct(product.id)}
                               >
                                 Supprimer
                               </AlertDialogAction>

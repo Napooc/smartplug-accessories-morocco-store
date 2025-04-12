@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useStore } from '@/lib/store';
 import { useLanguage } from '@/lib/languageContext';
+import { useEffect } from 'react';
 
 const ContactPage = () => {
   const { addContactMessage } = useStore();
@@ -28,6 +30,11 @@ const ContactPage = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -64,11 +71,14 @@ const ContactPage = () => {
     setIsSubmitting(true);
     
     try {
-      const newMessage = await addContactMessage(formData);
-      console.log('Message sent successfully:', newMessage);
+      await addContactMessage({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || '',
+        message: formData.message
+      });
       
       toast.success(t('messageSent'));
-      
       setMessageSent(true);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -106,7 +116,7 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">{t('phoneTitle')}</h3>
-                  <p className="text-gray-600">+212-555-1234</p>
+                  <p className="text-gray-600">+212-691-772215</p>
                 </div>
               </div>
               

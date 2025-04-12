@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -59,7 +58,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('smartplug-cart');
     if (savedCart) {
@@ -75,7 +73,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
     }
 
-    // Fetch products from Supabase
     fetchProducts().then(() => {
       setIsLoading(false);
     });
@@ -84,12 +81,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     fetchContactMessages();
   }, []);
   
-  // Save cart to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('smartplug-cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Fetch products from Supabase
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
@@ -120,10 +115,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         
         setProducts(formattedProducts);
       } else {
-        // If no products in database, use initial products and add them to database
         setProducts(initialProducts);
         
-        // Add initial products to Supabase
         for (const product of initialProducts) {
           await supabase
             .from('products')
@@ -259,7 +252,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
     try {
-      // Convert from frontend model to database model
       const dbUpdate: any = {};
       
       if (productUpdate.name !== undefined) dbUpdate.name = productUpdate.name;
@@ -462,7 +454,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>) => {
+  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<ContactMessage> => {
     try {
       const currentDate = new Date().toISOString();
       
