@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -131,7 +130,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               category: product.category,
               images: product.images,
               featured: product.featured,
-              on_sale: product.onSale,
+              onSale: product.onSale,
               stock: product.stock,
               rating: product.rating,
               sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
@@ -581,7 +580,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     fetchContactMessages,
     isAdmin,
     login,
-    logout
+    logout,
+    fetchProducts // Add this line to include fetchProducts in the context value
   };
   
   return (
