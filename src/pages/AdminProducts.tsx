@@ -37,6 +37,7 @@ const AdminProducts = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Use scroll to top hook
   useScrollToTop();
@@ -111,10 +112,17 @@ const AdminProducts = () => {
   
   const handleDeleteProduct = async (productId: string) => {
     try {
+      setIsDeleting(true);
+      console.log("Deleting product:", productId);
       await deleteProduct(productId);
-      refreshProducts(); // Refresh products list after deleting
+      
+      // Don't need to call refreshProducts here as deleteProduct updates the local state
+      toast.success("Produit supprimé avec succès");
     } catch (error) {
       console.error("Error deleting product:", error);
+      toast.error("Échec de la suppression du produit");
+    } finally {
+      setIsDeleting(false);
     }
   };
   
@@ -173,7 +181,10 @@ const AdminProducts = () => {
               <X size={18} />
             </Button>
           </div>
-          <AdminAddProduct />
+          <AdminAddProduct onProductAdded={() => {
+            setShowAddProduct(false);
+            refreshProducts();
+          }} />
         </div>
       )}
       
@@ -282,6 +293,7 @@ const AdminProducts = () => {
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                              disabled={isDeleting}
                             >
                               <Trash2 size={16} />
                             </Button>

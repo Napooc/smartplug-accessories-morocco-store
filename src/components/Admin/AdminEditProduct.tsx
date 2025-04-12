@@ -35,6 +35,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   
   // Re-sync product data if product prop changes
   useEffect(() => {
+    console.log("Product data received in edit form:", product);
     setProductData({ ...product });
   }, [product]);
   
@@ -50,7 +51,9 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     const { name, value } = e.target;
     setProductData(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'oldPrice' || name === 'stock' ? parseFloat(value) : value
+      [name]: name === 'price' || name === 'oldPrice' || name === 'stock' 
+        ? parseFloat(value) || 0 // Ensure we don't pass NaN
+        : value
     }));
     
     if (errors[name as keyof typeof errors]) {
@@ -91,6 +94,14 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     }));
     
     setImageUrl('');
+    
+    // Clear any image errors
+    if (errors.images) {
+      setErrors(prev => ({
+        ...prev,
+        images: ''
+      }));
+    }
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,6 +121,14 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             ...prev,
             images: [...prev.images, event.target!.result as string]
           }));
+          
+          // Clear any image errors
+          if (errors.images) {
+            setErrors(prev => ({
+              ...prev,
+              images: ''
+            }));
+          }
         }
         setIsUploading(false);
       };
@@ -143,9 +162,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     }));
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const validateForm = () => {
     const newErrors = {
       name: productData.name ? '' : 'Le nom est requis',
       description: productData.description ? '' : 'La description est requise',
@@ -155,8 +172,13 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     };
     
     setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error);
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    if (Object.values(newErrors).some(error => error)) {
+    if (!validateForm()) {
       toast.error("Veuillez corriger les erreurs avant de soumettre");
       return;
     }
@@ -166,6 +188,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       console.log("Submitting product update:", productData);
       
       await updateProduct(product.id, productData);
+      toast.success("Produit mis à jour avec succès");
       onClose();
     } catch (error) {
       console.error('Error updating product:', error);

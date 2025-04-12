@@ -16,7 +16,7 @@ interface StoreContextType {
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   searchProducts: (query: string) => Product[];
-  fetchProducts: () => Promise<void>; // Added this line to expose the fetchProducts method
+  fetchProducts: () => Promise<void>;
   
   // Cart
   cart: CartItem[];
@@ -88,6 +88,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const fetchProducts = async () => {
     try {
+      console.log('Fetching products from Supabase...');
       const { data, error } = await supabase
         .from('products')
         .select('*');
@@ -99,6 +100,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       if (data && data.length > 0) {
+        console.log('Products fetched successfully:', data.length);
         const formattedProducts: Product[] = data.map(product => ({
           id: product.id,
           name: product.name,
@@ -116,6 +118,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         
         setProducts(formattedProducts);
       } else {
+        console.log('No products found, initializing with sample data');
         setProducts(initialProducts);
         
         for (const product of initialProducts) {
@@ -130,7 +133,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               category: product.category,
               images: product.images,
               featured: product.featured,
-              onSale: product.onSale,
+              on_sale: product.onSale,
               stock: product.stock,
               rating: product.rating,
               sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
@@ -209,7 +212,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         name: product.name,
         description: product.description,
         price: product.price,
-        oldPrice: product.oldPrice,
+        old_price: product.oldPrice,
         category: product.category,
         images: product.images,
         featured: product.featured,
@@ -275,16 +278,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Sending to database:", dbUpdate);
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('products')
         .update(dbUpdate)
-        .eq('id', id);
+        .eq('id', id)
+        .select();
       
       if (error) {
         console.error('Error updating product:', error);
         toast.error("Erreur lors de la mise à jour du produit");
         throw error;
       }
+      
+      console.log("Update response:", data);
       
       setProducts(prevProducts => 
         prevProducts.map(product => 
@@ -302,6 +308,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const deleteProduct = async (id: string) => {
     try {
+      console.log("Deleting product with ID:", id);
+      
       const { error } = await supabase
         .from('products')
         .delete()
@@ -315,6 +323,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
       toast.success('Produit supprimé avec succès');
+      console.log("Product deleted successfully");
     } catch (error) {
       console.error('Error deleting product:', error);
       throw error;
@@ -469,7 +478,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Adding contact message:", message);
       
-      // Make sure fields are not empty
       if (!message.name.trim() || !message.email.trim() || !message.message.trim()) {
         throw new Error('Required fields are missing');
       }
@@ -493,7 +501,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Contact message added successfully, data:", data);
       
-      // Immediately add the new message to state to avoid needing a separate fetch
       if (data) {
         const formattedMessage: ContactMessage = {
           id: data.id,
@@ -507,7 +514,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setContactMessages(prev => [formattedMessage, ...prev]);
       }
       
-      // Also refresh messages to ensure everything is in sync
       fetchContactMessages();
     } catch (error) {
       console.error('Error saving contact message:', error);
@@ -581,7 +587,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     isAdmin,
     login,
     logout,
-    fetchProducts // Add this line to include fetchProducts in the context value
+    fetchProducts
   };
   
   return (
