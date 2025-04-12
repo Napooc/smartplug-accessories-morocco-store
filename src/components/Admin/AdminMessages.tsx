@@ -32,10 +32,10 @@ const AdminMessages = () => {
     setIsRefreshing(true);
     try {
       await fetchContactMessages();
-      toast.success("Messages refreshed");
+      toast.success("Messages rafraîchis");
     } catch (error) {
       console.error("Error refreshing messages:", error);
-      toast.error("Failed to refresh messages");
+      toast.error("Échec du rafraîchissement des messages");
     } finally {
       setIsRefreshing(false);
     }
@@ -75,10 +75,10 @@ const AdminMessages = () => {
                 <div className="flex-1">
                   <div className="flex items-center">
                     <div className="flex-1">
-                      <h4 className="font-medium">{message.subject || 'No Subject'}</h4>
+                      <h4 className="font-medium">{message.subject || 'Sans Objet'}</h4>
                       <div className="flex items-center text-sm text-gray-500 mt-1">
                         <span>
-                          From {message.name} ({message.email})
+                          De {message.name} ({message.email})
                         </span>
                       </div>
                     </div>
@@ -105,21 +105,21 @@ const AdminMessages = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete message</AlertDialogTitle>
+                        <AlertDialogTitle>Supprimer le message</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete this message? This action cannot be undone.
+                          Êtes-vous sûr de vouloir supprimer ce message ? Cette action ne peut pas être annulée.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
                         <AlertDialogAction 
                           className="bg-red-500 hover:bg-red-600"
                           onClick={() => {
                             deleteContactMessage(message.id);
-                            toast.success("Message deleted successfully");
+                            toast.success("Message supprimé avec succès");
                           }}
                         >
-                          Delete
+                          Supprimer
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -138,11 +138,11 @@ const AdminMessages = () => {
                       size="sm" 
                       className="text-smartplug-blue border-smartplug-blue flex items-center"
                       onClick={() => {
-                        window.location.href = `mailto:${message.email}?subject=Re: ${message.subject || 'Your SmartPlug Inquiry'}`;
+                        window.location.href = `mailto:${message.email}?subject=Re: ${message.subject || 'Votre Demande SmartPlug'}`;
                       }}
                     >
                       <Mail size={16} className="mr-1" />
-                      Reply by Email
+                      Répondre par Email
                     </Button>
                   </div>
                 </div>
@@ -161,9 +161,9 @@ const AdminMessages = () => {
           <div className="p-3 bg-gray-100 rounded-full mb-4">
             <Mail className="h-6 w-6 text-gray-400" />
           </div>
-          <h3 className="font-medium text-lg mb-1">No Messages Yet</h3>
+          <h3 className="font-medium text-lg mb-1">Aucun message</h3>
           <p className="text-gray-500 mb-4">
-            You haven't received any contact messages yet.
+            Vous n'avez pas encore reçu de messages de contact.
           </p>
           <Button 
             variant="outline" 
@@ -172,7 +172,7 @@ const AdminMessages = () => {
             className="flex items-center"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh Messages
+            Rafraîchir les messages
           </Button>
         </div>
       </div>
@@ -182,7 +182,7 @@ const AdminMessages = () => {
   return (
     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
       <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-        <h3 className="font-medium">Contact Messages ({contactMessages.length})</h3>
+        <h3 className="font-medium">Messages de contact ({contactMessages.length})</h3>
         <Button 
           variant="outline" 
           size="sm" 
@@ -191,14 +191,14 @@ const AdminMessages = () => {
           className="flex items-center"
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
+          Rafraîchir
         </Button>
       </div>
       
       <div className="p-4">
-        {renderMessageGroup(groupedMessages.today, "Today")}
-        {renderMessageGroup(groupedMessages.yesterday, "Yesterday")}
-        {renderMessageGroup(groupedMessages.older, "Older")}
+        {renderMessageGroup(groupedMessages.today, "Aujourd'hui")}
+        {renderMessageGroup(groupedMessages.yesterday, "Hier")}
+        {renderMessageGroup(groupedMessages.older, "Plus anciens")}
       </div>
     </div>
   );
