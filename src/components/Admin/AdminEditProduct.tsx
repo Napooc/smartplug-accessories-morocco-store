@@ -29,7 +29,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [productData, setProductData] = useState<Product>({ ...product });
-  const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -85,36 +84,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     }
   };
   
-  const addImage = () => {
-    if (!imageUrl.trim()) {
-      toast.error("L'URL de l'image ne peut pas être vide");
-      return;
-    }
-    
-    // Basic URL validation
-    try {
-      new URL(imageUrl);
-    } catch (e) {
-      toast.error("L'URL de l'image n'est pas valide");
-      return;
-    }
-    
-    setProductData(prev => ({
-      ...prev,
-      images: [...prev.images, imageUrl]
-    }));
-    
-    setImageUrl('');
-    
-    // Clear any image errors
-    if (errors.images) {
-      setErrors(prev => ({
-        ...prev,
-        images: ''
-      }));
-    }
-  };
-  
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -143,7 +112,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       };
       
       reader.onerror = () => {
-        toast.error("Échec de lecture du fichier image");
+        toast.error("Failed to read image file");
         setIsUploading(false);
       };
       
@@ -160,7 +129,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     if (productData.images.length <= 1 && index === 0) {
       setErrors(prev => ({
         ...prev,
-        images: 'Le produit doit avoir au moins une image'
+        images: 'Product must have at least one image'
       }));
       return;
     }
@@ -173,11 +142,11 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   
   const validateForm = () => {
     const newErrors = {
-      name: productData.name ? '' : 'Le nom est requis',
-      description: productData.description ? '' : 'La description est requise',
-      price: productData.price > 0 ? '' : 'Le prix doit être supérieur à 0',
-      category: productData.category ? '' : 'La catégorie est requise',
-      images: productData.images.length > 0 ? '' : 'Le produit doit avoir au moins une image'
+      name: productData.name ? '' : 'Name is required',
+      description: productData.description ? '' : 'Description is required',
+      price: productData.price > 0 ? '' : 'Price must be greater than 0',
+      category: productData.category ? '' : 'Category is required',
+      images: productData.images.length > 0 ? '' : 'Product must have at least one image'
     };
     
     setErrors(newErrors);
@@ -188,7 +157,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error("Veuillez corriger les erreurs avant de soumettre");
+      toast.error("Please correct the errors before submitting");
       return;
     }
     
@@ -197,11 +166,11 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       console.log("Submitting product update:", productData);
       
       await updateProduct(product.id, productData);
-      toast.success("Produit mis à jour avec succès");
+      toast.success("Product updated successfully");
       onClose();
     } catch (error) {
       console.error('Error updating product:', error);
-      toast.error("Erreur lors de la mise à jour du produit");
+      toast.error("Error updating product");
     } finally {
       setIsSubmitting(false);
     }
@@ -212,23 +181,23 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Nom du Produit</Label>
+            <Label htmlFor="name">Product Name</Label>
             <Input
               id="name"
               name="name"
               value={productData.name}
               onChange={handleChange}
-              placeholder="Entrer le nom du produit"
+              placeholder="Enter product name"
               className={errors.name ? 'border-red-500' : ''}
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="category">Catégorie</Label>
+            <Label htmlFor="category">Category</Label>
             <Select value={productData.category} onValueChange={handleCategoryChange}>
               <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Sélectionner une catégorie" />
+                <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -249,7 +218,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             name="description"
             value={productData.description}
             onChange={handleChange}
-            placeholder="Entrer la description du produit"
+            placeholder="Enter product description"
             rows={4}
             className={errors.description ? 'border-red-500' : ''}
           />
@@ -258,7 +227,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="price">Prix (DH)</Label>
+            <Label htmlFor="price">Price (DH)</Label>
             <Input
               id="price"
               name="price"
@@ -274,7 +243,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="oldPrice">Ancien Prix (DH)</Label>
+            <Label htmlFor="oldPrice">Old Price (DH)</Label>
             <Input
               id="oldPrice"
               name="oldPrice"
@@ -288,7 +257,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="stock">Quantité en Stock</Label>
+            <Label htmlFor="stock">Stock Quantity</Label>
             <Input
               id="stock"
               name="stock"
@@ -308,7 +277,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               checked={productData.featured || false}
               onCheckedChange={(checked) => handleCheckboxChange('featured', checked as boolean)}
             />
-            <Label htmlFor="featured">Produit Mis en Avant</Label>
+            <Label htmlFor="featured">Featured Product</Label>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -317,59 +286,41 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               checked={productData.onSale || false}
               onCheckedChange={(checked) => handleCheckboxChange('onSale', checked as boolean)}
             />
-            <Label htmlFor="onSale">En Solde</Label>
+            <Label htmlFor="onSale">On Sale</Label>
           </div>
         </div>
         
         <div className="space-y-4">
-          <Label>Images du Produit</Label>
+          <Label>Product Images</Label>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex">
-              <Input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Entrer l'URL de l'image"
-                className="rounded-r-none"
-              />
-              <Button 
-                type="button" 
-                onClick={addImage}
-                className="rounded-l-none"
-              >
-                Ajouter
-              </Button>
-            </div>
-            
-            <div className="flex">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-              <Button 
-                type="button" 
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full flex items-center justify-center"
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Téléchargement...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Télécharger depuis l'appareil
-                  </>
-                )}
-              </Button>
-            </div>
+          <div className="flex">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <Button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              className="w-full flex items-center justify-center"
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload from device
+                </>
+              )}
+            </Button>
           </div>
           
           {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
@@ -379,7 +330,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               <div key={index} className="relative group">
                 <img 
                   src={image} 
-                  alt={`Produit ${index+1}`} 
+                  alt={`Product ${index+1}`} 
                   className="w-full h-32 object-cover rounded-md border"
                 />
                 <button
@@ -396,7 +347,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               <div className="border border-dashed rounded-md flex items-center justify-center h-32 bg-gray-50">
                 <div className="text-center text-gray-500">
                   <Plus size={24} className="mx-auto mb-1" />
-                  <p className="text-xs">Pas encore d'images</p>
+                  <p className="text-xs">No images yet</p>
                 </div>
               </div>
             )}
@@ -405,7 +356,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         
         <div className="flex space-x-3 justify-end pt-4">
           <SheetClose asChild>
-            <Button type="button" variant="outline">Annuler</Button>
+            <Button type="button" variant="outline">Cancel</Button>
           </SheetClose>
           <Button 
             type="submit" 
@@ -415,10 +366,10 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Mise à jour...
+                Updating...
               </>
             ) : (
-              "Mettre à Jour le Produit"
+              "Update Product"
             )}
           </Button>
         </div>

@@ -95,7 +95,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching products:', error);
-        toast.error("Erreur lors du chargement des produits");
+        toast.error("Error loading products");
         setProducts(initialProducts); // Fall back to initial products
         return;
       }
@@ -143,7 +143,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error fetching products:', error);
-      toast.error("Erreur lors du chargement des produits");
+      toast.error("Error loading products");
       setProducts(initialProducts); // Fall back to initial products
     }
   };
@@ -218,7 +218,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         category: product.category,
         images: product.images,
         featured: product.featured || false,
-        on_sale: product.onSale || false,
+        onSale: product.onSale || false,
         stock: product.stock || 0,
         rating: product.rating || 0,
         sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
@@ -234,7 +234,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error adding product:', error);
-        toast.error("Erreur lors de l'ajout du produit");
+        toast.error("Error adding product");
         throw error;
       }
       
@@ -258,10 +258,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       
       setProducts(prevProducts => [...prevProducts, formattedProduct]);
-      toast.success(`${product.name} ajouté aux produits`);
+      toast.success(`${product.name} added to products`);
     } catch (error) {
       console.error('Error adding product:', error);
-      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -294,7 +294,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error updating product:', error);
-        toast.error("Erreur lors de la mise à jour du produit");
+        toast.error("Error updating product");
         throw error;
       }
       
@@ -305,10 +305,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       );
       
       console.log("Product updated successfully");
-      toast.success('Produit mis à jour avec succès');
+      toast.success('Product updated successfully');
     } catch (error) {
       console.error('Error updating product:', error);
-      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -324,16 +324,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error deleting product:', error);
-        toast.error("Erreur lors de la suppression du produit");
+        toast.error("Error deleting product");
         throw error;
       }
       
       setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-      toast.success('Produit supprimé avec succès');
+      toast.success('Product deleted successfully');
       console.log("Product deleted successfully");
     } catch (error) {
       console.error('Error deleting product:', error);
-      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -353,12 +353,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     });
     
-    toast.success(`${product.name} ajouté au panier`);
+    toast.success(`${product.name} added to cart`);
   };
   
   const removeFromCart = (productId: string) => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
-    toast.info("Article retiré du panier");
+    toast.info("Item removed from cart");
   };
   
   const updateCartItemQuantity = (productId: string, quantity: number) => {
@@ -446,7 +446,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       clearCart();
       setCustomerInfo(null);
       
-      toast.success("Commande passée avec succès!");
+      toast.success("Order placed successfully!");
       return newOrder;
     } catch (error) {
       console.error('Error placing order:', error);
@@ -463,7 +463,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error updating order status:', error);
-        toast.error('Échec de la mise à jour du statut de la commande');
+        toast.error('Error updating order status');
         return;
       }
       
@@ -475,10 +475,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         )
       );
       
-      toast.success(`Commande ${orderId} mise à jour en ${status}`);
+      toast.success(`Order ${orderId} updated to ${status}`);
     } catch (error) {
       console.error('Error updating order status:', error);
-      toast.error('Échec de la mise à jour du statut de la commande');
+      toast.error('Error updating order status');
     }
   };
   
@@ -539,15 +539,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error deleting contact message:', error);
-        toast.error('Échec de la suppression du message');
+        toast.error('Error deleting contact message');
         throw error;
       }
       
       setContactMessages(prev => prev.filter(message => message.id !== messageId));
-      toast.success('Message supprimé avec succès');
+      toast.success('Message deleted successfully');
     } catch (error) {
       console.error('Error deleting contact message:', error);
-      toast.error('Échec de la suppression du message');
+      toast.error('Error deleting contact message');
       throw error;
     }
   };
