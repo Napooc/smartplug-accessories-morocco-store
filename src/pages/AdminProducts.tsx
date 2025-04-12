@@ -125,6 +125,11 @@ const AdminProducts = () => {
     }
   };
   
+  const handleProductAdded = () => {
+    setShowAddProduct(false);
+    refreshProducts();
+  };
+  
   return (
     <AdminLayout title="Produits">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -180,10 +185,7 @@ const AdminProducts = () => {
               <X size={18} />
             </Button>
           </div>
-          <AdminAddProduct onProductAdded={() => {
-            setShowAddProduct(false);
-            refreshProducts();
-          }} />
+          <AdminAddProduct onProductAdded={handleProductAdded} />
         </div>
       )}
       
@@ -241,7 +243,7 @@ const AdminProducts = () => {
                     </td>
                     <td className="px-6 py-4">
                       {product.price} DH
-                      {product.oldPrice > 0 && (
+                      {product.oldPrice && product.oldPrice > 0 && (
                         <span className="text-gray-400 line-through ml-2">{product.oldPrice} DH</span>
                       )}
                     </td>
