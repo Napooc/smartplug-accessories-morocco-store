@@ -95,9 +95,10 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       
       reader.onload = (event) => {
         if (event.target?.result) {
+          const base64Image = event.target.result as string;
           setProductData(prev => ({
             ...prev,
-            images: [...prev.images, event.target!.result as string]
+            images: [...prev.images, base64Image]
           }));
           
           // Clear any image errors

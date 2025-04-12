@@ -47,7 +47,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     images: ''
   });
   
-  const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -89,35 +88,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     }
   };
   
-  const addImage = () => {
-    if (!imageUrl.trim()) {
-      toast.error("L'URL de l'image ne peut pas être vide");
-      return;
-    }
-    
-    // Basic URL validation
-    try {
-      new URL(imageUrl);
-    } catch (e) {
-      toast.error("L'URL de l'image n'est pas valide");
-      return;
-    }
-    
-    setProduct(prev => ({
-      ...prev,
-      images: [...prev.images, imageUrl]
-    }));
-    
-    setImageUrl('');
-    
-    if (errors.images) {
-      setErrors(prev => ({
-        ...prev,
-        images: ''
-      }));
-    }
-  };
-  
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -129,9 +99,10 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       
       reader.onload = (event) => {
         if (event.target?.result) {
+          const base64Image = event.target.result as string;
           setProduct(prev => ({
             ...prev,
-            images: [...prev.images, event.target!.result as string]
+            images: [...prev.images, base64Image]
           }));
           
           if (errors.images) {
@@ -145,7 +116,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       };
       
       reader.onerror = () => {
-        toast.error("Échec de lecture du fichier image");
+        toast.error("Failed to read image file");
         setIsUploading(false);
       };
       
@@ -167,11 +138,11 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
   
   const validateForm = () => {
     const newErrors = {
-      name: product.name ? '' : 'Le nom est requis',
-      description: product.description ? '' : 'La description est requise',
-      price: product.price > 0 ? '' : 'Le prix doit être supérieur à 0',
-      category: product.category ? '' : 'La catégorie est requise',
-      images: product.images.length > 0 ? '' : 'Le produit doit avoir au moins une image'
+      name: product.name ? '' : 'Name is required',
+      description: product.description ? '' : 'Description is required',
+      price: product.price > 0 ? '' : 'Price must be greater than 0',
+      category: product.category ? '' : 'Category is required',
+      images: product.images.length > 0 ? '' : 'Product must have at least one image'
     };
     
     setErrors(newErrors);
@@ -182,7 +153,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error("Veuillez corriger les erreurs avant de soumettre");
+      toast.error("Please correct the errors before submitting");
       return;
     }
     
@@ -206,11 +177,11 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
         sku: ''
       });
       
-      toast.success("Produit ajouté avec succès");
+      toast.success("Product added successfully");
       onProductAdded(); // Call the callback function after successfully adding a product
     } catch (error) {
       console.error('Error adding product:', error);
-      toast.error("Erreur lors de l'ajout du produit");
+      toast.error("Error adding product");
     } finally {
       setIsSubmitting(false);
     }
@@ -221,23 +192,23 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Nom du Produit</Label>
+            <Label htmlFor="name">Product Name</Label>
             <Input
               id="name"
               name="name"
               value={product.name}
               onChange={handleChange}
-              placeholder="Entrer le nom du produit"
+              placeholder="Enter product name"
               className={errors.name ? 'border-red-500' : ''}
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="category">Catégorie</Label>
+            <Label htmlFor="category">Category</Label>
             <Select value={product.category} onValueChange={handleCategoryChange}>
               <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Sélectionner une catégorie" />
+                <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(category => (
@@ -258,7 +229,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
             name="description"
             value={product.description}
             onChange={handleChange}
-            placeholder="Entrer la description du produit"
+            placeholder="Enter product description"
             rows={4}
             className={errors.description ? 'border-red-500' : ''}
           />
@@ -267,7 +238,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="price">Prix (DH)</Label>
+            <Label htmlFor="price">Price (DH)</Label>
             <Input
               id="price"
               name="price"
@@ -283,7 +254,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="oldPrice">Ancien Prix (DH)</Label>
+            <Label htmlFor="oldPrice">Old Price (DH)</Label>
             <Input
               id="oldPrice"
               name="oldPrice"
@@ -297,7 +268,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="stock">Quantité en Stock</Label>
+            <Label htmlFor="stock">Stock Quantity</Label>
             <Input
               id="stock"
               name="stock"
@@ -316,7 +287,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
               name="sku"
               value={product.sku}
               onChange={handleChange}
-              placeholder="Entrer SKU (ou laisser vide pour générer)"
+              placeholder="Enter SKU (or leave empty to generate)"
             />
           </div>
         </div>
@@ -328,7 +299,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
               checked={product.featured}
               onCheckedChange={(checked) => handleCheckboxChange('featured', checked as boolean)}
             />
-            <Label htmlFor="featured">Produit Mis en Avant</Label>
+            <Label htmlFor="featured">Featured Product</Label>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -337,59 +308,41 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
               checked={product.onSale}
               onCheckedChange={(checked) => handleCheckboxChange('onSale', checked as boolean)}
             />
-            <Label htmlFor="onSale">En Solde</Label>
+            <Label htmlFor="onSale">On Sale</Label>
           </div>
         </div>
         
         <div className="space-y-4">
-          <Label>Images du Produit</Label>
+          <Label>Product Images</Label>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex">
-              <Input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Entrer l'URL de l'image"
-                className="rounded-r-none"
-              />
-              <Button 
-                type="button" 
-                onClick={addImage}
-                className="rounded-l-none"
-              >
-                Ajouter
-              </Button>
-            </div>
-            
-            <div className="flex">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-              <Button 
-                type="button" 
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full flex items-center justify-center"
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Téléchargement...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Télécharger depuis l'appareil
-                  </>
-                )}
-              </Button>
-            </div>
+          <div className="flex">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <Button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              className="w-full flex items-center justify-center"
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload from device
+                </>
+              )}
+            </Button>
           </div>
           
           {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
@@ -399,7 +352,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
               <div key={index} className="relative group">
                 <img 
                   src={image} 
-                  alt={`Produit ${index+1}`} 
+                  alt={`Product ${index+1}`} 
                   className="w-full h-32 object-cover rounded-md border"
                 />
                 <button
@@ -416,7 +369,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
               <div className="border border-dashed rounded-md flex items-center justify-center h-32 bg-gray-50">
                 <div className="text-center text-gray-500">
                   <Plus size={24} className="mx-auto mb-1" />
-                  <p className="text-xs">Pas encore d'images</p>
+                  <p className="text-xs">No images yet</p>
                 </div>
               </div>
             )}
@@ -431,10 +384,10 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Ajout en cours...
+              Adding...
             </>
           ) : (
-            "Ajouter Produit"
+            "Add Product"
           )}
         </Button>
       </form>

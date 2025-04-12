@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -96,8 +97,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error fetching products:', error);
         toast.error("Error loading products");
-        setProducts(initialProducts); // Fall back to initial products
-        return;
+        
+        // Try to get products from localStorage as a fallback
+        const localProducts = localStorage.getItem('smartplug-products');
+        if (localProducts) {
+          try {
+            const parsedProducts = JSON.parse(localProducts);
+            setProducts(parsedProducts);
+            return;
+          } catch (parseError) {
+            console.error('Error parsing local products:', parseError);
+            setProducts(initialProducts); // Fall back to initial products
+            return;
+          }
+        } else {
+          setProducts(initialProducts); // Fall back to initial products
+          return;
+        }
       }
       
       if (data && data.length > 0) {
@@ -118,10 +134,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }));
         
         setProducts(formattedProducts);
+        
+        // Save to localStorage for offline access
+        localStorage.setItem('smartplug-products', JSON.stringify(formattedProducts));
       } else {
         console.log('No products found, initializing with sample data');
         setProducts(initialProducts);
         
+        // Save initial products to database
         for (const product of initialProducts) {
           await supabase
             .from('products')
@@ -140,11 +160,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
             });
         }
+        
+        // Save to localStorage for offline access
+        localStorage.setItem('smartplug-products', JSON.stringify(initialProducts));
       }
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error("Error loading products");
-      setProducts(initialProducts); // Fall back to initial products
+      
+      // Try to get products from localStorage as a fallback
+      const localProducts = localStorage.getItem('smartplug-products');
+      if (localProducts) {
+        try {
+          const parsedProducts = JSON.parse(localProducts);
+          setProducts(parsedProducts);
+        } catch (parseError) {
+          console.error('Error parsing local products:', parseError);
+          setProducts(initialProducts); // Fall back to initial products
+        }
+      } else {
+        setProducts(initialProducts); // Fall back to initial products
+      }
     }
   };
   
@@ -218,7 +254,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         category: product.category,
         images: product.images,
         featured: product.featured || false,
-        onSale: product.onSale || false,
+        on_sale: product.onSale || false,
         stock: product.stock || 0,
         rating: product.rating || 0,
         sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
@@ -257,7 +293,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         sku: data.sku
       };
       
-      setProducts(prevProducts => [...prevProducts, formattedProduct]);
+      setProducts(prevProducts => {
+        const updatedProducts = [...prevProducts, formattedProduct];
+        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
+        return updatedProducts;
+      });
+      
       toast.success(`${product.name} added to products`);
     } catch (error) {
       console.error('Error adding product:', error);
@@ -298,11 +339,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw error;
       }
       
-      setProducts(prevProducts => 
-        prevProducts.map(product => 
+      setProducts(prevProducts => {
+        const updatedProducts = prevProducts.map(product => 
           product.id === id ? { ...product, ...productUpdate } : product
-        )
-      );
+        );
+        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
+        return updatedProducts;
+      });
       
       console.log("Product updated successfully");
       toast.success('Product updated successfully');
@@ -328,7 +371,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw error;
       }
       
-      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+      setProducts(prevProducts => {
+        const updatedProducts = prevProducts.filter(product => product.id !== id);
+        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
+        return updatedProducts;
+      });
+      
       toast.success('Product deleted successfully');
       console.log("Product deleted successfully");
     } catch (error) {
