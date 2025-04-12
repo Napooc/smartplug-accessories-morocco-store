@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
@@ -6,7 +5,17 @@ import AdminEditProduct from '@/components/Admin/AdminEditProduct';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, X, Edit, Trash2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { 
+  Search, 
+  Plus, 
+  X, 
+  Edit, 
+  Trash2, 
+  ChevronDown, 
+  ChevronUp, 
+  RefreshCw,
+  Loader2
+} from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -28,6 +37,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useScrollToTop } from '@/hooks/useScrollToTop';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from 'sonner';
 
 const AdminProducts = () => {
@@ -39,6 +57,10 @@ const AdminProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [selectedProductsForDeletion, setSelectedProductsForDeletion] = useState<string[]>([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showAddImage, setShowAddImage] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   // Use scroll to top hook
   useScrollToTop();
@@ -130,6 +152,47 @@ const AdminProducts = () => {
     refreshProducts();
   };
   
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProductsForDeletion(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
+  };
+  
+  const handleSelectAll = () => {
+    if (selectedProductsForDeletion.length === filteredProducts.length) {
+      // If all are selected, unselect all
+      setSelectedProductsForDeletion([]);
+    } else {
+      // Otherwise, select all
+      setSelectedProductsForDeletion(filteredProducts.map(p => p.id));
+    }
+  };
+  
+  const handleBulkDelete = async () => {
+    if (selectedProductsForDeletion.length === 0) return;
+    
+    setIsBulkDeleting(true);
+    try {
+      // Delete multiple products in sequence
+      for (const productId of selectedProductsForDeletion) {
+        await deleteProduct(productId);
+      }
+      
+      toast.success(`${selectedProductsForDeletion.length} produits supprimés avec succès`);
+      setSelectedProductsForDeletion([]);
+      setShowBulkDeleteConfirm(false);
+    } catch (error) {
+      console.error("Error bulk deleting products:", error);
+      toast.error("Erreur lors de la suppression groupée");
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+  
   return (
     <AdminLayout title="Produits">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -159,7 +222,11 @@ const AdminProducts = () => {
             disabled={isRefreshing}
             className="flex items-center"
           >
-            <RefreshCw className={`mr-1 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-1 h-4 w-4" />
+            )}
             Rafraîchir
           </Button>
           
@@ -189,11 +256,83 @@ const AdminProducts = () => {
         </div>
       )}
       
+      {selectedProductsForDeletion.length > 0 && (
+        <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg mb-4">
+          <div className="font-medium text-blue-800">
+            {selectedProductsForDeletion.length} produits sélectionnés
+          </div>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setSelectedProductsForDeletion([])}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowBulkDeleteConfirm(true)}
+            >
+              Supprimer la sélection
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {/* Dialog for bulk delete confirmation */}
+      <Dialog open={showBulkDeleteConfirm} onOpenChange={setShowBulkDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer Produits</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer {selectedProductsForDeletion.length} produits? Cette action ne peut pas être annulée.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowBulkDeleteConfirm(false)}
+              disabled={isBulkDeleting}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleBulkDelete}
+              disabled={isBulkDeleting}
+            >
+              {isBulkDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Suppression...
+                </>
+              ) : (
+                "Confirmer la Suppression"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
               <tr>
+                <th className="px-4 py-3">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      checked={
+                        filteredProducts.length > 0 &&
+                        selectedProductsForDeletion.length === filteredProducts.length
+                      }
+                      onChange={handleSelectAll}
+                    />
+                  </div>
+                </th>
                 <th className="px-6 py-3">Image</th>
                 <th className="px-6 py-3 cursor-pointer" onClick={() => toggleSort('name')}>
                   <div className="flex items-center">
@@ -222,6 +361,14 @@ const AdminProducts = () => {
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                        checked={selectedProductsForDeletion.includes(product.id)}
+                        onChange={() => toggleProductSelection(product.id)}
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {product.images && product.images.length > 0 ? (
                         <img
@@ -303,7 +450,11 @@ const AdminProducts = () => {
                               className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
                               disabled={isDeleting === product.id}
                             >
-                              <Trash2 size={16} />
+                              {isDeleting === product.id ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={16} />
+                              )}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -330,7 +481,7 @@ const AdminProducts = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
                     {searchTerm ? 'Aucun produit trouvé avec les critères de recherche' : 'Aucun produit trouvé'}
                   </td>
                 </tr>

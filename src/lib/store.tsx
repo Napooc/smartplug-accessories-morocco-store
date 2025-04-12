@@ -95,6 +95,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching products:', error);
+        toast.error("Erreur lors du chargement des produits");
         setProducts(initialProducts); // Fall back to initial products
         return;
       }
@@ -142,6 +143,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      toast.error("Erreur lors du chargement des produits");
       setProducts(initialProducts); // Fall back to initial products
     }
   };

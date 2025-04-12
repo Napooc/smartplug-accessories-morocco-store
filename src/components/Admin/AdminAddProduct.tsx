@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Upload, X } from 'lucide-react';
+import { Plus, Upload, X, Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -90,7 +90,18 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
   };
   
   const addImage = () => {
-    if (!imageUrl.trim()) return;
+    if (!imageUrl.trim()) {
+      toast.error("L'URL de l'image ne peut pas être vide");
+      return;
+    }
+    
+    // Basic URL validation
+    try {
+      new URL(imageUrl);
+    } catch (e) {
+      toast.error("L'URL de l'image n'est pas valide");
+      return;
+    }
     
     setProduct(prev => ({
       ...prev,
@@ -366,8 +377,17 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
                 className="w-full flex items-center justify-center"
                 disabled={isUploading}
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? "Téléchargement..." : "Télécharger depuis l'appareil"}
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Téléchargement...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Télécharger depuis l'appareil
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -408,7 +428,14 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           className="bg-smartplug-blue hover:bg-smartplug-lightblue"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Ajout en cours..." : "Ajouter Produit"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Ajout en cours...
+            </>
+          ) : (
+            "Ajouter Produit"
+          )}
         </Button>
       </form>
     </div>
