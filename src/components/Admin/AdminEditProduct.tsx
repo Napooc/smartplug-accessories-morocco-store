@@ -55,11 +55,9 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         : value
     }));
     
+    // Clear error for this field if it exists
     if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
   
@@ -76,11 +74,9 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       category: value
     }));
     
+    // Clear category error if it exists
     if (errors.category) {
-      setErrors(prev => ({
-        ...prev,
-        category: ''
-      }));
+      setErrors(prev => ({ ...prev, category: '' }));
     }
   };
   
@@ -90,6 +86,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     
     setIsUploading(true);
     
+    // Process each file
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       
@@ -106,10 +103,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             
             // Clear any image errors
             if (errors.images) {
-              setErrors(prev => ({
-                ...prev,
-                images: ''
-              }));
+              setErrors(prev => ({ ...prev, images: '' }));
             }
             
             return updatedProduct;
@@ -123,6 +117,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         setIsUploading(false);
       };
       
+      // Read the file as a data URL (base64)
       reader.readAsDataURL(file);
     });
     
@@ -133,6 +128,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   };
   
   const removeImage = (index: number) => {
+    // Don't allow removing the last image
     if (productData.images.length <= 1 && index === 0) {
       setErrors(prev => ({
         ...prev,
@@ -141,6 +137,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       return;
     }
     
+    // Remove the image at the specified index
     setProductData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
@@ -172,21 +169,8 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       setIsSubmitting(true);
       console.log("Submitting product update:", productData);
       
+      // Update the product
       await updateProduct(product.id, productData);
-      
-      // Update in localStorage specifically for image persistence
-      const localProducts = localStorage.getItem('smartplug-products');
-      if (localProducts) {
-        try {
-          const parsedProducts = JSON.parse(localProducts);
-          const updatedLocalProducts = parsedProducts.map((p: Product) => 
-            p.id === product.id ? { ...p, ...productData } : p
-          );
-          localStorage.setItem('smartplug-products', JSON.stringify(updatedLocalProducts));
-        } catch (error) {
-          console.error('Error updating localStorage products:', error);
-        }
-      }
       
       toast.success("Product updated successfully");
       onClose();

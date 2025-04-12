@@ -52,6 +52,13 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
+// Storage keys
+const STORAGE_KEYS = {
+  PRODUCTS: 'smartplug-products',
+  CART: 'smartplug-cart',
+  ADMIN: 'smartplug-admin'
+};
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -61,8 +68,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Initialize store data on component mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('smartplug-cart');
+    // Restore cart from localStorage
+    const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart));
@@ -71,144 +80,131 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const adminLoggedIn = localStorage.getItem('smartplug-admin');
+    // Check admin status
+    const adminLoggedIn = localStorage.getItem(STORAGE_KEYS.ADMIN);
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
 
-    fetchProducts().then(() => {
+    // Fetch data from sources
+    Promise.all([
+      fetchProducts(),
+      fetchOrders(),
+      fetchContactMessages()
+    ]).finally(() => {
       setIsLoading(false);
     });
-    
-    fetchOrders();
-    fetchContactMessages();
   }, []);
   
+  // Sync cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('smartplug-cart', JSON.stringify(cart));
+    localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
   }, [cart]);
 
+  /**
+   * Fetches products from Supabase and handles fallback to localStorage if needed
+   */
   const fetchProducts = async () => {
     try {
       console.log('Fetching products from Supabase...');
       
       // First try to get products from localStorage for immediate display
-      const localProducts = localStorage.getItem('smartplug-products');
-      if (localProducts) {
+      const localProductsJson = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      let localProducts: Product[] = [];
+      
+      if (localProductsJson) {
         try {
-          const parsedProducts = JSON.parse(localProducts);
-          setProducts(parsedProducts);
-          // Continue with database fetch to ensure we have latest data
+          localProducts = JSON.parse(localProductsJson);
+          setProducts(localProducts);
+          console.log('Loaded products from localStorage:', localProducts.length);
         } catch (parseError) {
           console.error('Error parsing local products:', parseError);
         }
       }
       
-      // Then try to fetch from Supabase
+      // Then try to fetch from Supabase for fresh data
       const { data, error } = await supabase
         .from('products')
         .select('*');
       
       if (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching products from Supabase:', error);
         toast.error("Error loading products from database");
         
-        // If we haven't loaded from localStorage yet, try that as fallback
-        if (!localProducts) {
-          const localFallback = localStorage.getItem('smartplug-products');
-          if (localFallback) {
-            try {
-              const parsedProducts = JSON.parse(localFallback);
-              setProducts(parsedProducts);
-              return;
-            } catch (parseError) {
-              console.error('Error parsing local products:', parseError);
-              // Last resort: use initial products
-              const productsWithUUIDs = initialProducts.map(product => ({
-                ...product,
-                id: uuidv4()
-              }));
-              setProducts(productsWithUUIDs);
-              // Store for future use
-              localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
-              return;
-            }
+        // If we haven't loaded from localStorage yet, use as fallback
+        if (localProducts.length === 0 && localProductsJson) {
+          try {
+            const parsedProducts = JSON.parse(localProductsJson);
+            setProducts(parsedProducts);
+            return;
+          } catch (parseError) {
+            console.error('Error parsing local products:', parseError);
+          }
+        }
+        
+        // Last resort: use initial sample data
+        if (localProducts.length === 0) {
+          const productsWithUUIDs = initialProducts.map(product => ({
+            ...product,
+            id: uuidv4()
+          }));
+          setProducts(productsWithUUIDs);
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
+        }
+        
+        return;
+      }
+      
+      if (data) {
+        if (data.length > 0) {
+          console.log('Products fetched successfully from DB:', data.length);
+          const formattedProducts: Product[] = data.map(product => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            oldPrice: product.old_price || undefined,
+            category: product.category,
+            images: product.images,
+            featured: product.featured,
+            onSale: product.on_sale,
+            stock: product.stock,
+            rating: product.rating || 0,
+            sku: product.sku
+          }));
+          
+          setProducts(formattedProducts);
+          
+          // Save to localStorage for offline access
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(formattedProducts));
+        } else {
+          // No products in DB, initialize with sample data
+          console.log('No products found in DB, initializing with sample data');
+          
+          if (localProducts.length > 0) {
+            // Use already loaded localStorage products
+            await syncLocalProductsToSupabase(localProducts);
           } else {
-            // Initialize with initial products if nothing else works
+            // Generate UUIDs for initial products
             const productsWithUUIDs = initialProducts.map(product => ({
               ...product,
               id: uuidv4()
             }));
+            
             setProducts(productsWithUUIDs);
-            // Store for future use
-            localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
-            return;
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
+            
+            // Save initial products to database
+            await syncLocalProductsToSupabase(productsWithUUIDs);
           }
-        }
-        return; // We've already loaded from localStorage
-      }
-      
-      if (data && data.length > 0) {
-        console.log('Products fetched successfully from DB:', data.length);
-        const formattedProducts: Product[] = data.map(product => ({
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          oldPrice: product.old_price || undefined,
-          category: product.category,
-          images: product.images,
-          featured: product.featured,
-          onSale: product.on_sale,
-          stock: product.stock,
-          rating: product.rating || 0,
-          sku: product.sku
-        }));
-        
-        setProducts(formattedProducts);
-        
-        // Save to localStorage for offline access and image persistence
-        localStorage.setItem('smartplug-products', JSON.stringify(formattedProducts));
-      } else if (data && data.length === 0) {
-        console.log('No products found in DB, initializing with sample data');
-        
-        // Generate UUIDs for initial products
-        const productsWithUUIDs = initialProducts.map(product => ({
-          ...product,
-          id: uuidv4()
-        }));
-        
-        setProducts(productsWithUUIDs);
-        
-        // Save to localStorage for offline access
-        localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
-        
-        // Save initial products to database
-        for (const product of productsWithUUIDs) {
-          await supabase
-            .from('products')
-            .insert({
-              id: product.id,
-              name: product.name,
-              description: product.description,
-              price: product.price,
-              old_price: product.oldPrice,
-              category: product.category,
-              images: product.images,
-              featured: product.featured,
-              on_sale: product.onSale,
-              stock: product.stock,
-              rating: product.rating,
-              sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
-            });
         }
       }
     } catch (error) {
       console.error('Error in fetchProducts:', error);
       toast.error("Error loading products");
       
-      // Try to get products from localStorage as a fallback if we haven't already
-      const localProducts = localStorage.getItem('smartplug-products');
+      // Try to get products from localStorage as a fallback
+      const localProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (localProducts) {
         try {
           const parsedProducts = JSON.parse(localProducts);
@@ -216,25 +212,55 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         } catch (parseError) {
           console.error('Error parsing local products:', parseError);
           
-          // Generate UUIDs for initial products if none exist
+          // Use initial products as last resort
           const productsWithUUIDs = initialProducts.map(product => ({
             ...product,
             id: uuidv4()
           }));
           
           setProducts(productsWithUUIDs);
-          localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
         }
       } else {
-        // Generate UUIDs for initial products if none exist
+        // Initialize with sample data if nothing else works
         const productsWithUUIDs = initialProducts.map(product => ({
           ...product,
           id: uuidv4()
         }));
         
         setProducts(productsWithUUIDs);
-        localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
       }
+    }
+  };
+  
+  /**
+   * Syncs local products to Supabase database
+   */
+  const syncLocalProductsToSupabase = async (localProducts: Product[]) => {
+    try {
+      for (const product of localProducts) {
+        await supabase
+          .from('products')
+          .upsert({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            old_price: product.oldPrice,
+            category: product.category,
+            images: product.images,
+            featured: product.featured,
+            on_sale: product.onSale,
+            stock: product.stock,
+            rating: product.rating,
+            sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
+          }, { onConflict: 'id' });
+      }
+      console.log(`Successfully synced ${localProducts.length} products to Supabase`);
+    } catch (error) {
+      console.error('Error syncing products to Supabase:', error);
+      toast.warning('Some products may not be synced to the database');
     }
   };
   
@@ -270,6 +296,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
   
+  // Computed properties
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
   
@@ -298,6 +325,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
+  /**
+   * Adds a new product to the store and syncs to all storage
+   */
   const addProduct = async (product: Omit<Product, 'id'>) => {
     try {
       const newProductId = uuidv4();
@@ -319,12 +349,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Adding new product:', newProduct);
       
-      // First, update local state and localStorage
-      setProducts(prevProducts => {
-        const updatedProducts = [...prevProducts, newProduct];
-        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
-        return updatedProducts;
-      });
+      // Update local state and localStorage first for immediate feedback
+      const updatedProducts = [...products, newProduct];
+      setProducts(updatedProducts);
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
       // Then, update the database
       const { error } = await supabase
@@ -347,7 +375,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error adding product to Supabase:', error);
         toast.warning("Product saved locally but not synced to database");
-        // We already updated local state, so we don't need to do anything else
       } else {
         toast.success(`${product.name} added to products`);
       }
@@ -358,49 +385,59 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  /**
+   * Updates an existing product and syncs changes to all storage
+   */
   const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
     try {
       console.log("Updating product with ID:", id);
       console.log("Update data:", productUpdate);
       
       // First, update local state and localStorage
-      setProducts(prevProducts => {
-        const updatedProducts = prevProducts.map(product => 
-          product.id === id ? { ...product, ...productUpdate } : product
-        );
-        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
-        return updatedProducts;
+      const updatedProducts = products.map(product => 
+        product.id === id ? { ...product, ...productUpdate } : product
+      );
+      
+      setProducts(updatedProducts);
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
+      
+      // Then, update the database with proper field mapping
+      const dbUpdate: Record<string, any> = {
+        name: productUpdate.name,
+        description: productUpdate.description,
+        price: productUpdate.price,
+        old_price: productUpdate.oldPrice,
+        category: productUpdate.category,
+        images: productUpdate.images,
+        featured: productUpdate.featured,
+        on_sale: productUpdate.onSale,
+        stock: productUpdate.stock,
+        rating: productUpdate.rating,
+        sku: productUpdate.sku
+      };
+      
+      // Remove undefined fields
+      Object.keys(dbUpdate).forEach(key => {
+        if (dbUpdate[key] === undefined) {
+          delete dbUpdate[key];
+        }
       });
-      
-      // Then, update the database
-      const dbUpdate: Record<string, any> = {};
-      
-      if (productUpdate.name !== undefined) dbUpdate.name = productUpdate.name;
-      if (productUpdate.description !== undefined) dbUpdate.description = productUpdate.description;
-      if (productUpdate.price !== undefined) dbUpdate.price = productUpdate.price;
-      if (productUpdate.oldPrice !== undefined) dbUpdate.old_price = productUpdate.oldPrice;
-      if (productUpdate.category !== undefined) dbUpdate.category = productUpdate.category;
-      if (productUpdate.images !== undefined) dbUpdate.images = productUpdate.images;
-      if (productUpdate.featured !== undefined) dbUpdate.featured = productUpdate.featured;
-      if (productUpdate.onSale !== undefined) dbUpdate.on_sale = productUpdate.onSale;
-      if (productUpdate.stock !== undefined) dbUpdate.stock = productUpdate.stock;
-      if (productUpdate.rating !== undefined) dbUpdate.rating = productUpdate.rating;
-      if (productUpdate.sku !== undefined) dbUpdate.sku = productUpdate.sku;
       
       console.log("Sending to database:", dbUpdate);
       
-      const { error } = await supabase
-        .from('products')
-        .update(dbUpdate)
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error updating product in Supabase:', error);
-        toast.warning("Product updated locally but not synced to database");
-        // We already updated local state, so we don't need to do anything else
-      } else {
-        console.log("Product updated successfully in database");
-        toast.success('Product updated successfully');
+      if (Object.keys(dbUpdate).length > 0) {
+        const { error } = await supabase
+          .from('products')
+          .update(dbUpdate)
+          .eq('id', id);
+        
+        if (error) {
+          console.error('Error updating product in Supabase:', error);
+          toast.warning("Product updated locally but not synced to database");
+        } else {
+          console.log("Product updated successfully in database");
+          toast.success('Product updated successfully');
+        }
       }
     } catch (error) {
       console.error('Error updating product:', error);
@@ -409,16 +446,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  /**
+   * Deletes a product and syncs changes to all storage
+   */
   const deleteProduct = async (id: string) => {
     try {
       console.log("Deleting product with ID:", id);
       
-      // First, update local state and localStorage
-      setProducts(prevProducts => {
-        const updatedProducts = prevProducts.filter(product => product.id !== id);
-        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
-        return updatedProducts;
-      });
+      // Update local state and localStorage first for immediate feedback
+      const updatedProducts = products.filter(product => product.id !== id);
+      setProducts(updatedProducts);
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
       // Then, delete from the database
       const { error } = await supabase
@@ -429,7 +467,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error deleting product from Supabase:', error);
         toast.warning("Product deleted locally but not from database");
-        // We already updated local state, so we don't need to do anything else
       } else {
         toast.success('Product deleted successfully');
         console.log("Product deleted successfully from database");
@@ -441,6 +478,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Cart operations
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.product.id === product.id);
@@ -480,6 +518,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
+  // Order operations
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -585,6 +624,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Contact message operations
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<void> => {
     try {
       console.log("Adding contact message:", message);
@@ -655,10 +695,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Admin operations
   const login = (username: string, password: string) => {
     if (username === 'admin' && password === 'admin123') {
       setIsAdmin(true);
-      localStorage.setItem('smartplug-admin', 'true');
+      localStorage.setItem(STORAGE_KEYS.ADMIN, 'true');
       return true;
     }
     return false;
@@ -666,9 +707,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const logout = () => {
     setIsAdmin(false);
-    localStorage.removeItem('smartplug-admin');
+    localStorage.removeItem(STORAGE_KEYS.ADMIN);
   };
   
+  // Create store context value
   const value: StoreContextType = {
     products,
     featuredProducts,
