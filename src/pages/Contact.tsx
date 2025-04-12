@@ -34,11 +34,11 @@ const ContactPage = () => {
   
   const validateForm = () => {
     const newErrors = {
-      name: formData.name ? '' : t('nameRequired'),
-      email: formData.email ? (
+      name: formData.name.trim() ? '' : t('nameRequired'),
+      email: formData.email.trim() ? (
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail')
       ) : t('emailRequired'),
-      message: formData.message ? '' : t('messageRequired')
+      message: formData.message.trim() ? '' : t('messageRequired')
     };
     
     setErrors(newErrors);
@@ -53,6 +53,7 @@ const ContactPage = () => {
       [name]: value
     }));
     
+    // Clear error when user types
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -65,20 +66,24 @@ const ContactPage = () => {
     e.preventDefault();
     
     if (!validateForm()) {
+      toast.error(t('pleaseFixErrors', { default: 'Veuillez corriger les erreurs' }));
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      console.log("Submitting contact form:", formData);
+      console.log("Submitting contact form with data:", formData);
       
+      // Make sure to trim all form fields
       await addContactMessage({
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim()
       });
+      
+      console.log("Message sent successfully");
       
       // Reset form after successful submission
       setFormData({

@@ -74,10 +74,10 @@ const AdminMessages = () => {
   const handleDeleteMessage = async (messageId: string) => {
     try {
       await deleteContactMessage(messageId);
-      toast.success("Message supprimé avec succès");
+      // Success toast is now handled in the store
     } catch (error) {
       console.error("Error deleting message:", error);
-      toast.error("Erreur lors de la suppression du message");
+      // Error toast is now handled in the store
     }
   };
   

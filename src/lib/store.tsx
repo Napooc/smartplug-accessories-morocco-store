@@ -461,6 +461,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Adding contact message:", message);
       
+      // Make sure fields are not empty
+      if (!message.name.trim() || !message.email.trim() || !message.message.trim()) {
+        throw new Error('Required fields are missing');
+      }
+      
       const { data, error } = await supabase
         .from('contact_messages')
         .insert({
@@ -513,7 +518,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error deleting contact message:', error);
         toast.error('Échec de la suppression du message');
-        return;
+        throw error;
       }
       
       setContactMessages(prev => prev.filter(message => message.id !== messageId));
@@ -521,6 +526,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error deleting contact message:', error);
       toast.error('Échec de la suppression du message');
+      throw error;
     }
   };
   
