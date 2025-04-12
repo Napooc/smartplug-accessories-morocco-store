@@ -215,12 +215,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         old_price: product.oldPrice,
         category: product.category,
         images: product.images,
-        featured: product.featured,
-        onSale: product.onSale,
-        stock: product.stock,
+        featured: product.featured || false,
+        on_sale: product.onSale || false,
+        stock: product.stock || 0,
         rating: product.rating || 0,
         sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
       };
+      
+      console.log('Adding new product:', newProduct);
       
       const { data, error } = await supabase
         .from('products')
@@ -232,6 +234,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error('Error adding product:', error);
         toast.error("Erreur lors de l'ajout du produit");
         throw error;
+      }
+      
+      if (!data) {
+        throw new Error('No data returned from product insertion');
       }
       
       const formattedProduct: Product = {
@@ -253,6 +259,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toast.success(`${product.name} ajouté aux produits`);
     } catch (error) {
       console.error('Error adding product:', error);
+      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -262,7 +269,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("Updating product with ID:", id);
       console.log("Update data:", productUpdate);
       
-      const dbUpdate: any = {};
+      const dbUpdate: Record<string, any> = {};
       
       if (productUpdate.name !== undefined) dbUpdate.name = productUpdate.name;
       if (productUpdate.description !== undefined) dbUpdate.description = productUpdate.description;
@@ -278,19 +285,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Sending to database:", dbUpdate);
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('products')
         .update(dbUpdate)
-        .eq('id', id)
-        .select();
+        .eq('id', id);
       
       if (error) {
         console.error('Error updating product:', error);
         toast.error("Erreur lors de la mise à jour du produit");
         throw error;
       }
-      
-      console.log("Update response:", data);
       
       setProducts(prevProducts => 
         prevProducts.map(product => 
@@ -302,6 +306,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toast.success('Produit mis à jour avec succès');
     } catch (error) {
       console.error('Error updating product:', error);
+      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -326,6 +331,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("Product deleted successfully");
     } catch (error) {
       console.error('Error deleting product:', error);
+      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -558,7 +564,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('smartplug-admin');
   };
   
-  const value = {
+  const value: StoreContextType = {
     products,
     featuredProducts,
     saleProducts,

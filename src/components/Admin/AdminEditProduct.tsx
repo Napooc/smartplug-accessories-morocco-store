@@ -52,7 +52,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     setProductData(prev => ({
       ...prev,
       [name]: name === 'price' || name === 'oldPrice' || name === 'stock' 
-        ? parseFloat(value) || 0 // Ensure we don't pass NaN
+        ? parseFloat(value) || 0 
         : value
     }));
     
@@ -110,8 +110,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     
     setIsUploading(true);
     
-    // In a real app, you would upload the file to a server here
-    // For now we'll just use FileReader to get a data URL
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       

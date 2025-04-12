@@ -55,7 +55,9 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     const { name, value } = e.target;
     setProduct(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'oldPrice' || name === 'stock' ? parseFloat(value) : value
+      [name]: name === 'price' || name === 'oldPrice' || name === 'stock' 
+        ? parseFloat(value) || 0 
+        : value
     }));
     
     if (errors[name as keyof typeof errors]) {
@@ -96,6 +98,13 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     }));
     
     setImageUrl('');
+    
+    if (errors.images) {
+      setErrors(prev => ({
+        ...prev,
+        images: ''
+      }));
+    }
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,8 +113,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     
     setIsUploading(true);
     
-    // In a real app, you would upload the file to a server here
-    // For now we'll just use FileReader to get a data URL
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       
@@ -115,6 +122,13 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
             ...prev,
             images: [...prev.images, event.target!.result as string]
           }));
+          
+          if (errors.images) {
+            setErrors(prev => ({
+              ...prev,
+              images: ''
+            }));
+          }
         }
         setIsUploading(false);
       };
@@ -134,23 +148,13 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
   };
   
   const removeImage = (index: number) => {
-    if (product.images.length <= 1 && index === 0) {
-      setErrors(prev => ({
-        ...prev,
-        images: 'Le produit doit avoir au moins une image'
-      }));
-      return;
-    }
-    
     setProduct(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
     }));
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const validateForm = () => {
     const newErrors = {
       name: product.name ? '' : 'Le nom est requis',
       description: product.description ? '' : 'La description est requise',
@@ -160,22 +164,23 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     };
     
     setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error);
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    if (Object.values(newErrors).some(error => error)) {
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs avant de soumettre");
       return;
     }
     
     try {
       setIsSubmitting(true);
       
-      if (!product.sku) {
-        const randomSku = `SKU-${Math.floor(Math.random() * 10000)}`;
-        const productWithSku = {...product, sku: randomSku};
-        await addProduct(productWithSku);
-      } else {
-        await addProduct(product);
-      }
+      await addProduct(product);
       
+      // Reset form
       setProduct({
         name: '',
         description: '',

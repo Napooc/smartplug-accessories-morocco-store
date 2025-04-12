@@ -13,6 +13,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from '@/components/ui/sheet';
 import { Product } from '@/lib/types';
 import {
@@ -37,7 +38,7 @@ const AdminProducts = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
   // Use scroll to top hook
   useScrollToTop();
@@ -112,17 +113,15 @@ const AdminProducts = () => {
   
   const handleDeleteProduct = async (productId: string) => {
     try {
-      setIsDeleting(true);
+      setIsDeleting(productId);
       console.log("Deleting product:", productId);
       await deleteProduct(productId);
-      
-      // Don't need to call refreshProducts here as deleteProduct updates the local state
       toast.success("Produit supprimé avec succès");
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Échec de la suppression du produit");
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(null);
     }
   };
   
@@ -222,11 +221,17 @@ const AdminProducts = () => {
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-12 w-12 object-cover rounded"
-                      />
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="h-12 w-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 bg-gray-200 rounded flex items-center justify-center">
+                          <X size={16} className="text-gray-400" />
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium">{product.name}</div>
@@ -260,6 +265,16 @@ const AdminProducts = () => {
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
                         <Sheet>
+                          <SheetTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleEditProduct(product)}
+                            >
+                              <Edit size={16} />
+                            </Button>
+                          </SheetTrigger>
                           <SheetContent side="right" className="w-[400px] sm:w-[600px] overflow-y-auto">
                             <SheetHeader>
                               <SheetTitle>Modifier Produit</SheetTitle>
@@ -276,15 +291,6 @@ const AdminProducts = () => {
                               )}
                             </div>
                           </SheetContent>
-                          
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            <Edit size={16} />
-                          </Button>
                         </Sheet>
                         
                         <AlertDialog>
@@ -293,7 +299,7 @@ const AdminProducts = () => {
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                              disabled={isDeleting}
+                              disabled={isDeleting === product.id}
                             >
                               <Trash2 size={16} />
                             </Button>
@@ -311,7 +317,7 @@ const AdminProducts = () => {
                                 className="bg-red-500 hover:bg-red-600"
                                 onClick={() => handleDeleteProduct(product.id)}
                               >
-                                Supprimer
+                                {isDeleting === product.id ? 'Suppression...' : 'Supprimer'}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -323,7 +329,7 @@ const AdminProducts = () => {
               ) : (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                    Aucun produit trouvé
+                    {searchTerm ? 'Aucun produit trouvé avec les critères de recherche' : 'Aucun produit trouvé'}
                   </td>
                 </tr>
               )}
