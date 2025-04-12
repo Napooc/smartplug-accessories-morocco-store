@@ -1,12 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
 import AdminEditProduct from '@/components/Admin/AdminEditProduct';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, X, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, X, Edit, Trash2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -27,17 +27,37 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useScrollToTop } from '@/hooks/useScrollToTop';
+import { toast } from 'sonner';
 
 const AdminProducts = () => {
-  const { products, deleteProduct } = useStore();
+  const { products, deleteProduct, fetchProducts } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [sortBy, setSortBy] = useState<string>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Use scroll to top hook
   useScrollToTop();
+  
+  // Fetch products on component mount
+  useEffect(() => {
+    refreshProducts();
+  }, []);
+  
+  const refreshProducts = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchProducts();
+      toast.success("Produits rafraîchis avec succès");
+    } catch (error) {
+      console.error("Error refreshing products:", error);
+      toast.error("Échec du rafraîchissement des produits");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   // Filter and sort products
   const filteredProducts = products
@@ -80,16 +100,19 @@ const AdminProducts = () => {
   };
   
   const handleEditProduct = (product: Product) => {
+    console.log("Editing product:", product);
     setSelectedProduct(product);
   };
   
   const handleCloseEditSheet = () => {
     setSelectedProduct(null);
+    refreshProducts(); // Refresh products list after editing
   };
   
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId);
+      refreshProducts(); // Refresh products list after deleting
     } catch (error) {
       console.error("Error deleting product:", error);
     }
@@ -117,13 +140,25 @@ const AdminProducts = () => {
           )}
         </div>
         
-        <Button
-          onClick={() => setShowAddProduct(true)}
-          className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
-        >
-          <Plus size={18} className="mr-1" />
-          Ajouter Produit
-        </Button>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            onClick={refreshProducts}
+            disabled={isRefreshing}
+            className="flex items-center"
+          >
+            <RefreshCw className={`mr-1 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Rafraîchir
+          </Button>
+          
+          <Button
+            onClick={() => setShowAddProduct(true)}
+            className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
+          >
+            <Plus size={18} className="mr-1" />
+            Ajouter Produit
+          </Button>
+        </div>
       </div>
       
       {showAddProduct && (

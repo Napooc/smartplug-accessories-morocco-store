@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,6 +32,11 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Re-sync product data if product prop changes
+  useEffect(() => {
+    setProductData({ ...product });
+  }, [product]);
   
   const [errors, setErrors] = useState({
     name: '',
@@ -152,14 +157,16 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     setErrors(newErrors);
     
     if (Object.values(newErrors).some(error => error)) {
+      toast.error("Veuillez corriger les erreurs avant de soumettre");
       return;
     }
     
     try {
       setIsSubmitting(true);
+      console.log("Submitting product update:", productData);
+      
       await updateProduct(product.id, productData);
       onClose();
-      toast.success("Produit mis à jour avec succès");
     } catch (error) {
       console.error('Error updating product:', error);
       toast.error("Erreur lors de la mise à jour du produit");

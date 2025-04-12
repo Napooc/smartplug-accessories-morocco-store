@@ -255,6 +255,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
     try {
+      console.log("Updating product with ID:", id);
+      console.log("Update data:", productUpdate);
+      
       const dbUpdate: any = {};
       
       if (productUpdate.name !== undefined) dbUpdate.name = productUpdate.name;
@@ -268,6 +271,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (productUpdate.stock !== undefined) dbUpdate.stock = productUpdate.stock;
       if (productUpdate.rating !== undefined) dbUpdate.rating = productUpdate.rating;
       if (productUpdate.sku !== undefined) dbUpdate.sku = productUpdate.sku;
+      
+      console.log("Sending to database:", dbUpdate);
       
       const { error } = await supabase
         .from('products')
@@ -285,6 +290,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           product.id === id ? { ...product, ...productUpdate } : product
         )
       );
+      
+      console.log("Product updated successfully");
       toast.success('Produit mis à jour avec succès');
     } catch (error) {
       console.error('Error updating product:', error);
