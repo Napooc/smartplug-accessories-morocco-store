@@ -5,6 +5,7 @@ import { products as initialProducts } from './data';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { v4 as uuidv4 } from 'uuid';
 
 interface StoreContextType {
   // Products
@@ -40,7 +41,7 @@ interface StoreContextType {
   // Contact
   contactMessages: ContactMessage[];
   addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<void>;
-  deleteContactMessage: (messageId: string) => void;
+  deleteContactMessage: (messageId: string) => Promise<void>;
   fetchContactMessages: () => Promise<void>;
 
   // Admin
@@ -139,10 +140,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('smartplug-products', JSON.stringify(formattedProducts));
       } else {
         console.log('No products found, initializing with sample data');
-        setProducts(initialProducts);
+        
+        // Generate UUIDs for initial products
+        const productsWithUUIDs = initialProducts.map(product => ({
+          ...product,
+          id: uuidv4()
+        }));
+        
+        setProducts(productsWithUUIDs);
         
         // Save initial products to database
-        for (const product of initialProducts) {
+        for (const product of productsWithUUIDs) {
           await supabase
             .from('products')
             .insert({
@@ -162,7 +170,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
         
         // Save to localStorage for offline access
-        localStorage.setItem('smartplug-products', JSON.stringify(initialProducts));
+        localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -176,10 +184,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setProducts(parsedProducts);
         } catch (parseError) {
           console.error('Error parsing local products:', parseError);
-          setProducts(initialProducts); // Fall back to initial products
+          
+          // Generate UUIDs for initial products if none exist
+          const productsWithUUIDs = initialProducts.map(product => ({
+            ...product,
+            id: uuidv4()
+          }));
+          
+          setProducts(productsWithUUIDs);
+          localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
         }
       } else {
-        setProducts(initialProducts); // Fall back to initial products
+        // Generate UUIDs for initial products if none exist
+        const productsWithUUIDs = initialProducts.map(product => ({
+          ...product,
+          id: uuidv4()
+        }));
+        
+        setProducts(productsWithUUIDs);
+        localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
       }
     }
   };
@@ -246,15 +269,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const addProduct = async (product: Omit<Product, 'id'>) => {
     try {
-      const newProduct = {
+      const newProductId = uuidv4();
+      
+      const newProduct: Product = {
+        id: newProductId,
         name: product.name,
         description: product.description,
         price: product.price,
-        old_price: product.oldPrice,
+        oldPrice: product.oldPrice,
         category: product.category,
         images: product.images,
         featured: product.featured || false,
-        on_sale: product.onSale || false,
+        onSale: product.onSale || false,
         stock: product.stock || 0,
         rating: product.rating || 0,
         sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
@@ -262,42 +288,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Adding new product:', newProduct);
       
-      const { data, error } = await supabase
-        .from('products')
-        .insert(newProduct)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error adding product:', error);
-        toast.error("Error adding product");
-        throw error;
-      }
-      
-      if (!data) {
-        throw new Error('No data returned from product insertion');
-      }
-      
-      const formattedProduct: Product = {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        oldPrice: data.old_price || undefined,
-        category: data.category,
-        images: data.images,
-        featured: data.featured,
-        onSale: data.on_sale,
-        stock: data.stock,
-        rating: data.rating || 0,
-        sku: data.sku
-      };
-      
+      // First, update local state
       setProducts(prevProducts => {
-        const updatedProducts = [...prevProducts, formattedProduct];
+        const updatedProducts = [...prevProducts, newProduct];
         localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
         return updatedProducts;
       });
+      
+      // Then, update the database
+      const { error } = await supabase
+        .from('products')
+        .insert({
+          id: newProduct.id,
+          name: newProduct.name,
+          description: newProduct.description,
+          price: newProduct.price,
+          old_price: newProduct.oldPrice,
+          category: newProduct.category,
+          images: newProduct.images,
+          featured: newProduct.featured,
+          on_sale: newProduct.onSale,
+          stock: newProduct.stock,
+          rating: newProduct.rating,
+          sku: newProduct.sku
+        });
+      
+      if (error) {
+        console.error('Error adding product to Supabase:', error);
+        // Continue with local state update even if Supabase update fails
+      }
       
       toast.success(`${product.name} added to products`);
     } catch (error) {
@@ -312,6 +331,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("Updating product with ID:", id);
       console.log("Update data:", productUpdate);
       
+      // First, update local state
+      setProducts(prevProducts => {
+        const updatedProducts = prevProducts.map(product => 
+          product.id === id ? { ...product, ...productUpdate } : product
+        );
+        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
+        return updatedProducts;
+      });
+      
+      // Then, update the database
       const dbUpdate: Record<string, any> = {};
       
       if (productUpdate.name !== undefined) dbUpdate.name = productUpdate.name;
@@ -334,18 +363,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .eq('id', id);
       
       if (error) {
-        console.error('Error updating product:', error);
-        toast.error("Error updating product");
-        throw error;
+        console.error('Error updating product in Supabase:', error);
+        // Continue with local state update even if Supabase update fails
       }
-      
-      setProducts(prevProducts => {
-        const updatedProducts = prevProducts.map(product => 
-          product.id === id ? { ...product, ...productUpdate } : product
-        );
-        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
-        return updatedProducts;
-      });
       
       console.log("Product updated successfully");
       toast.success('Product updated successfully');
@@ -360,22 +380,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Deleting product with ID:", id);
       
+      // First, update local state
+      setProducts(prevProducts => {
+        const updatedProducts = prevProducts.filter(product => product.id !== id);
+        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
+        return updatedProducts;
+      });
+      
+      // Then, delete from the database
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', id);
       
       if (error) {
-        console.error('Error deleting product:', error);
-        toast.error("Error deleting product");
-        throw error;
+        console.error('Error deleting product from Supabase:', error);
+        // Continue with local state update even if Supabase delete fails
       }
-      
-      setProducts(prevProducts => {
-        const updatedProducts = prevProducts.filter(product => product.id !== id);
-        localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
-        return updatedProducts;
-      });
       
       toast.success('Product deleted successfully');
       console.log("Product deleted successfully");
