@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import { useScrollToTop } from '@/hooks/useScrollToTop';
 const ContactPage = () => {
   const { addContactMessage } = useStore();
   const { t, direction } = useLanguage();
-  useScrollToTop(); // Use the scroll to top hook
+  useScrollToTop();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -31,6 +31,20 @@ const ContactPage = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
+  
+  const validateForm = () => {
+    const newErrors = {
+      name: formData.name ? '' : t('nameRequired'),
+      email: formData.email ? (
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail')
+      ) : t('emailRequired'),
+      message: formData.message ? '' : t('messageRequired')
+    };
+    
+    setErrors(newErrors);
+    
+    return !newErrors.name && !newErrors.email && !newErrors.message;
+  };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -50,33 +64,19 @@ const ContactPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newErrors = {
-      name: formData.name ? '' : t('nameRequired'),
-      email: formData.email ? (
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail')
-      ) : t('emailRequired'),
-      message: formData.message ? '' : t('messageRequired')
-    };
-    
-    setErrors(newErrors);
-    
-    if (newErrors.name || newErrors.email || newErrors.message) {
+    if (!validateForm()) {
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      // Call the store function to add the contact message
       await addContactMessage({
         name: formData.name,
         email: formData.email,
-        subject: formData.subject || '',
+        subject: formData.subject,
         message: formData.message
       });
-      
-      setMessageSent(true);
-      toast.success(t('messageSent'));
       
       // Reset form after successful submission
       setFormData({
@@ -86,6 +86,8 @@ const ContactPage = () => {
         message: ''
       });
       
+      setMessageSent(true);
+      toast.success(t('messageSent'));
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error(t('messageFailed'));

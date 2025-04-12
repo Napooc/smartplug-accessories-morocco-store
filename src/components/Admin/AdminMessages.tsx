@@ -23,14 +23,14 @@ const AdminMessages = () => {
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Refresh messages when component mounts
+  // Fetch messages when component mounts
   useEffect(() => {
     const getMessages = async () => {
       setIsRefreshing(true);
       try {
         console.log("AdminMessages: Fetching contact messages on mount");
         await fetchContactMessages();
-        console.log("AdminMessages: Fetched messages:", contactMessages);
+        console.log("AdminMessages: Fetched messages count:", contactMessages.length);
       } catch (error) {
         console.error("Error fetching messages:", error);
         toast.error("Échec du chargement des messages");
@@ -47,7 +47,7 @@ const AdminMessages = () => {
     try {
       console.log("AdminMessages: Manually refreshing messages");
       await fetchContactMessages();
-      console.log("AdminMessages: Refreshed messages:", contactMessages);
+      console.log("AdminMessages: Refreshed messages count:", contactMessages.length);
       toast.success("Messages rafraîchis");
     } catch (error) {
       console.error("Error refreshing messages:", error);
@@ -68,10 +68,14 @@ const AdminMessages = () => {
   };
   
   const toggleMessage = (messageId: string) => {
-    if (expandedMessage === messageId) {
-      setExpandedMessage(null);
-    } else {
-      setExpandedMessage(messageId);
+    setExpandedMessage(expandedMessage === messageId ? null : messageId);
+  };
+  
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await deleteContactMessage(messageId);
+    } catch (error) {
+      console.error("Error deleting message:", error);
     }
   };
   
@@ -130,9 +134,7 @@ const AdminMessages = () => {
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
                         <AlertDialogAction 
                           className="bg-red-500 hover:bg-red-600"
-                          onClick={() => {
-                            deleteContactMessage(message.id);
-                          }}
+                          onClick={() => handleDeleteMessage(message.id)}
                         >
                           Supprimer
                         </AlertDialogAction>

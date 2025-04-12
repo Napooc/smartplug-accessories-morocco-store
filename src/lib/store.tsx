@@ -37,7 +37,7 @@ interface StoreContextType {
 
   // Contact
   contactMessages: ContactMessage[];
-  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<ContactMessage>;
+  addContactMessage: (message: Omit<ContactMessage, 'id' | 'date'>) => Promise<void>;
   deleteContactMessage: (messageId: string) => void;
   fetchContactMessages: () => Promise<void>;
 
@@ -152,11 +152,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching contact messages:', error);
-        return;
+        throw error;
       }
       
       if (data) {
-        console.log("Contact messages fetched:", data);
+        console.log("Contact messages fetched:", data.length);
         const formattedMessages: ContactMessage[] = data.map(msg => ({
           id: msg.id,
           name: msg.name,
@@ -170,6 +170,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error fetching contact messages:', error);
+      throw error;
     }
   }, []);
   
@@ -456,7 +457,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<ContactMessage> => {
+  const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<void> => {
     try {
       console.log("Adding contact message:", message);
       const currentDate = new Date().toISOString();
@@ -469,33 +470,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           subject: message.subject || null,
           message: message.message,
           date: currentDate
-        })
-        .select()
-        .single();
+        });
       
       if (error) {
         console.error('Error saving contact message:', error);
         throw new Error('Failed to send message');
       }
       
-      if (!data) {
-        console.error('No data returned from insert operation');
-        throw new Error('Failed to send message: No data returned');
-      }
+      console.log("Contact message added successfully");
       
-      console.log("Contact message added successfully:", data);
-      const newMessage: ContactMessage = {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        subject: data.subject || '',
-        message: data.message,
-        date: new Date(data.date).toISOString().split('T')[0]
-      };
-      
-      setContactMessages(prev => [newMessage, ...prev]);
-      
-      return newMessage;
+      // Refresh the messages
+      await fetchContactMessages();
     } catch (error) {
       console.error('Error saving contact message:', error);
       throw error;
