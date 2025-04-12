@@ -17,7 +17,11 @@ import {
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
 
-const AdminAddProduct = () => {
+interface AdminAddProductProps {
+  onProductAdded: () => void;
+}
+
+const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
   const { addProduct } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -187,6 +191,7 @@ const AdminAddProduct = () => {
       });
       
       toast.success("Produit ajouté avec succès");
+      onProductAdded(); // Call the callback function after successfully adding a product
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error("Erreur lors de l'ajout du produit");
