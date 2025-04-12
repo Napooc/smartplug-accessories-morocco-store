@@ -91,34 +91,65 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const fetchProducts = async () => {
     try {
       console.log('Fetching products from Supabase...');
+      
+      // First try to get products from localStorage for immediate display
+      const localProducts = localStorage.getItem('smartplug-products');
+      if (localProducts) {
+        try {
+          const parsedProducts = JSON.parse(localProducts);
+          setProducts(parsedProducts);
+          // Continue with database fetch to ensure we have latest data
+        } catch (parseError) {
+          console.error('Error parsing local products:', parseError);
+        }
+      }
+      
+      // Then try to fetch from Supabase
       const { data, error } = await supabase
         .from('products')
         .select('*');
       
       if (error) {
         console.error('Error fetching products:', error);
-        toast.error("Error loading products");
+        toast.error("Error loading products from database");
         
-        // Try to get products from localStorage as a fallback
-        const localProducts = localStorage.getItem('smartplug-products');
-        if (localProducts) {
-          try {
-            const parsedProducts = JSON.parse(localProducts);
-            setProducts(parsedProducts);
-            return;
-          } catch (parseError) {
-            console.error('Error parsing local products:', parseError);
-            setProducts(initialProducts); // Fall back to initial products
+        // If we haven't loaded from localStorage yet, try that as fallback
+        if (!localProducts) {
+          const localFallback = localStorage.getItem('smartplug-products');
+          if (localFallback) {
+            try {
+              const parsedProducts = JSON.parse(localFallback);
+              setProducts(parsedProducts);
+              return;
+            } catch (parseError) {
+              console.error('Error parsing local products:', parseError);
+              // Last resort: use initial products
+              const productsWithUUIDs = initialProducts.map(product => ({
+                ...product,
+                id: uuidv4()
+              }));
+              setProducts(productsWithUUIDs);
+              // Store for future use
+              localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
+              return;
+            }
+          } else {
+            // Initialize with initial products if nothing else works
+            const productsWithUUIDs = initialProducts.map(product => ({
+              ...product,
+              id: uuidv4()
+            }));
+            setProducts(productsWithUUIDs);
+            // Store for future use
+            localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
             return;
           }
-        } else {
-          setProducts(initialProducts); // Fall back to initial products
-          return;
         }
+        return; // We've already loaded from localStorage
       }
       
       if (data && data.length > 0) {
-        console.log('Products fetched successfully:', data.length);
+        console.log('Products fetched successfully from DB:', data.length);
         const formattedProducts: Product[] = data.map(product => ({
           id: product.id,
           name: product.name,
@@ -136,10 +167,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         
         setProducts(formattedProducts);
         
-        // Save to localStorage for offline access
+        // Save to localStorage for offline access and image persistence
         localStorage.setItem('smartplug-products', JSON.stringify(formattedProducts));
-      } else {
-        console.log('No products found, initializing with sample data');
+      } else if (data && data.length === 0) {
+        console.log('No products found in DB, initializing with sample data');
         
         // Generate UUIDs for initial products
         const productsWithUUIDs = initialProducts.map(product => ({
@@ -148,6 +179,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }));
         
         setProducts(productsWithUUIDs);
+        
+        // Save to localStorage for offline access
+        localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
         
         // Save initial products to database
         for (const product of productsWithUUIDs) {
@@ -168,15 +202,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
             });
         }
-        
-        // Save to localStorage for offline access
-        localStorage.setItem('smartplug-products', JSON.stringify(productsWithUUIDs));
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error in fetchProducts:', error);
       toast.error("Error loading products");
       
-      // Try to get products from localStorage as a fallback
+      // Try to get products from localStorage as a fallback if we haven't already
       const localProducts = localStorage.getItem('smartplug-products');
       if (localProducts) {
         try {
@@ -288,7 +319,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Adding new product:', newProduct);
       
-      // First, update local state
+      // First, update local state and localStorage
       setProducts(prevProducts => {
         const updatedProducts = [...prevProducts, newProduct];
         localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
@@ -315,10 +346,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error adding product to Supabase:', error);
-        // Continue with local state update even if Supabase update fails
+        toast.warning("Product saved locally but not synced to database");
+        // We already updated local state, so we don't need to do anything else
+      } else {
+        toast.success(`${product.name} added to products`);
       }
-      
-      toast.success(`${product.name} added to products`);
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -331,7 +363,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("Updating product with ID:", id);
       console.log("Update data:", productUpdate);
       
-      // First, update local state
+      // First, update local state and localStorage
       setProducts(prevProducts => {
         const updatedProducts = prevProducts.map(product => 
           product.id === id ? { ...product, ...productUpdate } : product
@@ -364,11 +396,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error updating product in Supabase:', error);
-        // Continue with local state update even if Supabase update fails
+        toast.warning("Product updated locally but not synced to database");
+        // We already updated local state, so we don't need to do anything else
+      } else {
+        console.log("Product updated successfully in database");
+        toast.success('Product updated successfully');
       }
-      
-      console.log("Product updated successfully");
-      toast.success('Product updated successfully');
     } catch (error) {
       console.error('Error updating product:', error);
       toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -380,7 +413,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Deleting product with ID:", id);
       
-      // First, update local state
+      // First, update local state and localStorage
       setProducts(prevProducts => {
         const updatedProducts = prevProducts.filter(product => product.id !== id);
         localStorage.setItem('smartplug-products', JSON.stringify(updatedProducts));
@@ -395,11 +428,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error deleting product from Supabase:', error);
-        // Continue with local state update even if Supabase delete fails
+        toast.warning("Product deleted locally but not from database");
+        // We already updated local state, so we don't need to do anything else
+      } else {
+        toast.success('Product deleted successfully');
+        console.log("Product deleted successfully from database");
       }
-      
-      toast.success('Product deleted successfully');
-      console.log("Product deleted successfully");
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);

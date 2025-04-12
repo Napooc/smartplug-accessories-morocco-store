@@ -96,18 +96,24 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       reader.onload = (event) => {
         if (event.target?.result) {
           const base64Image = event.target.result as string;
-          setProductData(prev => ({
-            ...prev,
-            images: [...prev.images, base64Image]
-          }));
           
-          // Clear any image errors
-          if (errors.images) {
-            setErrors(prev => ({
+          setProductData(prev => {
+            // Create a new product with updated images
+            const updatedProduct = {
               ...prev,
-              images: ''
-            }));
-          }
+              images: [...prev.images, base64Image]
+            };
+            
+            // Clear any image errors
+            if (errors.images) {
+              setErrors(prev => ({
+                ...prev,
+                images: ''
+              }));
+            }
+            
+            return updatedProduct;
+          });
         }
         setIsUploading(false);
       };
@@ -167,6 +173,21 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       console.log("Submitting product update:", productData);
       
       await updateProduct(product.id, productData);
+      
+      // Update in localStorage specifically for image persistence
+      const localProducts = localStorage.getItem('smartplug-products');
+      if (localProducts) {
+        try {
+          const parsedProducts = JSON.parse(localProducts);
+          const updatedLocalProducts = parsedProducts.map((p: Product) => 
+            p.id === product.id ? { ...p, ...productData } : p
+          );
+          localStorage.setItem('smartplug-products', JSON.stringify(updatedLocalProducts));
+        } catch (error) {
+          console.error('Error updating localStorage products:', error);
+        }
+      }
+      
       toast.success("Product updated successfully");
       onClose();
     } catch (error) {

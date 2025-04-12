@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminAddProduct from '@/components/Admin/AdminAddProduct';
@@ -60,7 +59,6 @@ const AdminProducts = () => {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedProductsForDeletion, setSelectedProductsForDeletion] = useState<string[]>([]);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
-  const [showAddImage, setShowAddImage] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   // Use scroll to top hook
