@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface AdminAddProductProps {
   onProductAdded: () => void;
@@ -36,7 +37,8 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     stock: 0,
     images: [] as string[],
     rating: 0,
-    sku: ''
+    sku: '',
+    placement: 'regular' as 'best_selling' | 'deals' | 'regular'
   });
   
   const [errors, setErrors] = useState({
@@ -86,6 +88,13 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
         category: ''
       }));
     }
+  };
+
+  const handlePlacementChange = (value: 'best_selling' | 'deals' | 'regular') => {
+    setProduct(prev => ({
+      ...prev,
+      placement: value
+    }));
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,7 +183,8 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
         stock: 0,
         images: [],
         rating: 0,
-        sku: ''
+        sku: '',
+        placement: 'regular'
       });
       
       toast.success("Product added successfully");
@@ -310,6 +320,28 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
             />
             <Label htmlFor="onSale">On Sale</Label>
           </div>
+        </div>
+
+        <div className="space-y-2 border-t pt-4">
+          <Label>Product Placement</Label>
+          <RadioGroup 
+            value={product.placement} 
+            onValueChange={(value) => handlePlacementChange(value as 'best_selling' | 'deals' | 'regular')}
+            className="flex flex-col space-y-2 mt-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="regular" id="placement-regular" />
+              <Label htmlFor="placement-regular">Regular Product</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="best_selling" id="placement-best-selling" />
+              <Label htmlFor="placement-best-selling">Add to "Best Selling Items" section</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="deals" id="placement-deals" />
+              <Label htmlFor="placement-deals">Add to "Discounts & Deals" section</Label>
+            </div>
+          </RadioGroup>
         </div>
         
         <div className="space-y-4">

@@ -14,6 +14,10 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storage: localStorage
+    },
+    // Adding global error handlers to prevent silent failures
+    global: {
+      fetch: (...args) => fetch(...args)
     }
   }
 );

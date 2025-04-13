@@ -47,26 +47,50 @@ const Checkout = () => {
     }
     
     try {
+      // Prevent multiple submissions
+      if (isLoading) return;
+      
       setIsLoading(true);
+      
+      // Save customer info first
       setCustomerInfo(formData);
       
-      // Place order and wait for the result
-      const orderResult = await placeOrder();
+      console.log('Placing order with customer info:', formData);
+      console.log('Cart contents:', cart);
+      
+      // Place order with proper error handling and timeout
+      const orderResult = await Promise.race([
+        placeOrder(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Order request timed out')), 15000)
+        )
+      ]);
+      
+      console.log('Order result:', orderResult);
       
       if (orderResult && orderResult.id) {
+        // Order successfully placed
         navigate('/confirmation', { 
           state: { 
             orderId: orderResult.id, 
             orderTotal: orderResult.total 
           } 
         });
+        toast.success(t('orderPlaced'));
       } else {
-        throw new Error('Failed to place order');
+        // This shouldn't happen if the API is working correctly
+        throw new Error('Failed to place order: empty response');
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      toast.error(t('orderFailed'));
-    } finally {
+      
+      // More specific error message based on the type of error
+      const errorMessage = error instanceof Error 
+        ? `${t('orderFailed')}: ${error.message}` 
+        : t('orderFailed');
+        
+      toast.error(errorMessage);
+      
       setIsLoading(false);
     }
   };

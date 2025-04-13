@@ -12,6 +12,7 @@ export interface Product {
   sku: string;
   featured?: boolean;
   onSale?: boolean;
+  placement?: 'best_selling' | 'deals' | 'regular';
 }
 
 export interface CartItem {

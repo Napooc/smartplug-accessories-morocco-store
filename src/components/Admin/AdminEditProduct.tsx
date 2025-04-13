@@ -18,6 +18,7 @@ import {
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
 import { Product } from '@/lib/types';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface AdminEditProductProps {
   product: Product;
@@ -78,6 +79,13 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     if (errors.category) {
       setErrors(prev => ({ ...prev, category: '' }));
     }
+  };
+
+  const handlePlacementChange = (value: 'best_selling' | 'deals' | 'regular') => {
+    setProductData(prev => ({
+      ...prev,
+      placement: value
+    }));
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -294,6 +302,28 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             />
             <Label htmlFor="onSale">On Sale</Label>
           </div>
+        </div>
+
+        <div className="space-y-2 border-t pt-4">
+          <Label>Product Placement</Label>
+          <RadioGroup 
+            value={productData.placement || 'regular'} 
+            onValueChange={(value) => handlePlacementChange(value as 'best_selling' | 'deals' | 'regular')}
+            className="flex flex-col space-y-2 mt-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="regular" id="edit-placement-regular" />
+              <Label htmlFor="edit-placement-regular">Regular Product</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="best_selling" id="edit-placement-best-selling" />
+              <Label htmlFor="edit-placement-best-selling">Add to "Best Selling Items" section</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="deals" id="edit-placement-deals" />
+              <Label htmlFor="edit-placement-deals">Add to "Discounts & Deals" section</Label>
+            </div>
+          </RadioGroup>
         </div>
         
         <div className="space-y-4">
