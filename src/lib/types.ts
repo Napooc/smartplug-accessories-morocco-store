@@ -1,4 +1,3 @@
-
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -56,4 +55,13 @@ export interface Category {
 export interface City {
   id: string;
   name: string;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  date: string;
 }
