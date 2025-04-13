@@ -1,15 +1,16 @@
 
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle, Home } from 'lucide-react';
+import { CheckCircle, Home, ShoppingBag } from 'lucide-react';
 import Layout from '@/components/Layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/languageContext';
+import { useStore } from '@/lib/store';
 
 const OrderConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { orderId } = location.state || {};
+  const { orderId, orderTotal, orderDate } = location.state || {};
   const { t, direction } = useLanguage();
   
   useEffect(() => {
@@ -43,8 +44,14 @@ const OrderConfirmation = () => {
             <p className="text-sm text-gray-600 mb-2">
               {t('orderReceived')}
             </p>
+            <p className="text-sm text-gray-600 mb-2">
+              {t('total')}: <span className="font-medium">{orderTotal?.toFixed(2)} DH</span>
+            </p>
+            <p className="text-sm text-gray-600 mb-2">
+              {t('date')}: <span className="font-medium">{orderDate || new Date().toISOString().split('T')[0]}</span>
+            </p>
             <p className="text-sm text-gray-600">
-              {t('paymentMethod')} <span className="font-medium">{t('cashOnDelivery')}</span>
+              {t('paymentMethod')}: <span className="font-medium">{t('cashOnDelivery')}</span>
             </p>
           </div>
           
@@ -60,7 +67,8 @@ const OrderConfirmation = () => {
             </Link>
             
             <Link to="/shop">
-              <Button className="bg-smartplug-blue hover:bg-smartplug-lightblue">
+              <Button className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center gap-2">
+                <ShoppingBag size={18} />
                 {t('continueShopping')}
               </Button>
             </Link>

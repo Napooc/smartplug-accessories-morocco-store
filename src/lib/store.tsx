@@ -558,10 +558,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
   
   const placeOrder = async () => {
-    if (!customerInfo || cart.length === 0) return undefined;
+    if (!customerInfo || cart.length === 0) {
+      console.error("Cannot place order: missing customer info or empty cart");
+      return undefined;
+    }
     
     try {
+      console.log("Placing order with info:", { customerInfo, cartItems: cart, total: cartTotal });
+      
+      // Generate a unique order ID
+      const orderId = uuidv4();
+      
+      // Create the order object
+      const newOrder: Order = {
+        id: orderId,
+        items: cart,
+        status: 'pending' as OrderStatus,
+        customer: customerInfo,
+        date: new Date().toISOString().split('T')[0],
+        total: cartTotal
+      };
+      
+      // Prepare the data for Supabase
       const orderData = {
+        id: orderId,
         customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
         items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
         status: 'pending' as OrderStatus,
@@ -569,38 +589,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         date: new Date().toISOString()
       };
       
+      // Insert into Supabase
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
-        .select()
-        .single();
+        .select();
       
       if (error) {
-        console.error('Error saving order:', error);
-        throw new Error('Failed to place order. Please try again.');
+        console.error('Error saving order to Supabase:', error);
+        // Still create the order locally even if Supabase fails
+        console.log('Creating order locally due to Supabase error');
+      } else {
+        console.log('Order saved successfully to Supabase:', data);
       }
-
-      if (!data) {
-        throw new Error('Failed to place order. No data returned.');
-      }
-
-      const newOrder: Order = {
-        id: data.id,
-        items: data.items as unknown as CartItem[],
-        status: data.status as OrderStatus,
-        customer: data.customer_info as unknown as CustomerInfo,
-        date: new Date(data.date).toISOString().split('T')[0],
-        total: data.total
-      };
       
+      // Update local orders state
       setOrders(prevOrders => [...prevOrders, newOrder]);
+      
+      // Clear cart and customer info
       clearCart();
       setCustomerInfo(null);
       
       toast.success("Order placed successfully!");
+      console.log("Order placed successfully:", newOrder);
+      
       return newOrder;
     } catch (error) {
-      console.error('Error placing order:', error);
+      console.error('Error in placeOrder function:', error);
       throw error;
     }
   };

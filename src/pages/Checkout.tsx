@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cities } from '@/lib/data';
 import { toast } from 'sonner';
-import { CustomerInfo, Order } from '@/lib/types';
+import { CustomerInfo } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
 import { Truck, Clock, RotateCcw, ShieldCheck } from 'lucide-react';
 
@@ -56,32 +56,29 @@ const Checkout = () => {
       if (isLoading) return;
       
       setIsLoading(true);
+      console.log('Starting order placement process...');
       
+      // Set customer info
       setCustomerInfo(formData);
+      console.log('Customer info set:', formData);
       
-      console.log('Placing order with customer info:', formData);
-      console.log('Cart contents:', cart);
-      
-      const orderResult = await Promise.race([
-        placeOrder(),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Order request timed out')), 15000)
-        )
-      ]);
-      
+      // Place the order
+      const orderResult = await placeOrder();
       console.log('Order result:', orderResult);
       
-      if (orderResult && typeof orderResult === 'object' && 'id' in orderResult) {
-        navigate('/confirmation', { 
-          state: { 
-            orderId: orderResult.id, 
-            orderTotal: orderResult.total 
-          } 
-        });
-        toast.success(t('orderPlaced'));
-      } else {
+      if (!orderResult) {
         throw new Error('Failed to place order: empty response');
       }
+      
+      // Navigate to confirmation page
+      navigate('/confirmation', { 
+        state: { 
+          orderId: orderResult.id, 
+          orderTotal: orderResult.total,
+          orderDate: orderResult.date
+        } 
+      });
+      
     } catch (error) {
       console.error('Error during checkout:', error);
       
@@ -90,7 +87,7 @@ const Checkout = () => {
         : t('orderFailed');
         
       toast.error(errorMessage);
-      
+    } finally {
       setIsLoading(false);
     }
   };
@@ -190,7 +187,7 @@ const Checkout = () => {
                   <div className="pt-4">
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue" 
                       disabled={isLoading}
                     >
                       {isLoading ? t('processing') : t('placeOrder')}
@@ -280,8 +277,7 @@ const Checkout = () => {
               
               <div className="mt-4 pt-4 border-t">
                 <Button 
-                  type="submit" 
-                  className="w-full" 
+                  className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue" 
                   disabled={isLoading}
                   onClick={handleSubmit}
                 >
