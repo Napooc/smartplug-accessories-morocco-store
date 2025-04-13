@@ -19,9 +19,12 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     console.log("Order data from location state:", orderData);
+    
     // If no order details are present, redirect to home after showing a message
     if (!orderId) {
+      console.error("No order ID found in location state");
       toast.error(t('noOrderFound', { default: 'No order details found' }));
+      
       // Short delay to allow the toast to be seen
       const timer = setTimeout(() => {
         navigate('/');
@@ -49,7 +52,7 @@ const OrderConfirmation = () => {
     return null;
   }
   
-  // Format the order date
+  // Format the order date with fallback
   const formattedDate = orderDate || new Date().toISOString().split('T')[0];
   
   return (

@@ -33,7 +33,7 @@ interface StoreContextType {
   // Checkout
   customerInfo: CustomerInfo | null;
   setCustomerInfo: (info: CustomerInfo) => void;
-  placeOrder: () => Promise<Order | undefined>;
+  placeOrder: (customerData: CustomerInfo) => Promise<Order | undefined>;
   
   // Orders
   orders: Order[];
@@ -560,18 +560,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   /**
    * Places an order with the given customer information and cart items
    */
-  const placeOrder = async (): Promise<Order | undefined> => {
+  const placeOrder = async (customerData: CustomerInfo): Promise<Order | undefined> => {
     try {
-      // This validation ensures we only proceed if customer info has been properly set
-      if (!customerInfo) {
-        console.error("Cannot place order: missing customer info");
-        console.log("Current customerInfo state:", customerInfo);
-        throw new Error("Customer information is required");
-      }
-      
-      // Extra validation to ensure all required customer fields are present
-      if (!customerInfo.name || !customerInfo.phone || !customerInfo.city) {
-        console.error("Customer information is incomplete:", customerInfo);
+      // Validate customer data
+      if (!customerData || !customerData.name || !customerData.phone || !customerData.city) {
+        console.error("Cannot place order: missing customer info", customerData);
         throw new Error("Complete customer information is required");
       }
       
@@ -580,9 +573,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw new Error("Your cart is empty");
       }
       
-      console.log("Placing order with customer info:", customerInfo);
+      console.log("Placing order with customer info:", customerData);
       console.log("Cart items to be ordered:", cart);
       console.log("Order total:", cartTotal);
+      
+      // Set customer info to state for record-keeping
+      setCustomerInfo(customerData);
       
       // Generate a unique order ID
       const orderId = uuidv4();
@@ -592,7 +588,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         id: orderId,
         items: [...cart],
         status: 'pending' as OrderStatus,
-        customer: { ...customerInfo },
+        customer: { ...customerData },
         date: new Date().toISOString().split('T')[0],
         total: cartTotal
       };
@@ -601,7 +597,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       // Convert CustomerInfo and CartItem[] to plain JSON objects for database storage
       // This prevents type issues with Supabase's JSON column
-      const customerInfoJson = JSON.parse(JSON.stringify(customerInfo));
+      const customerInfoJson = JSON.parse(JSON.stringify(customerData));
       const cartItemsJson = JSON.parse(JSON.stringify(cart));
       
       // Prepare the data object for Supabase

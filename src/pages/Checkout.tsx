@@ -13,15 +13,37 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal } = useStore();
   const { t, direction } = useLanguage();
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Empty cart redirect
+  // Verify cart is not empty and redirect if it is
   useEffect(() => {
-    if (cart.length === 0) {
-      toast.error(t('emptyCart', { default: 'Your cart is empty' }));
-      navigate('/shop');
-    }
+    const checkCart = () => {
+      setIsLoading(false);
+      if (cart.length === 0) {
+        toast.error(t('emptyCart', { default: 'Your cart is empty' }));
+        navigate('/shop');
+        return false;
+      }
+      return true;
+    };
+    
+    // Short timeout to ensure store is loaded
+    const timer = setTimeout(checkCart, 300);
+    return () => clearTimeout(timer);
   }, [cart, navigate, t]);
   
+  // Show loading state while checking cart
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-smartplug-blue"></div>
+        </div>
+      </Layout>
+    );
+  }
+  
+  // Show empty cart message if cart is empty
   if (cart.length === 0) {
     return (
       <Layout>
@@ -43,7 +65,7 @@ const Checkout = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
-            {/* New CheckoutForm component */}
+            {/* Checkout form */}
             <CheckoutForm />
             
             <div className="mt-6 bg-gray-50 p-6 rounded-lg border">

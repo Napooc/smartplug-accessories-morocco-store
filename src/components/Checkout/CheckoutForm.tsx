@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,46 +13,58 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { cities } from '@/lib/data';
+import { CustomerInfo } from '@/lib/types';
 
 const CheckoutForm = () => {
   const { t, direction } = useLanguage();
   const navigate = useNavigate();
   const { processOrder, isProcessing } = useCheckout();
+  const [submitError, setSubmitError] = useState<string | null>(null);
   
-  // Create a schema for form validation
+  // Create a more strict schema for form validation
   const formSchema = z.object({
-    name: z.string().min(2, { message: t('nameRequired', { default: 'Name is required' }) }),
-    phone: z.string().min(8, { message: t('phoneRequired', { default: 'Valid phone number is required' }) }),
+    name: z.string().min(2, { message: t('nameRequired', { default: 'Name is required (min 2 characters)' }) }),
+    phone: z.string().min(8, { message: t('phoneRequired', { default: 'Valid phone number is required (min 8 digits)' }) }),
     city: z.string().min(1, { message: t('cityRequired', { default: 'City is required' }) }),
   });
   
-  // Initialize the form with react-hook-form
+  // Initialize the form with react-hook-form and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       phone: '',
       city: 'Casablanca'
-    }
+    },
+    mode: 'onChange' // Validate on change for better UX
   });
   
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setSubmitError(null);
       console.log('Form submitted with values:', values);
       
-      const result = await processOrder({
-        name: values.name,
-        phone: values.phone,
+      // Create a complete customer information object
+      const customerInfo: CustomerInfo = {
+        name: values.name.trim(),
+        phone: values.phone.trim(),
         city: values.city,
         country: 'Morocco',
-        // Split name into first and last name
+        // Extract first and last name
         firstName: values.name.split(' ')[0] || '',
         lastName: values.name.split(' ').slice(1).join(' ') || '',
-        // Default values to prevent null/undefined issues
+        // Default values
         email: 'customer@example.com',
         address: `${values.city}, Morocco`,
         postalCode: '00000'
-      });
+      };
+      
+      console.log('Prepared customer info:', customerInfo);
+      
+      // Process the order
+      const result = await processOrder(customerInfo);
+      
+      console.log('Order processing result:', result);
       
       if (result.success) {
         toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
@@ -64,11 +76,15 @@ const CheckoutForm = () => {
           } 
         });
       } else {
+        console.error('Order failed:', result.error);
+        setSubmitError(result.error || t('orderFailed', { default: 'Failed to place order' }));
         toast.error(result.error || t('orderFailed', { default: 'Failed to place order' }));
       }
     } catch (error) {
       console.error('Error processing order:', error);
-      toast.error(t('orderFailed', { default: 'Failed to place order' }));
+      const errorMessage = error instanceof Error ? error.message : 'Failed to place order';
+      setSubmitError(errorMessage);
+      toast.error(t('orderFailed', { default: errorMessage }));
     }
   };
   
@@ -134,11 +150,17 @@ const CheckoutForm = () => {
             )}
           />
           
+          {submitError && (
+            <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm">
+              {submitError}
+            </div>
+          )}
+          
           <div className="pt-4">
             <Button 
               type="submit" 
               className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center justify-center gap-2" 
-              disabled={isProcessing}
+              disabled={isProcessing || !form.formState.isValid}
             >
               {isProcessing ? (
                 <>
