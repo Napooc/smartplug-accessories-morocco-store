@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Share2, Check } from 'lucide-react';
@@ -52,6 +51,11 @@ const ProductDetail = () => {
     addToCart(product, quantity);
   };
   
+  // Get product image - use the first image if available or find a suitable placeholder
+  let productImage = product.images && product.images.length > 0 
+    ? product.images[0] 
+    : `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80`;
+  
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -73,10 +77,11 @@ const ProductDetail = () => {
           {/* Product image */}
           <div className="bg-white rounded-lg p-4 border">
             <img 
-              src={product.images[0]} 
+              src={productImage} 
               alt={product.name} 
               className="w-full h-auto object-contain"
               style={{ maxHeight: '400px' }}
+              loading="eager"
             />
           </div>
           

@@ -13,9 +13,8 @@ interface ProductCardProps {
 // Helper to get a unique product image based on product name/id
 const getUniqueProductImage = (productId: string, productName: string): string => {
   // If the product already has real images, use the first one
-  if (productId.startsWith('prod-') && !productId.includes('1')) {
-    // These are newly added products with real images
-    return ''; // Will use the product's actual image
+  if (product => product.images && product.images.length > 0) {
+    return product.images[0];
   }
   
   // For demo products, generate unique images based on name
@@ -88,8 +87,18 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useStore();
   const { t, direction } = useLanguage();
   
-  // Get product image - either use the custom one or the first from the product
-  const productImage = getUniqueProductImage(product.id, product.name) || product.images[0];
+  // Get product image - use default image or match based on name
+  let productImage = "";
+  
+  // First check if the product has actual images
+  if (product.images && product.images.length > 0) {
+    productImage = product.images[0];
+  } 
+  
+  // If no actual images, use the unique image generator
+  if (!productImage) {
+    productImage = getUniqueProductImage(product.id, product.name);
+  }
   
   // Function to get translated product name and description
   // For a real app, we would have translation keys for each product
@@ -114,6 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           src={productImage} 
           alt={getTranslatedProductData('name')}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          loading="eager"
         />
       </Link>
       
