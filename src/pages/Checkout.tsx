@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -14,7 +13,7 @@ import { Truck, Clock, RotateCcw, ShieldCheck } from 'lucide-react';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, cartTotal, setCustomerInfo, placeOrder } = useStore();
+  const { cart, cartTotal, setCustomerInfo, placeOrder, clearCart } = useStore();
   const { t, language, direction } = useLanguage();
   
   const [formData, setFormData] = useState<CustomerInfo>({
@@ -70,9 +69,12 @@ const Checkout = () => {
       const orderResult = await placeOrder();
       console.log('Order result:', orderResult);
       
-      if (!orderResult) {
+      if (!orderResult || !orderResult.id) {
         throw new Error('Order creation failed');
       }
+      
+      // Clear cart only after successful order placement
+      clearCart();
       
       // Navigate to confirmation page with order details
       navigate('/confirmation', { 
@@ -82,6 +84,8 @@ const Checkout = () => {
           orderDate: orderResult.date
         } 
       });
+      
+      toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
     } catch (error) {
       console.error('Error during checkout:', error);
       
