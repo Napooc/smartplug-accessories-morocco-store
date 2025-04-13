@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -31,7 +30,7 @@ interface StoreContextType {
   // Checkout
   customerInfo: CustomerInfo | null;
   setCustomerInfo: (info: CustomerInfo) => void;
-  placeOrder: () => Promise<Order | undefined>;
+  placeOrder: () => Promise<Order>;
   
   // Orders
   orders: Order[];
@@ -68,9 +67,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Initialize store data on component mount
   useEffect(() => {
-    // Restore cart from localStorage
     const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
     if (savedCart) {
       try {
@@ -80,13 +77,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Check admin status
     const adminLoggedIn = localStorage.getItem(STORAGE_KEYS.ADMIN);
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
 
-    // Fetch data from sources
     Promise.all([
       fetchProducts(),
       fetchOrders(),
@@ -96,19 +91,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, []);
   
-  // Sync cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
   }, [cart]);
-
-  /**
-   * Fetches products from Supabase and handles fallback to localStorage if needed
-   */
+  
   const fetchProducts = async () => {
     try {
       console.log('Fetching products from Supabase...');
       
-      // First try to get products from localStorage for immediate display
       const localProductsJson = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       let localProducts: Product[] = [];
       
@@ -122,7 +112,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
       }
       
-      // Then try to fetch from Supabase for fresh data
       const { data, error } = await supabase
         .from('products')
         .select('*');
@@ -131,7 +120,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error('Error fetching products from Supabase:', error);
         toast.error("Error loading products from database");
         
-        // If we haven't loaded from localStorage yet, use as fallback
         if (localProducts.length === 0 && localProductsJson) {
           try {
             const parsedProducts = JSON.parse(localProductsJson);
@@ -142,7 +130,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
         }
         
-        // Last resort: use initial sample data
         if (localProducts.length === 0) {
           const productsWithUUIDs = initialProducts.map(product => ({
             ...product,
@@ -175,17 +162,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           
           setProducts(formattedProducts);
           
-          // Save to localStorage for offline access
           localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(formattedProducts));
         } else {
-          // No products in DB, initialize with sample data
           console.log('No products found in DB, initializing with sample data');
           
           if (localProducts.length > 0) {
-            // Use already loaded localStorage products
             await syncLocalProductsToSupabase(localProducts);
           } else {
-            // Generate UUIDs for initial products
             const productsWithUUIDs = initialProducts.map(product => ({
               ...product,
               id: uuidv4()
@@ -194,7 +177,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             setProducts(productsWithUUIDs);
             localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
             
-            // Save initial products to database
             await syncLocalProductsToSupabase(productsWithUUIDs);
           }
         }
@@ -203,7 +185,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error('Error in fetchProducts:', error);
       toast.error("Error loading products");
       
-      // Try to get products from localStorage as a fallback
       const localProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (localProducts) {
         try {
@@ -212,7 +193,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         } catch (parseError) {
           console.error('Error parsing local products:', parseError);
           
-          // Use initial products as last resort
           const productsWithUUIDs = initialProducts.map(product => ({
             ...product,
             id: uuidv4()
@@ -222,7 +202,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
         }
       } else {
-        // Initialize with sample data if nothing else works
         const productsWithUUIDs = initialProducts.map(product => ({
           ...product,
           id: uuidv4()
@@ -234,9 +213,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  /**
-   * Syncs local products to Supabase database
-   */
   const syncLocalProductsToSupabase = async (localProducts: Product[]) => {
     try {
       for (const product of localProducts) {
@@ -296,9 +272,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
   
-  // Computed properties
   const featuredProducts = products.filter(product => product.featured);
-  const saleProducts = products.filter(product => product.onSale);
+  const saleProducts = products.filter(product => product.onSale || product.category === 'discounts-deals');
   
   const cartTotal = cart.reduce(
     (total, item) => total + item.product.price * item.quantity, 
@@ -325,9 +300,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
-  /**
-   * Adds a new product to the store and syncs to all storage
-   */
   const addProduct = async (product: Omit<Product, 'id'>) => {
     try {
       const newProductId = uuidv4();
@@ -349,12 +321,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Adding new product:', newProduct);
       
-      // Update local state and localStorage first for immediate feedback
       const updatedProducts = [...products, newProduct];
       setProducts(updatedProducts);
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
-      // Then, update the database
       const { error } = await supabase
         .from('products')
         .insert({
@@ -385,15 +355,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  /**
-   * Updates an existing product and syncs changes to all storage
-   */
   const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
     try {
       console.log("Updating product with ID:", id);
       console.log("Update data:", productUpdate);
       
-      // First, update local state and localStorage
       const updatedProducts = products.map(product => 
         product.id === id ? { ...product, ...productUpdate } : product
       );
@@ -401,7 +367,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setProducts(updatedProducts);
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
-      // Then, update the database with proper field mapping
       const dbUpdate: Record<string, any> = {
         name: productUpdate.name,
         description: productUpdate.description,
@@ -416,7 +381,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         sku: productUpdate.sku
       };
       
-      // Remove undefined fields
       Object.keys(dbUpdate).forEach(key => {
         if (dbUpdate[key] === undefined) {
           delete dbUpdate[key];
@@ -446,19 +410,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  /**
-   * Deletes a product and syncs changes to all storage
-   */
   const deleteProduct = async (id: string) => {
     try {
       console.log("Deleting product with ID:", id);
       
-      // Update local state and localStorage first for immediate feedback
       const updatedProducts = products.filter(product => product.id !== id);
       setProducts(updatedProducts);
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
-      // Then, delete from the database
       const { error } = await supabase
         .from('products')
         .delete()
@@ -478,7 +437,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  // Cart operations
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.product.id === product.id);
@@ -518,7 +476,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
-  // Order operations
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -548,33 +505,40 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const placeOrder = async () => {
-    if (!customerInfo || cart.length === 0) return undefined;
+  const placeOrder = async (): Promise<Order> => {
+    if (!customerInfo || cart.length === 0) {
+      throw new Error('Missing required customer information or cart is empty');
+    }
+    
+    console.log('Starting order placement process');
+    
+    const orderData = {
+      customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
+      items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
+      status: 'pending' as OrderStatus,
+      total: cartTotal,
+      date: new Date().toISOString()
+    };
     
     try {
-      const orderData = {
-        customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
-        items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
-        status: 'pending' as OrderStatus,
-        total: cartTotal,
-        date: new Date().toISOString()
-      };
-      
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
-        .select()
+        .select('*')
         .single();
       
       if (error) {
-        console.error('Error saving order:', error);
-        throw new Error('Failed to place order. Please try again.');
+        console.error('Database error when placing order:', error);
+        throw new Error(`Failed to save order: ${error.message}`);
       }
-
+      
       if (!data) {
-        throw new Error('Failed to place order. No data returned.');
+        console.error('No data returned from order insertion');
+        throw new Error('Order was not created. Please try again.');
       }
-
+      
+      console.log('Order successfully saved to database:', data);
+      
       const newOrder: Order = {
         id: data.id,
         items: data.items as unknown as CartItem[],
@@ -584,14 +548,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         total: data.total
       };
       
-      setOrders(prevOrders => [...prevOrders, newOrder]);
+      setOrders(prevOrders => [newOrder, ...prevOrders]);
+      
       clearCart();
       setCustomerInfo(null);
       
-      toast.success("Order placed successfully!");
+      console.log('Order process completed successfully');
       return newOrder;
     } catch (error) {
-      console.error('Error placing order:', error);
+      console.error('Error during placeOrder:', error);
       throw error;
     }
   };
@@ -624,7 +589,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  // Contact message operations
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<void> => {
     try {
       console.log("Adding contact message:", message);
@@ -695,7 +659,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  // Admin operations
   const login = (username: string, password: string) => {
     if (username === 'admin' && password === 'admin123') {
       setIsAdmin(true);
@@ -710,7 +673,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEYS.ADMIN);
   };
   
-  // Create store context value
   const value: StoreContextType = {
     products,
     featuredProducts,
