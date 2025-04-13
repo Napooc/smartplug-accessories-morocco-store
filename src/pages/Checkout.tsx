@@ -69,9 +69,9 @@ const Checkout = () => {
         // Fill required fields with defaults to avoid null errors
         firstName: values.name.split(' ')[0] || '',
         lastName: values.name.split(' ').slice(1).join(' ') || '',
-        email: '',
-        address: '',
-        postalCode: ''
+        email: 'customer@example.com', // Default email to prevent null values
+        address: `${values.city}, Morocco`, // Default address using city
+        postalCode: '00000' // Default postal code
       };
       
       console.log('Setting customer info:', customerInfo);
@@ -79,34 +79,45 @@ const Checkout = () => {
       // Set customer info in the store
       setCustomerInfo(customerInfo);
       
-      // Place the order
-      const orderResult = await placeOrder();
-      console.log('Order result:', orderResult);
-      
-      if (!orderResult || !orderResult.id) {
-        throw new Error('Order creation failed');
-      }
-      
-      // Clear cart after successful order placement
-      clearCart();
-      
-      // Navigate to confirmation page with order details
-      navigate('/confirmation', { 
-        state: { 
-          orderId: orderResult.id, 
-          orderTotal: orderResult.total,
-          orderDate: orderResult.date
-        } 
-      });
-      
-      toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
+      // Delay order placement slightly to ensure customer info is set
+      setTimeout(async () => {
+        try {
+          // Place the order
+          const orderResult = await placeOrder();
+          console.log('Order result:', orderResult);
+          
+          if (!orderResult || !orderResult.id) {
+            throw new Error('Order creation failed');
+          }
+          
+          // Clear cart after successful order placement
+          clearCart();
+          
+          // Navigate to confirmation page with order details
+          navigate('/confirmation', { 
+            state: { 
+              orderId: orderResult.id, 
+              orderTotal: orderResult.total,
+              orderDate: orderResult.date
+            } 
+          });
+          
+          toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
+        } catch (error) {
+          console.error('Error during checkout (delayed):', error);
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : t('orderFailed', { default: 'Failed to place order' });
+          toast.error(errorMessage);
+          setIsLoading(false);
+        }
+      }, 300);
     } catch (error) {
       console.error('Error during checkout:', error);
       const errorMessage = error instanceof Error 
         ? error.message 
         : t('orderFailed', { default: 'Failed to place order' });
       toast.error(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };

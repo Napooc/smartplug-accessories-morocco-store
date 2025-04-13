@@ -561,6 +561,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       if (!customerInfo) {
         console.error("Cannot place order: missing customer info");
+        console.log("Current customerInfo state:", customerInfo);
         throw new Error("Customer information is required");
       }
       
@@ -570,6 +571,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       console.log("Placing order with info:", { customerInfo, cartItems: cart, total: cartTotal });
+      
+      // Validate all required customer fields are present
+      if (!customerInfo.name || !customerInfo.phone || !customerInfo.city) {
+        console.error("Customer information is incomplete:", customerInfo);
+        throw new Error("Complete customer information is required");
+      }
       
       // Generate a unique order ID
       const orderId = uuidv4();
