@@ -11,7 +11,13 @@ import { useEffect } from "react";
 import { useLanguage } from "@/lib/languageContext";
 
 const Index = () => {
-  const { featuredProducts, fetchOrders } = useStore();
+  const { 
+    featuredProducts, 
+    bestSellingProducts, 
+    dealsProducts, 
+    fetchOrders 
+  } = useStore();
+  
   const { t, direction } = useLanguage();
   
   // Fetch orders when the component mounts
@@ -27,11 +33,30 @@ const Index = () => {
         <CategoryGrid />
         
         <div className="my-12">
-          <TopSellingProducts />
+          {bestSellingProducts.length > 0 ? (
+            <ProductGrid 
+              products={bestSellingProducts} 
+              title={t('bestSellingItems', { default: 'Best Selling Items' })} 
+            />
+          ) : (
+            <TopSellingProducts />
+          )}
         </div>
         
         <div className="my-12">
-          <ProductGrid products={featuredProducts} title={t('featured', { default: 'Featured Products' })} />
+          {dealsProducts.length > 0 && (
+            <ProductGrid 
+              products={dealsProducts} 
+              title={t('discountDeals', { default: 'Discounts & Deals' })} 
+            />
+          )}
+        </div>
+        
+        <div className="my-12">
+          <ProductGrid 
+            products={featuredProducts} 
+            title={t('featured', { default: 'Featured Products' })} 
+          />
         </div>
         
         <div className="my-12">

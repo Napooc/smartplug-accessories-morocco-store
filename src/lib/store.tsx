@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
@@ -12,8 +11,11 @@ interface StoreContextType {
   products: Product[];
   featuredProducts: Product[];
   saleProducts: Product[];
+  bestSellingProducts: Product[];
+  dealsProducts: Product[];
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
+  getProductsByPlacement: (placement: 'best_selling' | 'deals' | 'regular') => Product[];
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -299,6 +301,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Computed properties
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
+  const bestSellingProducts = products.filter(product => product.placement === 'best_selling');
+  const dealsProducts = products.filter(product => product.placement === 'deals');
   
   const cartTotal = cart.reduce(
     (total, item) => total + item.product.price * item.quantity, 
@@ -311,6 +315,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const getProductsByCategory = (category: string) => {
     return products.filter(product => product.category === category);
+  };
+  
+  const getProductsByPlacement = (placement: 'best_selling' | 'deals' | 'regular') => {
+    return products.filter(product => product.placement === placement);
   };
   
   const searchProducts = (query: string) => {
@@ -715,8 +723,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     products,
     featuredProducts,
     saleProducts,
+    bestSellingProducts,
+    dealsProducts,
     getProductById,
     getProductsByCategory,
+    getProductsByPlacement,
     searchProducts,
     addProduct,
     updateProduct,

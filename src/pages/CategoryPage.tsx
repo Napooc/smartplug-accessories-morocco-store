@@ -13,7 +13,8 @@ import {
   PaintBucket,
   Bath,
   Thermometer,
-  ArrowLeft
+  ArrowLeft,
+  Percent
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/languageContext';
@@ -27,16 +28,27 @@ const categoryIcons: Record<string, JSX.Element> = {
   'garden-terrace': <Flower className="h-6 w-6" />,
   'paint-hardware': <PaintBucket className="h-6 w-6" />,
   'bathroom-toilet': <Bath className="h-6 w-6" />,
-  'heating-ac': <Thermometer className="h-6 w-6" />
+  'heating-ac': <Thermometer className="h-6 w-6" />,
+  'discounts-deals': <Percent className="h-6 w-6" />
 };
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const { getProductsByCategory } = useStore();
+  const { getProductsByCategory, getProductsByPlacement, dealsProducts } = useStore();
   const { t } = useLanguage();
   
-  const category = categories.find((c) => c.id === categoryId);
-  const products = getProductsByCategory(categoryId || '');
+  // Handle special categories
+  let products = [];
+  let categoryName = '';
+  
+  if (categoryId === 'discounts-deals') {
+    products = dealsProducts;
+    categoryName = t('discountDeals', { default: 'Discounts & Deals' });
+  } else {
+    products = getProductsByCategory(categoryId || '');
+    const category = categories.find((c) => c.id === categoryId);
+    categoryName = category?.name || t('category');
+  }
   
   return (
     <Layout>
@@ -54,13 +66,13 @@ const CategoryPage = () => {
               {categoryIcons[categoryId || ''] || <Home className="h-8 w-8" />}
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 capitalize">{category?.name || t('category')}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 capitalize">{categoryName}</h1>
               <div className="flex items-center text-sm mt-2 text-gray-600">
                 <Link to="/" className="hover:text-smartplug-blue">{t('home')}</Link>
                 <span className="mx-2">/</span>
                 <Link to="/shop" className="hover:text-smartplug-blue">{t('shop')}</Link>
                 <span className="mx-2">/</span>
-                <span className="font-medium text-gray-800 capitalize">{category?.name || categoryId}</span>
+                <span className="font-medium text-gray-800 capitalize">{categoryName}</span>
               </div>
             </div>
           </div>
@@ -85,7 +97,7 @@ const CategoryPage = () => {
           <>
             <div className="mb-8">
               <p className="text-gray-600">
-                {t('showingProducts', { count: products.length, category: category?.name || t('thisCategory') })}
+                {t('showingProducts', { count: products.length, category: categoryName })}
               </p>
             </div>
             <ProductGrid products={products} />
