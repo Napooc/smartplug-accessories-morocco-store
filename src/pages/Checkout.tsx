@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -58,15 +57,12 @@ const Checkout = () => {
     try {
       setIsLoading(true);
       
-      console.log('Form values:', values);
-      
-      // Create a complete customer info object
+      // Create a complete customer info object with all required fields
       const customerInfo: CustomerInfo = {
         name: values.name,
         phone: values.phone,
         city: values.city,
         country: 'Morocco',
-        // Fill required fields with defaults to avoid null errors
         firstName: values.name.split(' ')[0] || '',
         lastName: values.name.split(' ').slice(1).join(' ') || '',
         email: 'customer@example.com', // Default email to prevent null values
@@ -74,49 +70,48 @@ const Checkout = () => {
         postalCode: '00000' // Default postal code
       };
       
-      console.log('Setting customer info:', customerInfo);
+      console.log('Setting customer info before order placement:', customerInfo);
       
-      // Set customer info in the store
+      // First set the customer info - this operation is synchronous
       setCustomerInfo(customerInfo);
       
-      // Delay order placement slightly to ensure customer info is set
-      setTimeout(async () => {
-        try {
-          // Place the order
-          const orderResult = await placeOrder();
-          console.log('Order result:', orderResult);
-          
-          if (!orderResult || !orderResult.id) {
-            throw new Error('Order creation failed');
-          }
-          
-          // Clear cart after successful order placement
-          clearCart();
-          
-          // Navigate to confirmation page with order details
-          navigate('/confirmation', { 
-            state: { 
-              orderId: orderResult.id, 
-              orderTotal: orderResult.total,
-              orderDate: orderResult.date
-            } 
-          });
-          
-          toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
-        } catch (error) {
-          console.error('Error during checkout (delayed):', error);
-          const errorMessage = error instanceof Error 
-            ? error.message 
-            : t('orderFailed', { default: 'Failed to place order' });
-          toast.error(errorMessage);
-          setIsLoading(false);
+      // NOW place the order - making sure we have all required fields already set
+      try {
+        console.log('Attempting to place order with valid customer info');
+        const orderResult = await placeOrder();
+        
+        console.log('Order result received:', orderResult);
+        
+        if (!orderResult || !orderResult.id) {
+          throw new Error('Order creation failed');
         }
-      }, 300);
+        
+        // Clear cart after successful order placement
+        clearCart();
+        
+        // Navigate to confirmation page with order details
+        navigate('/confirmation', { 
+          state: { 
+            orderId: orderResult.id, 
+            orderTotal: orderResult.total,
+            orderDate: orderResult.date
+          } 
+        });
+        
+        toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
+      } catch (error) {
+        console.error('Error during order placement:', error);
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : t('orderFailed', { default: 'Failed to place order' });
+        toast.error(errorMessage);
+        setIsLoading(false);
+      }
     } catch (error) {
-      console.error('Error during checkout:', error);
+      console.error('Error during checkout form processing:', error);
       const errorMessage = error instanceof Error 
         ? error.message 
-        : t('orderFailed', { default: 'Failed to place order' });
+        : t('orderFailed', { default: 'Failed to process checkout form' });
       toast.error(errorMessage);
       setIsLoading(false);
     }

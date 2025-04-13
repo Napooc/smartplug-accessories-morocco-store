@@ -557,12 +557,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  /**
+   * Places an order with the given customer information and cart items
+   */
   const placeOrder = async (): Promise<Order | undefined> => {
     try {
+      // This validation ensures we only proceed if customer info has been properly set
       if (!customerInfo) {
         console.error("Cannot place order: missing customer info");
         console.log("Current customerInfo state:", customerInfo);
         throw new Error("Customer information is required");
+      }
+      
+      // Extra validation to ensure all required customer fields are present
+      if (!customerInfo.name || !customerInfo.phone || !customerInfo.city) {
+        console.error("Customer information is incomplete:", customerInfo);
+        throw new Error("Complete customer information is required");
       }
       
       if (cart.length === 0) {
@@ -570,18 +580,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw new Error("Your cart is empty");
       }
       
-      console.log("Placing order with info:", { customerInfo, cartItems: cart, total: cartTotal });
-      
-      // Validate all required customer fields are present
-      if (!customerInfo.name || !customerInfo.phone || !customerInfo.city) {
-        console.error("Customer information is incomplete:", customerInfo);
-        throw new Error("Complete customer information is required");
-      }
+      console.log("Placing order with customer info:", customerInfo);
+      console.log("Cart items to be ordered:", cart);
+      console.log("Order total:", cartTotal);
       
       // Generate a unique order ID
       const orderId = uuidv4();
       
-      // Create the order object
+      // Create the order object that will be used in the app logic
       const newOrder: Order = {
         id: orderId,
         items: [...cart],
@@ -593,12 +599,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Created new order object:", newOrder);
       
-      // Convert CustomerInfo and CartItem[] to plain objects for database compatibility
-      // This fixes the TypeScript error with Json type compatibility
+      // Convert CustomerInfo and CartItem[] to plain JSON objects for database storage
+      // This ensures proper serialization and fixes TypeScript JSON type issues
       const customerInfoJson = JSON.parse(JSON.stringify(customerInfo));
       const cartItemsJson = JSON.parse(JSON.stringify(cart));
       
-      // Prepare the data for Supabase
+      // Prepare the data object for Supabase
       const orderData = {
         id: orderId,
         customer_info: customerInfoJson,
@@ -610,7 +616,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Sending order data to Supabase:", orderData);
       
-      // Insert into Supabase
+      // Insert the order into Supabase
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
@@ -632,7 +638,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // Update local orders state
       setOrders(prevOrders => [...prevOrders, newOrder]);
       
-      // Return the order object
+      // Return the complete order object
       return newOrder;
     } catch (error) {
       console.error('Error in placeOrder function:', error);
