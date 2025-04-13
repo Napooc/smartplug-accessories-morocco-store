@@ -4,11 +4,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Rating } from '@/components/Products/Rating';
-import { Loader2, MessageCircle } from 'lucide-react';
+import { Loader2, MessageCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useStore } from '@/lib/store';
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 
+// Define comment type
 interface Comment {
   id: string;
   name: string;
@@ -18,27 +29,47 @@ interface Comment {
   created_at: string;
 }
 
+// Props for the component
 interface ProductCommentsProps {
   productId: string;
 }
+
+// Form validation schema
+const commentFormSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  comment: z.string().min(5, { message: 'Comment must be at least 5 characters' }),
+  rating: z.number().min(1).max(5)
+});
+
+type CommentFormValues = z.infer<typeof commentFormSchema>;
 
 const ProductComments = ({ productId }: ProductCommentsProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [newComment, setNewComment] = useState({
-    name: '',
-    email: '',
-    comment: '',
-    rating: 5
-  });
   const { products } = useStore();
+  
+  // Initialize form with react-hook-form and zod validation
+  const form = useForm<CommentFormValues>({
+    resolver: zodResolver(commentFormSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      comment: '',
+      rating: 5
+    }
+  });
 
   useEffect(() => {
-    fetchComments();
+    if (productId) {
+      fetchComments();
+    }
   }, [productId]);
 
   const fetchComments = async () => {
+    if (!productId) return;
+    
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -61,25 +92,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setNewComment(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleRatingChange = (value: number) => {
-    setNewComment(prev => ({ ...prev, rating: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newComment.name.trim() || !newComment.email.trim() || !newComment.comment.trim()) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
+  const handleSubmit = async (values: CommentFormValues) => {
     try {
       setSubmitting(true);
       
@@ -87,23 +100,24 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       const storeProduct = products.find(p => p.id === productId);
       if (!storeProduct) {
         toast.error('Product not found. Cannot submit comment.');
-        setSubmitting(false);
         return;
       }
       
-      // Submit comment directly without additional product check
+      // Submit comment
       const { error } = await supabase
         .from('product_comments')
         .insert({
           product_id: productId,
-          name: newComment.name,
-          email: newComment.email,
-          comment: newComment.comment,
-          rating: newComment.rating
+          name: values.name,
+          email: values.email,
+          comment: values.comment,
+          rating: values.rating
         });
 
       if (error) {
         console.error('Error submitting comment:', error);
+        
+        // Handle specific error cases
         if (error.code === '23503') { // Foreign key violation
           toast.error('Cannot comment on this product - it may have been removed');
         } else if (error.code === '42501' || error.code === '401') { // Permission denied
@@ -117,7 +131,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       toast.success('Your comment has been submitted!');
       
       // Reset form
-      setNewComment({
+      form.reset({
         name: '',
         email: '',
         comment: '',
@@ -133,6 +147,27 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       setSubmitting(false);
     }
   };
+  
+  // Star rating component
+  const StarRating = ({ value, onChange }: { value: number, onChange: (value: number) => void }) => {
+    return (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            className="text-2xl focus:outline-none transition-colors duration-200"
+            onClick={() => onChange(star)}
+            aria-label={`Rate ${star} stars out of 5`}
+          >
+            <span className={star <= value ? "text-yellow-400" : "text-gray-300 hover:text-gray-400"}>
+              ★
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -142,6 +177,39 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       day: 'numeric'
     });
   };
+  
+  // Comment Item component
+  const CommentItem = ({ comment }: { comment: Comment }) => (
+    <div key={comment.id} className="bg-white rounded-lg p-4 border hover:shadow-md transition-shadow duration-200">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h5 className="font-semibold">{comment.name}</h5>
+          <div className="text-sm text-gray-500">
+            {formatDate(comment.created_at)}
+          </div>
+        </div>
+        {comment.rating && (
+          <div className="flex items-center">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span key={i} className={`text-lg ${i < comment.rating! ? "text-yellow-400" : "text-gray-300"}`}>
+                ★
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      <p className="text-gray-700 mt-2">{comment.comment}</p>
+    </div>
+  );
+
+  // Empty state component
+  const EmptyState = () => (
+    <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+      <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+      <h3 className="mt-2 text-sm font-semibold text-gray-900">No comments yet</h3>
+      <p className="mt-1 text-sm text-gray-500">Be the first to leave a comment on this product.</p>
+    </div>
+  );
 
   return (
     <div className="mt-8">
@@ -151,86 +219,92 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       </h3>
 
       {/* Comment Form */}
-      <div className="bg-white rounded-lg p-6 border mb-8">
+      <div className="bg-white rounded-lg p-6 border mb-8 shadow-sm">
         <h4 className="text-lg font-semibold mb-4">Leave a Comment</h4>
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
-                Name *
-              </label>
-              <Input
-                id="name"
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="name"
-                value={newComment.name}
-                onChange={handleInputChange}
-                required
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name *</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Your name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
-                Email *
-              </label>
-              <Input
-                id="email"
+              
+              <FormField
+                control={form.control}
                 name="email"
-                type="email"
-                value={newComment.email}
-                onChange={handleInputChange}
-                required
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email *</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" placeholder="your.email@example.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="comment" className="block text-sm font-medium mb-1">
-              Comment *
-            </label>
-            <Textarea
-              id="comment"
+            
+            <FormField
+              control={form.control}
               name="comment"
-              rows={4}
-              value={newComment.comment}
-              onChange={handleInputChange}
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Comment *</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      placeholder="Share your thoughts about this product..."
+                      rows={4}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Rating
-            </label>
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  className="text-2xl focus:outline-none"
-                  onClick={() => handleRatingChange(star)}
-                >
-                  <span className={star <= newComment.rating ? "text-yellow-400" : "text-gray-300"}>
-                    ★
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <Button 
-            type="submit" 
-            className="bg-smartplug-blue hover:bg-smartplug-lightblue"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              'Submit Comment'
-            )}
-          </Button>
-        </form>
+            
+            <FormField
+              control={form.control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rating</FormLabel>
+                  <FormControl>
+                    <StarRating 
+                      value={field.value} 
+                      onChange={(value) => field.onChange(value)} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              className="bg-smartplug-blue hover:bg-smartplug-lightblue"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Comment'
+              )}
+            </Button>
+          </form>
+        </Form>
       </div>
 
       {/* Comments List */}
@@ -245,27 +319,14 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
           <div className="flex justify-center p-6">
             <Loader2 className="h-8 w-8 animate-spin text-smartplug-blue" />
           </div>
-        ) : (
-          <div className="space-y-6">
+        ) : comments.length > 0 ? (
+          <div className="space-y-4">
             {comments.map((comment) => (
-              <div key={comment.id} className="bg-white rounded-lg p-4 border">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h5 className="font-semibold">{comment.name}</h5>
-                    <div className="text-sm text-gray-500">
-                      {formatDate(comment.created_at)}
-                    </div>
-                  </div>
-                  {comment.rating && (
-                    <div className="flex items-center">
-                      <Rating value={comment.rating} />
-                    </div>
-                  )}
-                </div>
-                <p className="text-gray-700 mt-2">{comment.comment}</p>
-              </div>
+              <CommentItem key={comment.id} comment={comment} />
             ))}
           </div>
+        ) : (
+          <EmptyState />
         )}
       </div>
     </div>
