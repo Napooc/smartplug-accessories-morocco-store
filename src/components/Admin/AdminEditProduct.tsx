@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -33,7 +32,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Re-sync product data if product prop changes
   useEffect(() => {
     console.log("Product data received in edit form:", product);
     setProductData({ ...product });
@@ -56,7 +54,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         : value
     }));
     
-    // Clear error for this field if it exists
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -75,13 +72,13 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       category: value
     }));
     
-    // Clear category error if it exists
     if (errors.category) {
       setErrors(prev => ({ ...prev, category: '' }));
     }
   };
 
   const handlePlacementChange = (value: 'best_selling' | 'deals' | 'regular') => {
+    console.log("Setting placement to:", value);
     setProductData(prev => ({
       ...prev,
       placement: value
@@ -94,7 +91,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     
     setIsUploading(true);
     
-    // Process each file
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       
@@ -103,13 +99,11 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           const base64Image = event.target.result as string;
           
           setProductData(prev => {
-            // Create a new product with updated images
             const updatedProduct = {
               ...prev,
               images: [...prev.images, base64Image]
             };
             
-            // Clear any image errors
             if (errors.images) {
               setErrors(prev => ({ ...prev, images: '' }));
             }
@@ -125,18 +119,15 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         setIsUploading(false);
       };
       
-      // Read the file as a data URL (base64)
       reader.readAsDataURL(file);
     });
     
-    // Clear the file input for future uploads
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
   
   const removeImage = (index: number) => {
-    // Don't allow removing the last image
     if (productData.images.length <= 1 && index === 0) {
       setErrors(prev => ({
         ...prev,
@@ -145,7 +136,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       return;
     }
     
-    // Remove the image at the specified index
     setProductData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
@@ -177,7 +167,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       setIsSubmitting(true);
       console.log("Submitting product update:", productData);
       
-      // Update the product
       await updateProduct(product.id, productData);
       
       toast.success("Product updated successfully");
@@ -189,6 +178,8 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
       setIsSubmitting(false);
     }
   };
+  
+  const currentPlacement = productData.placement || 'regular';
   
   return (
     <div className="space-y-6">
@@ -307,7 +298,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         <div className="space-y-2 border-t pt-4">
           <Label>Product Placement</Label>
           <RadioGroup 
-            value={productData.placement || 'regular'} 
+            value={currentPlacement} 
             onValueChange={(value) => handlePlacementChange(value as 'best_selling' | 'deals' | 'regular')}
             className="flex flex-col space-y-2 mt-2"
           >

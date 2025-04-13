@@ -11,8 +11,6 @@ interface ProductCardProps {
 
 // Helper to get a unique product image based on product name/id
 const getUniqueProductImage = (productId: string, productName: string): string => {
-  // If the product already has real images, use the first one
-  
   // For demo products, generate unique images based on name
   const nameHash = productName.toLowerCase().replace(/\s/g, '');
   

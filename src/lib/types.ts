@@ -1,33 +1,21 @@
-
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  oldPrice?: number;
-  images: string[];
-  category: string;
-  rating: number;
-  stock: number;
-  sku: string;
-  featured?: boolean;
-  onSale?: boolean;
-  placement?: 'best_selling' | 'deals' | 'regular';
-}
-
 export interface CartItem {
   product: Product;
   quantity: number;
 }
 
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-
 export interface CustomerInfo {
-  name: string;
-  nickname?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   phone: string;
+  address: string;
   city: string;
+  country: string;
+  postalCode: string;
+  orderNotes?: string;
 }
+
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface Order {
   id: string;
@@ -38,22 +26,27 @@ export interface Order {
   total: number;
 }
 
-export type Category = {
+export interface Product {
   id: string;
   name: string;
-  icon: string;
-};
-
-export type City = {
-  id: string;
-  name: string;
-};
+  description: string;
+  price: number;
+  oldPrice?: number;
+  category: string;
+  images: string[];
+  featured: boolean;
+  onSale: boolean;
+  stock: number;
+  rating: number;
+  sku: string;
+  placement?: 'best_selling' | 'deals' | 'regular';
+}
 
 export interface ContactMessage {
   id: string;
   name: string;
   email: string;
-  subject?: string;
+  subject: string;
   message: string;
   date: string;
 }

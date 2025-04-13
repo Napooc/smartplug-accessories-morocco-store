@@ -421,7 +421,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         on_sale: productUpdate.onSale,
         stock: productUpdate.stock,
         rating: productUpdate.rating,
-        sku: productUpdate.sku
+        sku: productUpdate.sku,
+        placement: productUpdate.placement // Include placement in database update
       };
       
       // Remove undefined fields

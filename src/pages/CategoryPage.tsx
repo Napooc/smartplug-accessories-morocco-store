@@ -34,7 +34,7 @@ const categoryIcons: Record<string, JSX.Element> = {
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const { getProductsByCategory, getProductsByPlacement, dealsProducts } = useStore();
+  const { getProductsByCategory, getProductsByPlacement } = useStore();
   const { t } = useLanguage();
   
   // Handle special categories
@@ -42,7 +42,8 @@ const CategoryPage = () => {
   let categoryName = '';
   
   if (categoryId === 'discounts-deals') {
-    products = dealsProducts;
+    // Get products marked with the 'deals' placement
+    products = getProductsByPlacement('deals');
     categoryName = t('discountDeals', { default: 'Discounts & Deals' });
   } else {
     products = getProductsByCategory(categoryId || '');
