@@ -584,15 +584,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         total: cartTotal
       };
       
+      console.log("Created new order object:", newOrder);
+      
       // Prepare the data for Supabase
       const orderData = {
         id: orderId,
-        customer_info: customerInfo as unknown as Database['public']['Tables']['orders']['Insert']['customer_info'],
-        items: cart as unknown as Database['public']['Tables']['orders']['Insert']['items'],
-        status: 'pending' as OrderStatus,
+        customer_info: customerInfo,
+        items: cart,
+        status: 'pending',
         total: cartTotal,
         date: new Date().toISOString()
       };
+      
+      console.log("Sending order data to Supabase:", orderData);
       
       // Insert into Supabase
       const { data, error } = await supabase
@@ -606,17 +610,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         throw new Error(`Failed to save order: ${error.message}`);
       }
       
+      if (!data) {
+        console.error('No data returned from Supabase after order insertion');
+        throw new Error('Empty response from server');
+      }
+      
       console.log('Order saved successfully to Supabase:', data);
       
       // Update local orders state
       setOrders(prevOrders => [...prevOrders, newOrder]);
       
-      // Clear cart and customer info
-      clearCart();
-      
-      toast.success("Order placed successfully!");
-      console.log("Order placed successfully:", newOrder);
-      
+      // Return the order object
       return newOrder;
     } catch (error) {
       console.error('Error in placeOrder function:', error);

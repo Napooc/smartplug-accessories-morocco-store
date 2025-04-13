@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
@@ -10,45 +11,44 @@ import { toast } from 'sonner';
 import { CustomerInfo } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
 import { Truck, Clock, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, setCustomerInfo, placeOrder, clearCart } = useStore();
-  const { t, language, direction } = useLanguage();
-  
-  const [formData, setFormData] = useState<CustomerInfo>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: 'Casablanca',
-    country: 'Morocco',
-    postalCode: '',
-    name: ''
-  });
+  const { t, direction } = useLanguage();
   
   const [isLoading, setIsLoading] = useState(false);
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // Create a schema for form validation
+  const formSchema = z.object({
+    name: z.string().min(2, { message: t('nameRequired', { default: 'Name is required' }) }),
+    phone: z.string().min(8, { message: t('phoneRequired', { default: 'Valid phone number is required' }) }),
+    city: z.string().min(1, { message: t('cityRequired', { default: 'City is required' }) }),
+  });
   
-  const handleCityChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, city: value }));
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Form validation
-    if (!formData.name?.trim() || !formData.phone?.trim()) {
-      toast.error(t('namePhoneRequired', { default: 'Name and phone are required' }));
-      return;
+  // Initialize the form with react-hook-form
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      phone: '',
+      city: 'Casablanca'
     }
-    
-    // Cart validation
+  });
+  
+  // Empty cart redirect
+  useEffect(() => {
+    if (cart.length === 0) {
+      toast.error(t('emptyCart', { default: 'Your cart is empty' }));
+      navigate('/shop');
+    }
+  }, [cart, navigate, t]);
+  
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (cart.length === 0) {
       toast.error(t('emptyCart', { default: 'Your cart is empty' }));
       navigate('/shop');
@@ -56,14 +56,28 @@ const Checkout = () => {
     }
     
     try {
-      if (isLoading) return;
       setIsLoading(true);
       
-      console.log('Starting order placement process...');
+      console.log('Form values:', values);
       
-      // Set customer info first
-      setCustomerInfo(formData);
-      console.log('Customer info set:', formData);
+      // Create a complete customer info object
+      const customerInfo: CustomerInfo = {
+        name: values.name,
+        phone: values.phone,
+        city: values.city,
+        country: 'Morocco',
+        // Fill required fields with defaults to avoid null errors
+        firstName: values.name.split(' ')[0] || '',
+        lastName: values.name.split(' ').slice(1).join(' ') || '',
+        email: '',
+        address: '',
+        postalCode: ''
+      };
+      
+      console.log('Setting customer info:', customerInfo);
+      
+      // Set customer info in the store
+      setCustomerInfo(customerInfo);
       
       // Place the order
       const orderResult = await placeOrder();
@@ -73,7 +87,7 @@ const Checkout = () => {
         throw new Error('Order creation failed');
       }
       
-      // Clear cart only after successful order placement
+      // Clear cart after successful order placement
       clearCart();
       
       // Navigate to confirmation page with order details
@@ -88,18 +102,15 @@ const Checkout = () => {
       toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
     } catch (error) {
       console.error('Error during checkout:', error);
-      
       const errorMessage = error instanceof Error 
         ? error.message 
-        : t('orderFailed', { default: 'Order failed' });
-        
+        : t('orderFailed', { default: 'Failed to place order' });
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Empty cart redirect
   if (cart.length === 0) {
     return (
       <Layout>
@@ -124,59 +135,63 @@ const Checkout = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h2 className="text-xl font-semibold mb-4">{t('shippingInfo')}</h2>
               
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1">
-                      {t('fullName')}*
-                    </label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder={t('fullName')}
-                      required
-                      className="w-full"
-                    />
-                  </div>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('fullName')}*</FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('fullName')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium mb-1">
-                      {t('phone')}*
-                    </label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder={t('phone')}
-                      required
-                      className="w-full"
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('phone')}*</FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('phone')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div>
-                    <label htmlFor="city" className="block text-sm font-medium mb-1">
-                      {t('city')}*
-                    </label>
-                    <Select 
-                      value={formData.city} 
-                      onValueChange={handleCityChange}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={`${t('city')}`} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cities.map((city) => (
-                          <SelectItem key={city.id} value={city.name}>
-                            {city.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('city')}*</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('city')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {cities.map((city) => (
+                              <SelectItem key={city.id} value={city.name}>
+                                {city.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
                   <div className="pt-4">
                     <Button 
@@ -187,8 +202,8 @@ const Checkout = () => {
                       {isLoading ? t('processing') : t('placeOrder')}
                     </Button>
                   </div>
-                </div>
-              </form>
+                </form>
+              </Form>
             </div>
             
             <div className="mt-6 bg-gray-50 p-6 rounded-lg border">
@@ -273,7 +288,7 @@ const Checkout = () => {
                 <Button 
                   className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue" 
                   disabled={isLoading}
-                  onClick={handleSubmit}
+                  onClick={form.handleSubmit(onSubmit)}
                 >
                   {isLoading ? t('processing') : t('placeOrder')}
                 </Button>

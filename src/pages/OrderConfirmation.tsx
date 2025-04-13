@@ -19,6 +19,7 @@ const OrderConfirmation = () => {
   const { orderId, orderTotal, orderDate } = orderData;
 
   useEffect(() => {
+    console.log("Order data from location state:", orderData);
     // If no order details are present, redirect to home after showing a message
     if (!orderId) {
       toast.error(t('noOrderFound', { default: 'No order details found' }));
@@ -31,7 +32,7 @@ const OrderConfirmation = () => {
     } else {
       setIsLoading(false);
     }
-  }, [orderId, navigate, t]);
+  }, [orderId, navigate, t, orderData]);
 
   // Show loading state
   if (isLoading) {
