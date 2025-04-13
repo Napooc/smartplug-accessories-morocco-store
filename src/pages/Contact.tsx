@@ -62,6 +62,7 @@ const ContactPage = () => {
     try {
       console.log("Submitting contact form with data:", data);
       
+      // Try to add the contact message to the database
       await addContactMessage({
         name: data.name.trim(),
         email: data.email.trim(),
