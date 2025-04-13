@@ -9,7 +9,8 @@ import {
   Home, 
   ShoppingBag, 
   Phone, 
-  MessageCircle
+  MessageCircle,
+  Tag
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
@@ -108,6 +109,12 @@ const Navbar = () => {
                     </Link>
                     <Link to="/categories/garden-terrace" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       {t('gardenTerrace')}
+                    </Link>
+                    <Link to="/categories/discounts-deals" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600">
+                      <span className="flex items-center">
+                        <Tag className="h-4 w-4 mr-1 text-red-500" />
+                        {t('discountsDeals', { default: 'Discounts & Deals' })}
+                      </span>
                     </Link>
                   </div>
                 </div>
@@ -251,6 +258,16 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t('gardenTerrace')}
+                  </Link>
+                  <Link 
+                    to="/categories/discounts-deals" 
+                    className="block py-2 px-3 rounded-md hover:bg-gray-100 text-red-500"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span className="flex items-center">
+                      <Tag className="h-4 w-4 mr-1" />
+                      {t('discountsDeals', { default: 'Discounts & Deals' })}
+                    </span>
                   </Link>
                 </div>
               </details>

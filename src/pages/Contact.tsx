@@ -151,8 +151,8 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">{t('addressTitle')}</h3>
-                  <p className="text-gray-600">123 Techno Avenue</p>
-                  <p className="text-gray-600">Casablanca, Morocco</p>
+                  <p className="text-gray-600">Baydi 2</p>
+                  <p className="text-gray-600">Berrechide, Morocco</p>
                 </div>
               </div>
             </div>

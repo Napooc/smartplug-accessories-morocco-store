@@ -108,7 +108,7 @@ const AboutPage = () => {
             <div>
               <h2 className="text-2xl font-bold mb-4">Visit Our Store</h2>
               <p className="text-gray-600 mb-6">
-                Experience our products in person at our flagship store in Casablanca. Our knowledgeable team is ready to help you find the perfect accessories for your device.
+                Experience our products in person at our flagship store in Berrechide. Our knowledgeable team is ready to help you find the perfect accessories for your device.
               </p>
               
               <div className="space-y-4">
@@ -116,7 +116,7 @@ const AboutPage = () => {
                   <MapPin className="h-5 w-5 text-smartplug-blue mr-3 mt-1" />
                   <div>
                     <h4 className="font-medium">Location</h4>
-                    <p className="text-gray-600">123 Techno Avenue, Casablanca, Morocco</p>
+                    <p className="text-gray-600">Baydi 2, Berrechide, Morocco</p>
                   </div>
                 </div>
                 
@@ -124,8 +124,7 @@ const AboutPage = () => {
                   <Clock className="h-5 w-5 text-smartplug-blue mr-3 mt-1" />
                   <div>
                     <h4 className="font-medium">Store Hours</h4>
-                    <p className="text-gray-600">Monday - Saturday: 10:00 AM - 8:00 PM</p>
-                    <p className="text-gray-600">Sunday: 12:00 PM - 6:00 PM</p>
+                    <p className="text-gray-600">Monday - Saturday: 08:00 AM - 6:00 PM</p>
                   </div>
                 </div>
               </div>
@@ -133,7 +132,7 @@ const AboutPage = () => {
             
             <div className="h-64 rounded-lg overflow-hidden">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106376.59211473469!2d-7.705168172265623!3d33.57240589999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda7d2e7c4b8b233%3A0x4c58f275de22807b!2sCasablanca%2C%20Morocco!5e0!3m2!1sen!2sus!4v1652186324564!5m2!1sen!2sus"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d53293.37174122122!2d-7.615080599999999!3d33.26849850000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda63da2dad8d647%3A0x892df6a8fb41e76!2sBerrechid%2C%20Morocco!5e0!3m2!1sen!2sus!4v1716489638211!5m2!1sen!2sus"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

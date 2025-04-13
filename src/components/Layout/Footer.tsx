@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Headphones, Phone, Mail } from 'lucide-react';
+import { Headphones, Phone, Mail, Facebook, Instagram, Twitter, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/lib/languageContext';
@@ -29,6 +29,12 @@ export default function Footer() {
               <Mail size={16} className="text-gray-600" />
               <span className="text-gray-600">Bouzraranwar@gmail.com</span>
             </div>
+            <div className="flex items-center space-x-2">
+              <Tag size={16} className="text-red-500" />
+              <Link to="/categories/discounts-deals" className="text-red-500 hover:text-red-600">
+                {t('discountsDeals', { default: 'Discounts & Deals' })}
+              </Link>
+            </div>
           </div>
           
           <div>
@@ -51,6 +57,11 @@ export default function Footer() {
                 <Link to="/contact" className="text-gray-600 hover:text-smartplug-blue">{t('contact')}</Link>
               </div>
             </ul>
+            <div className="mt-4">
+              <h4 className="font-medium mb-2">{t('address', { default: 'Address' })}</h4>
+              <p className="text-gray-600">Baydi 2, Berrechide, Morocco</p>
+              <p className="text-gray-600">{t('storeHours', { default: 'Store Hours' })}: Monday - Saturday: 08:00 AM - 6:00 PM</p>
+            </div>
           </div>
           
           <div>
@@ -59,6 +70,21 @@ export default function Footer() {
             <div className="flex space-x-2">
               <Input type="email" placeholder={t('enterEmail')} className="bg-gray-100" />
               <Button>{t('subscribe')}</Button>
+            </div>
+            
+            <div className="mt-6">
+              <h4 className="font-medium mb-2">{t('followUs', { default: 'Follow Us' })}</h4>
+              <div className="flex space-x-4">
+                <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                  <Facebook size={18} className="text-gray-600" />
+                </a>
+                <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                  <Instagram size={18} className="text-gray-600" />
+                </a>
+                <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                  <Twitter size={18} className="text-gray-600" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

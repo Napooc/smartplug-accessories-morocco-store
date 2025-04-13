@@ -5,6 +5,7 @@ import CategoryGrid from "@/components/Home/CategoryGrid";
 import ProductGrid from "@/components/Products/ProductGrid";
 import TopSellingProducts from "@/components/Home/TopSellingProducts";
 import InnovationShowcase from "@/components/Home/InnovationShowcase";
+import CustomerBenefits from "@/components/Home/CustomerBenefits";
 import { useStore } from "@/lib/store";
 import { useEffect } from "react";
 import { useLanguage } from "@/lib/languageContext";
@@ -35,6 +36,10 @@ const Index = () => {
         
         <div className="my-12">
           <InnovationShowcase />
+        </div>
+        
+        <div className="my-12">
+          <CustomerBenefits />
         </div>
       </div>
     </Layout>
