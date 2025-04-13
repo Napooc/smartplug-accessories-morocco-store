@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -581,6 +580,103 @@ export const translations: Translations = {
     en: 'View All',
     fr: 'Voir tout',
     ar: 'عرض الكل'
+  },
+  
+  // Discount Showcase translations
+  specialOffers: {
+    en: 'Special Offers',
+    fr: 'Offres Spéciales',
+    ar: 'عروض خاصة'
+  },
+  exclusiveDiscounts: {
+    en: 'Exclusive Discounts',
+    fr: 'Remises Exclusives',
+    ar: 'خصومات حصرية'
+  },
+  discountDesc: {
+    en: 'Limited time deals on our best products. Save up to 30% on selected items across our entire catalog.',
+    fr: 'Offres à durée limitée sur nos meilleurs produits. Économisez jusqu\'à 30% sur des articles sélectionnés dans tout notre catalogue.',
+    ar: 'صفقات لفترة محدودة على أفضل منتجاتنا. وفر حتى 30٪ على العناصر المختارة في جميع أنحاء الكتالوج بأكمله.'
+  },
+  freeShipping: {
+    en: 'Free Shipping',
+    fr: 'Livraison Gratuite',
+    ar: 'شحن مجاني'
+  },
+  freeShippingDesc: {
+    en: 'On all orders, no minimum purchase required',
+    fr: 'Sur toutes les commandes, sans minimum d\'achat requis',
+    ar: 'على جميع الطلبات، بدون حد أدنى للشراء'
+  },
+  freeShippingDetail: {
+    en: 'We offer free shipping on all orders throughout Morocco.',
+    fr: 'Nous offrons la livraison gratuite sur toutes les commandes au Maroc.',
+    ar: 'نقدم شحنًا مجانيًا على جميع الطلبات في جميع أنحاء المغرب.'
+  },
+  fastDelivery: {
+    en: 'Fast Delivery',
+    fr: 'Livraison Rapide',
+    ar: 'توصيل سريع'
+  },
+  fastDeliveryDesc: {
+    en: 'Delivery between 1-3 business days',
+    fr: 'Livraison entre 1-3 jours ouvrables',
+    ar: 'التوصيل بين 1-3 أيام عمل'
+  },
+  fastDeliveryDetail: {
+    en: 'Get your order in 1-3 business days.',
+    fr: 'Recevez votre commande en 1-3 jours ouvrables.',
+    ar: 'احصل على طلبك في غضون 1-3 أيام عمل.'
+  },
+  easyReturns: {
+    en: 'Easy Returns',
+    fr: 'Retours Faciles',
+    ar: 'إرجاع سهل'
+  },
+  easyReturnsDesc: {
+    en: 'Full refund if you\'re not satisfied with your purchase',
+    fr: 'Remboursement intégral si vous n\'êtes pas satisfait de votre achat',
+    ar: 'استرداد كامل إذا لم تكن راضيًا عن شرائك'
+  },
+  easyReturnsDetail: {
+    en: 'Not satisfied? Get a full refund within 14 days.',
+    fr: 'Pas satisfait? Obtenez un remboursement complet dans les 14 jours.',
+    ar: 'غير راض؟ احصل على استرداد كامل في غضون 14 يومًا.'
+  },
+  limitedOffers: {
+    en: 'Limited-time offers - act fast before they\'re gone!',
+    fr: 'Offres à durée limitée - agissez vite avant qu\'elles ne disparaissent!',
+    ar: 'عروض لفترة محدودة - تصرف بسرعة قبل نفادها!'
+  },
+  limitedTime: {
+    en: 'Limited Time',
+    fr: 'Temps Limité',
+    ar: 'وقت محدود'
+  },
+  shopNow: {
+    en: 'Shop Now',
+    fr: 'Acheter Maintenant',
+    ar: 'تسوق الآن'
+  },
+  secureCheckout: {
+    en: 'Secure Checkout',
+    fr: 'Paiement Sécurisé',
+    ar: 'دفع آمن'
+  },
+  secureCheckoutDetail: {
+    en: 'Your personal data is safe with our secure checkout.',
+    fr: 'Vos données personnelles sont en sécurité avec notre paiement sécurisé.',
+    ar: 'بياناتك الشخصية آمنة مع نظام الدفع الآمن لدينا.'
+  },
+  shippingAndReturns: {
+    en: 'Shipping & Returns Policy',
+    fr: 'Politique d\'Expédition et de Retour',
+    ar: 'سياسة الشحن والإرجاع'
+  },
+  deliveryTime: {
+    en: 'Delivery in 1-3 business days',
+    fr: 'Livraison en 1-3 jours ouvrables',
+    ar: 'التسليم في غضون 1-3 أيام عمل'
   }
 };
 

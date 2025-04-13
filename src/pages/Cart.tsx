@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Truck, Clock, RotateCcw } from 'lucide-react';
 import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -167,6 +167,39 @@ const Cart = () => {
                 <div className="flex items-center space-x-2">
                   <div className="p-2 border rounded">
                     {t('cashOnDelivery')}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Shipping and Return Policy Information */}
+              <div className="mt-6 space-y-4 border-t pt-4">
+                <div className="flex items-start">
+                  <Truck className="w-5 h-5 text-smartplug-blue mr-2 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-sm">{t('freeShipping', { default: 'Free Shipping' })}</h4>
+                    <p className="text-gray-500 text-xs">
+                      {t('freeShippingDesc', { default: 'On all orders, no minimum purchase required' })}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <Clock className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-sm">{t('fastDelivery', { default: 'Fast Delivery' })}</h4>
+                    <p className="text-gray-500 text-xs">
+                      {t('fastDeliveryDesc', { default: 'Delivery between 1-3 business days' })}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <RotateCcw className="w-5 h-5 text-orange-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-sm">{t('easyReturns', { default: 'Easy Returns' })}</h4>
+                    <p className="text-gray-500 text-xs">
+                      {t('easyReturnsDesc', { default: 'Full refund if you\'re not satisfied with your purchase' })}
+                    </p>
                   </div>
                 </div>
               </div>

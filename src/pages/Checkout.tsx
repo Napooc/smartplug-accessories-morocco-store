@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -10,6 +9,7 @@ import { cities } from '@/lib/data';
 import { toast } from 'sonner';
 import { CustomerInfo, Order } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
+import { Truck, Clock, RotateCcw, ShieldCheck } from 'lucide-react';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -53,18 +53,15 @@ const Checkout = () => {
     }
     
     try {
-      // Prevent multiple submissions
       if (isLoading) return;
       
       setIsLoading(true);
       
-      // Save customer info first
       setCustomerInfo(formData);
       
       console.log('Placing order with customer info:', formData);
       console.log('Cart contents:', cart);
       
-      // Place order with proper error handling and timeout
       const orderResult = await Promise.race([
         placeOrder(),
         new Promise<never>((_, reject) => 
@@ -75,7 +72,6 @@ const Checkout = () => {
       console.log('Order result:', orderResult);
       
       if (orderResult && typeof orderResult === 'object' && 'id' in orderResult) {
-        // Order successfully placed
         navigate('/confirmation', { 
           state: { 
             orderId: orderResult.id, 
@@ -84,13 +80,11 @@ const Checkout = () => {
         });
         toast.success(t('orderPlaced'));
       } else {
-        // This shouldn't happen if the API is working correctly
         throw new Error('Failed to place order: empty response');
       }
     } catch (error) {
       console.error('Error during checkout:', error);
       
-      // More specific error message based on the type of error
       const errorMessage = error instanceof Error 
         ? `${t('orderFailed')}: ${error.message}` 
         : t('orderFailed');
@@ -118,7 +112,7 @@ const Checkout = () => {
   return (
     <Layout>
       <div className="container mx-auto py-10" dir={direction}>
-        <h1 className="text-2xl font-bold mb-6">{t('cart')}</h1>
+        <h1 className="text-2xl font-bold mb-6">{t('checkout')}</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
@@ -205,6 +199,52 @@ const Checkout = () => {
                 </div>
               </form>
             </div>
+            
+            <div className="mt-6 bg-gray-50 p-6 rounded-lg border">
+              <h3 className="font-medium mb-4 text-gray-800">{t('shippingAndReturns', { default: 'Shipping & Returns Policy' })}</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-start p-3 bg-white rounded-lg border">
+                  <Truck className="w-8 h-8 text-smartplug-blue mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium">{t('freeShipping', { default: 'Free Shipping' })}</h4>
+                    <p className="text-gray-500 text-sm">
+                      {t('freeShippingDetail', { default: 'We offer free shipping on all orders throughout Morocco.' })}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start p-3 bg-white rounded-lg border">
+                  <Clock className="w-8 h-8 text-green-600 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium">{t('fastDelivery', { default: 'Fast Delivery' })}</h4>
+                    <p className="text-gray-500 text-sm">
+                      {t('fastDeliveryDetail', { default: 'Get your order in 1-3 business days.' })}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start p-3 bg-white rounded-lg border">
+                  <RotateCcw className="w-8 h-8 text-orange-500 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium">{t('easyReturns', { default: 'Easy Returns' })}</h4>
+                    <p className="text-gray-500 text-sm">
+                      {t('easyReturnsDetail', { default: 'Not satisfied? Get a full refund within 14 days.' })}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start p-3 bg-white rounded-lg border">
+                  <ShieldCheck className="w-8 h-8 text-purple-600 mr-3 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium">{t('secureCheckout', { default: 'Secure Checkout' })}</h4>
+                    <p className="text-gray-500 text-sm">
+                      {t('secureCheckoutDetail', { default: 'Your personal data is safe with our secure checkout.' })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div>
@@ -235,6 +275,18 @@ const Checkout = () => {
               <div className="mt-4 text-sm text-gray-500">
                 <p>* {t('cashOnDelivery')}</p>
                 <p>* {t('free')} {t('shipping')}</p>
+                <p>* {t('deliveryTime', { default: 'Delivery in 1-3 business days' })}</p>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t">
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                  onClick={handleSubmit}
+                >
+                  {isLoading ? t('processing') : t('placeOrder')}
+                </Button>
               </div>
             </div>
           </div>
