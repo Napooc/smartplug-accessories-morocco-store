@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cities } from '@/lib/data';
 import { toast } from 'sonner';
-import { CustomerInfo } from '@/lib/types';
+import { CustomerInfo, Order } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
 
 const Checkout = () => {
@@ -61,14 +61,14 @@ const Checkout = () => {
       // Place order with proper error handling and timeout
       const orderResult = await Promise.race([
         placeOrder(),
-        new Promise((_, reject) => 
+        new Promise<never>((_, reject) => 
           setTimeout(() => reject(new Error('Order request timed out')), 15000)
         )
       ]);
       
       console.log('Order result:', orderResult);
       
-      if (orderResult && orderResult.id) {
+      if (orderResult && typeof orderResult === 'object' && 'id' in orderResult) {
         // Order successfully placed
         navigate('/confirmation', { 
           state: { 
