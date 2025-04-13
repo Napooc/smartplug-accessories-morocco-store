@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Tag, Zap, TruckFast, RotateCcw, Clock } from 'lucide-react';
+import { Tag, Zap, Truck, RotateCcw, Clock } from 'lucide-react';
 import { useLanguage } from '@/lib/languageContext';
 
 export default function InnovationShowcase() {
@@ -24,7 +24,7 @@ export default function InnovationShowcase() {
             
             <ul className="space-y-3 mb-8 text-left max-w-md mx-auto lg:mx-0">
               <li className="flex items-start text-white/90">
-                <TruckFast className="h-5 w-5 text-white mr-2 mt-0.5 bg-white/30 rounded-full p-1 flex-shrink-0" />
+                <Truck className="h-5 w-5 text-white mr-2 mt-0.5 bg-white/30 rounded-full p-1 flex-shrink-0" />
                 <span>{t('freeShipping', { default: 'Free shipping on all orders above 300 DH' })}</span>
               </li>
               <li className="flex items-start text-white/90">
