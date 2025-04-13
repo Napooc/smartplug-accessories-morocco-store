@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Product } from '@/lib/types';
@@ -13,9 +12,6 @@ interface ProductCardProps {
 // Helper to get a unique product image based on product name/id
 const getUniqueProductImage = (productId: string, productName: string): string => {
   // If the product already has real images, use the first one
-  if (product => product.images && product.images.length > 0) {
-    return product.images[0];
-  }
   
   // For demo products, generate unique images based on name
   const nameHash = productName.toLowerCase().replace(/\s/g, '');
