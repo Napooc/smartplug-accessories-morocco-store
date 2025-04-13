@@ -44,7 +44,7 @@ const AdminOrders = () => {
       const query = searchQuery.toLowerCase();
       return (
         order.id.toLowerCase().includes(query) ||
-        order.customer.name.toLowerCase().includes(query) ||
+        (order.customer.name && order.customer.name.toLowerCase().includes(query)) ||
         order.customer.phone.includes(query)
       );
     }

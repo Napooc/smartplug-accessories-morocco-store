@@ -1,3 +1,4 @@
+
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -13,6 +14,9 @@ export interface CustomerInfo {
   country: string;
   postalCode: string;
   orderNotes?: string;
+  // Adding these fields to match the usage in the app
+  name?: string;
+  nickname?: string;
 }
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -42,11 +46,14 @@ export interface Product {
   placement?: 'best_selling' | 'deals' | 'regular';
 }
 
-export interface ContactMessage {
+// Adding the missing interfaces
+export interface Category {
   id: string;
   name: string;
-  email: string;
-  subject: string;
-  message: string;
-  date: string;
+  icon: string;
+}
+
+export interface City {
+  id: string;
+  name: string;
 }

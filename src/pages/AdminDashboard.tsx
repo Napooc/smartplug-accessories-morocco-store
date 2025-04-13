@@ -1,4 +1,3 @@
-
 import { ShoppingCart, Package, TrendingUp, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminMessages from '@/components/Admin/AdminMessages';
@@ -12,13 +11,11 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const location = useLocation();
   
-  // Fetch orders and messages on component mount
   useEffect(() => {
     fetchOrders();
     fetchContactMessages();
   }, [fetchOrders, fetchContactMessages]);
   
-  // Switch to messages tab if coming from contact page with messages
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get('tab') === 'messages') {
@@ -26,7 +23,6 @@ const AdminDashboard = () => {
     }
   }, [location]);
   
-  // Calculate statistics
   const totalOrders = orders.length;
   const totalProducts = products.length;
   const pendingOrders = orders.filter(order => order.status === 'pending').length;

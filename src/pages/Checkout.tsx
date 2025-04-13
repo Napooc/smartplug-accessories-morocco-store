@@ -17,9 +17,15 @@ const Checkout = () => {
   const { t, language, direction } = useLanguage();
   
   const [formData, setFormData] = useState<CustomerInfo>({
-    name: '',
+    firstName: '',
+    lastName: '',
+    email: '',
     phone: '',
+    address: '',
     city: 'Casablanca',
+    country: 'Morocco',
+    postalCode: '',
+    name: ''
   });
   
   const [isLoading, setIsLoading] = useState(false);

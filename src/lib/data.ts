@@ -1,4 +1,5 @@
-import { Product, Category, City, Order } from './types';
+
+import { Product, Category, City, Order, CustomerInfo } from './types';
 
 export const categories: Category[] = [
   { id: 'home-kitchen', name: 'Home & Kitchen', icon: 'home' },
@@ -36,7 +37,9 @@ export const products: Product[] = [
     category: 'home-kitchen',
     rating: 4.5,
     stock: 42,
-    sku: 'HK-BL-002'
+    sku: 'HK-BL-002',
+    featured: false,
+    onSale: false
   },
   {
     id: 'hk-003',
@@ -49,6 +52,7 @@ export const products: Product[] = [
     rating: 4.8,
     stock: 28,
     sku: 'HK-AF-003',
+    featured: false,
     onSale: true
   },
   
@@ -76,7 +80,9 @@ export const products: Product[] = [
     category: 'electronics',
     rating: 4.6,
     stock: 38,
-    sku: 'EL-BS-002'
+    sku: 'EL-BS-002',
+    featured: false,
+    onSale: false
   },
   {
     id: 'el-003',
@@ -89,6 +95,7 @@ export const products: Product[] = [
     rating: 4.7,
     stock: 32,
     sku: 'EL-SE-003',
+    featured: false,
     onSale: true
   },
   
@@ -116,7 +123,9 @@ export const products: Product[] = [
     category: 'tools-lighting',
     rating: 4.5,
     stock: 40,
-    sku: 'TL-SL-002'
+    sku: 'TL-SL-002',
+    featured: false,
+    onSale: false
   },
   {
     id: 'tl-003',
@@ -129,6 +138,7 @@ export const products: Product[] = [
     rating: 4.7,
     stock: 30,
     sku: 'TL-MT-003',
+    featured: false,
     onSale: true
   },
   
@@ -144,6 +154,7 @@ export const products: Product[] = [
     rating: 4.6,
     stock: 22,
     sku: 'PL-KF-001',
+    featured: false,
     onSale: true
   },
   {
@@ -156,7 +167,8 @@ export const products: Product[] = [
     rating: 4.8,
     stock: 35,
     sku: 'PL-WF-002',
-    featured: true
+    featured: true,
+    onSale: false
   },
   {
     id: 'pl-003',
@@ -169,6 +181,7 @@ export const products: Product[] = [
     rating: 4.5,
     stock: 50,
     sku: 'PL-SH-003',
+    featured: false,
     onSale: true
   },
   
@@ -196,7 +209,9 @@ export const products: Product[] = [
     category: 'garden-terrace',
     rating: 4.6,
     stock: 20,
-    sku: 'GT-LM-002'
+    sku: 'GT-LM-002',
+    featured: false,
+    onSale: false
   },
   {
     id: 'gt-003',
@@ -209,6 +224,7 @@ export const products: Product[] = [
     rating: 4.5,
     stock: 45,
     sku: 'GT-TS-003',
+    featured: false,
     onSale: true
   },
   
@@ -224,6 +240,7 @@ export const products: Product[] = [
     rating: 4.7,
     stock: 60,
     sku: 'PH-IP-001',
+    featured: false,
     onSale: true
   },
   {
@@ -236,7 +253,8 @@ export const products: Product[] = [
     rating: 4.8,
     stock: 40,
     sku: 'PH-HK-002',
-    featured: true
+    featured: true,
+    onSale: false
   },
   {
     id: 'ph-003',
@@ -249,6 +267,7 @@ export const products: Product[] = [
     rating: 4.6,
     stock: 55,
     sku: 'PH-PR-003',
+    featured: false,
     onSale: true
   },
   
@@ -276,7 +295,9 @@ export const products: Product[] = [
     category: 'bathroom-toilet',
     rating: 4.7,
     stock: 25,
-    sku: 'BT-WT-002'
+    sku: 'BT-WT-002',
+    featured: false,
+    onSale: false
   },
   {
     id: 'bt-003',
@@ -289,6 +310,7 @@ export const products: Product[] = [
     rating: 4.9,
     stock: 15,
     sku: 'BT-SS-003',
+    featured: false,
     onSale: true
   },
   
@@ -316,7 +338,9 @@ export const products: Product[] = [
     category: 'heating-ac',
     rating: 4.6,
     stock: 20,
-    sku: 'HA-AC-002'
+    sku: 'HA-AC-002',
+    featured: false,
+    onSale: false
   },
   {
     id: 'ha-003',
@@ -329,6 +353,7 @@ export const products: Product[] = [
     rating: 4.5,
     stock: 25,
     sku: 'HA-RH-003',
+    featured: false,
     onSale: true
   }
 ];
@@ -395,9 +420,15 @@ export const mockOrders: Order[] = [
     ],
     status: 'pending',
     customer: {
-      name: 'Mohammed Ali',
+      firstName: '',
+      lastName: '',
+      email: '',
       phone: '0612345678',
-      city: 'Casablanca'
+      address: '',
+      city: 'Casablanca',
+      country: '',
+      postalCode: '',
+      name: 'Mohammed Ali'
     },
     date: '2023-09-15',
     total: products[0].price * 2 + products[3].price
@@ -409,10 +440,16 @@ export const mockOrders: Order[] = [
     ],
     status: 'shipped',
     customer: {
-      name: 'Fatima Zahra',
-      nickname: 'Fati',
+      firstName: '',
+      lastName: '',
+      email: '',
       phone: '0623456789',
-      city: 'Rabat'
+      address: '',
+      city: 'Rabat',
+      country: '',
+      postalCode: '',
+      name: 'Fatima Zahra',
+      nickname: 'Fati'
     },
     date: '2023-09-12',
     total: products[2].price
@@ -425,11 +462,18 @@ export const mockOrders: Order[] = [
     ],
     status: 'delivered',
     customer: {
-      name: 'Youssef El Mansouri',
+      firstName: '',
+      lastName: '',
+      email: '',
       phone: '0634567890',
-      city: 'Marrakech'
+      address: '',
+      city: 'Marrakech',
+      country: '',
+      postalCode: '',
+      name: 'Youssef El Mansouri'
     },
     date: '2023-09-08',
     total: products[1].price * 3 + products[4].price * 2
   },
 ];
+
