@@ -557,13 +557,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const placeOrder = async () => {
-    if (!customerInfo || cart.length === 0) {
-      console.error("Cannot place order: missing customer info or empty cart");
-      return undefined;
-    }
-    
+  const placeOrder = async (): Promise<Order | undefined> => {
     try {
+      if (!customerInfo) {
+        console.error("Cannot place order: missing customer info");
+        throw new Error("Customer information is required");
+      }
+      
+      if (cart.length === 0) {
+        console.error("Cannot place order: empty cart");
+        throw new Error("Your cart is empty");
+      }
+      
       console.log("Placing order with info:", { customerInfo, cartItems: cart, total: cartTotal });
       
       // Generate a unique order ID
@@ -572,9 +577,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // Create the order object
       const newOrder: Order = {
         id: orderId,
-        items: cart,
+        items: [...cart],
         status: 'pending' as OrderStatus,
-        customer: customerInfo,
+        customer: { ...customerInfo },
         date: new Date().toISOString().split('T')[0],
         total: cartTotal
       };
@@ -593,22 +598,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
-        .select();
+        .select('*')
+        .single();
       
       if (error) {
         console.error('Error saving order to Supabase:', error);
-        // Still create the order locally even if Supabase fails
-        console.log('Creating order locally due to Supabase error');
-      } else {
-        console.log('Order saved successfully to Supabase:', data);
+        throw new Error(`Failed to save order: ${error.message}`);
       }
+      
+      console.log('Order saved successfully to Supabase:', data);
       
       // Update local orders state
       setOrders(prevOrders => [...prevOrders, newOrder]);
       
       // Clear cart and customer info
       clearCart();
-      setCustomerInfo(null);
       
       toast.success("Order placed successfully!");
       console.log("Order placed successfully:", newOrder);

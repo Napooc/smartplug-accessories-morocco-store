@@ -13,12 +13,14 @@ const OrderConfirmation = () => {
   const { orderId, orderTotal, orderDate } = location.state || {};
   const { t, direction } = useLanguage();
   
+  // Redirect to home if no order ID is present
   useEffect(() => {
     if (!orderId) {
       navigate('/');
     }
   }, [orderId, navigate]);
   
+  // Return null during redirect
   if (!orderId) {
     return null;
   }

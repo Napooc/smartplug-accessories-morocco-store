@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
@@ -42,23 +43,26 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.phone || !formData.city) {
-      toast.error(t('nameRequired'));
+    // Form validation
+    if (!formData.name?.trim() || !formData.phone?.trim()) {
+      toast.error(t('namePhoneRequired', { default: 'Name and phone are required' }));
       return;
     }
     
+    // Cart validation
     if (cart.length === 0) {
-      toast.error(t('emptyCart'));
+      toast.error(t('emptyCart', { default: 'Your cart is empty' }));
+      navigate('/shop');
       return;
     }
     
     try {
       if (isLoading) return;
-      
       setIsLoading(true);
+      
       console.log('Starting order placement process...');
       
-      // Set customer info
+      // Set customer info first
       setCustomerInfo(formData);
       console.log('Customer info set:', formData);
       
@@ -67,10 +71,10 @@ const Checkout = () => {
       console.log('Order result:', orderResult);
       
       if (!orderResult) {
-        throw new Error('Failed to place order: empty response');
+        throw new Error('Order creation failed');
       }
       
-      // Navigate to confirmation page
+      // Navigate to confirmation page with order details
       navigate('/confirmation', { 
         state: { 
           orderId: orderResult.id, 
@@ -78,13 +82,12 @@ const Checkout = () => {
           orderDate: orderResult.date
         } 
       });
-      
     } catch (error) {
       console.error('Error during checkout:', error);
       
       const errorMessage = error instanceof Error 
-        ? `${t('orderFailed')}: ${error.message}` 
-        : t('orderFailed');
+        ? error.message 
+        : t('orderFailed', { default: 'Order failed' });
         
       toast.error(errorMessage);
     } finally {
@@ -92,6 +95,7 @@ const Checkout = () => {
     }
   };
   
+  // Empty cart redirect
   if (cart.length === 0) {
     return (
       <Layout>
@@ -129,20 +133,6 @@ const Checkout = () => {
                       onChange={handleInputChange}
                       placeholder={t('fullName')}
                       required
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="nickname" className="block text-sm font-medium mb-1">
-                      {t('nickname')}
-                    </label>
-                    <Input
-                      id="nickname"
-                      name="nickname"
-                      value={formData.nickname || ''}
-                      onChange={handleInputChange}
-                      placeholder={t('enterNickname')}
                       className="w-full"
                     />
                   </div>
