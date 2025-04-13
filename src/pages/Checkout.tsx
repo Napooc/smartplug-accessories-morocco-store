@@ -5,16 +5,10 @@ import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cities } from '@/lib/data';
 import { toast } from 'sonner';
-import { CustomerInfo } from '@/lib/types';
+import { CustomerInfo, Order } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
 
 const Checkout = () => {
@@ -52,40 +46,40 @@ const Checkout = () => {
       return;
     }
     
-    // Prevent multiple submissions
-    if (isLoading) return;
-    
-    setIsLoading(true);
-    
     try {
+      // Prevent multiple submissions
+      if (isLoading) return;
+      
+      setIsLoading(true);
+      
       // Save customer info first
       setCustomerInfo(formData);
       
       console.log('Placing order with customer info:', formData);
       console.log('Cart contents:', cart);
       
-      // Place order with proper error handling
-      const orderResult = await placeOrder();
+      // Place order with proper error handling and timeout
+      const orderResult = await Promise.race([
+        placeOrder(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Order request timed out')), 15000)
+        )
+      ]);
       
       console.log('Order result:', orderResult);
       
-      if (orderResult && typeof orderResult === 'object') {
-        // Order successfully placed - using type guard pattern for safety
-        // Explicitly check for expected properties to avoid TypeScript errors
-        const orderId = orderResult.id ? String(orderResult.id) : 'unknown';
-        const orderTotal = orderResult.total ? Number(orderResult.total) : cartTotal;
-        
-        // Navigate to confirmation page with order details
+      if (orderResult && typeof orderResult === 'object' && 'id' in orderResult) {
+        // Order successfully placed
         navigate('/confirmation', { 
           state: { 
-            orderId: orderId, 
-            orderTotal: orderTotal 
+            orderId: orderResult.id, 
+            orderTotal: orderResult.total 
           } 
         });
         toast.success(t('orderPlaced'));
       } else {
-        // Fallback error for unexpected response format
-        throw new Error('Failed to place order: invalid response format');
+        // This shouldn't happen if the API is working correctly
+        throw new Error('Failed to place order: empty response');
       }
     } catch (error) {
       console.error('Error during checkout:', error);
@@ -96,7 +90,7 @@ const Checkout = () => {
         : t('orderFailed');
         
       toast.error(errorMessage);
-    } finally {
+      
       setIsLoading(false);
     }
   };

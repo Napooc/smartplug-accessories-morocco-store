@@ -17,7 +17,7 @@ export const supabase = createClient<Database>(
     },
     // Adding global error handlers to prevent silent failures
     global: {
-      fetch: (url, options) => fetch(url, options)
+      fetch: (...args: Parameters<typeof fetch>) => fetch(...args)
     }
   }
 );
