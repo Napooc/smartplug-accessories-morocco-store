@@ -1,9 +1,11 @@
+
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Share2, Check } from 'lucide-react';
 import Layout from '@/components/Layout/Layout';
 import { Rating } from '@/components/Products/Rating';
 import ProductGrid from '@/components/Products/ProductGrid';
+import ProductComments from '@/components/Products/ProductComments';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -172,10 +174,11 @@ const ProductDetail = () => {
         {/* Product tabs */}
         <div className="mt-12">
           <Tabs defaultValue="description">
-            <TabsList className="w-full border-b border-gray-200 grid grid-cols-3 max-w-md">
+            <TabsList className="w-full border-b border-gray-200 grid grid-cols-4 max-w-md">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              <TabsTrigger value="comments">Comments</TabsTrigger>
             </TabsList>
             <div className="p-4 border rounded-b-lg bg-white">
               <TabsContent value="description">
@@ -218,6 +221,9 @@ const ProductDetail = () => {
                 <p className="text-gray-600">
                   Be the first to review this product!
                 </p>
+              </TabsContent>
+              <TabsContent value="comments">
+                <ProductComments productId={product.id} />
               </TabsContent>
             </div>
           </Tabs>
