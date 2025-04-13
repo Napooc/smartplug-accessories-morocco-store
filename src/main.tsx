@@ -5,12 +5,15 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { LanguageProvider } from './lib/languageContext.tsx'
+import { StoreProvider } from './lib/store'
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <LanguageProvider>
-        <App />
+        <StoreProvider>
+          <App />
+        </StoreProvider>
       </LanguageProvider>
     </BrowserRouter>
   </React.StrictMode>
