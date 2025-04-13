@@ -38,19 +38,6 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     fetchComments();
   }, [productId]);
 
-  // Verify if the product exists in our database
-  const validateProductId = () => {
-    // First check if the product exists in our local store
-    const storeProduct = products.find(p => p.id === productId);
-    if (storeProduct) {
-      return true;
-    }
-    
-    // If not in local store, we're likely dealing with a invalid product ID
-    console.log("Product ID not found in store:", productId);
-    return false;
-  };
-
   const fetchComments = async () => {
     try {
       setLoading(true);
@@ -93,28 +80,18 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       return;
     }
 
-    // Validate product ID before attempting to submit
-    if (!validateProductId()) {
-      toast.error('Invalid product ID. Cannot submit comment.');
-      return;
-    }
-
     try {
       setSubmitting(true);
       
-      // First check if this product actually exists in Supabase
-      const { data: productExists, error: productCheckError } = await supabase
-        .from('products')
-        .select('id')
-        .eq('id', productId)
-        .single();
-        
-      if (productCheckError || !productExists) {
-        console.error('Product does not exist in database:', productId);
-        toast.error('Cannot comment on this product - it may have been removed');
+      // Verify product exists in our store first
+      const storeProduct = products.find(p => p.id === productId);
+      if (!storeProduct) {
+        toast.error('Product not found. Cannot submit comment.');
+        setSubmitting(false);
         return;
       }
       
+      // Submit comment directly without additional product check
       const { error } = await supabase
         .from('product_comments')
         .insert({
@@ -127,7 +104,13 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
 
       if (error) {
         console.error('Error submitting comment:', error);
-        toast.error('Could not submit your comment');
+        if (error.code === '23503') { // Foreign key violation
+          toast.error('Cannot comment on this product - it may have been removed');
+        } else if (error.code === '42501' || error.code === '401') { // Permission denied
+          toast.error('Permission denied. Please try again later.');
+        } else {
+          toast.error('Could not submit your comment. Please try again later.');
+        }
         return;
       }
 
