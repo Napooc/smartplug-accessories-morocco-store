@@ -5,7 +5,6 @@ import { CheckCircle, Home, ShoppingBag, Clock, Package, AlertTriangle } from 'l
 import Layout from '@/components/Layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/lib/languageContext';
-import { useStore } from '@/lib/store';
 import { toast } from 'sonner';
 
 const OrderConfirmation = () => {

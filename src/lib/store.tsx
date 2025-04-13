@@ -600,7 +600,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("Created new order object:", newOrder);
       
       // Convert CustomerInfo and CartItem[] to plain JSON objects for database storage
-      // This ensures proper serialization and fixes TypeScript JSON type issues
+      // This prevents type issues with Supabase's JSON column
       const customerInfoJson = JSON.parse(JSON.stringify(customerInfo));
       const cartItemsJson = JSON.parse(JSON.stringify(cart));
       

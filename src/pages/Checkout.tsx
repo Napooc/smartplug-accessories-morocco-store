@@ -1,43 +1,18 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
 import { useStore } from '@/lib/store';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cities } from '@/lib/data';
-import { toast } from 'sonner';
-import { CustomerInfo } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
+import { Button } from '@/components/ui/button';
 import { Truck, Clock, RotateCcw, ShieldCheck } from 'lucide-react';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import CheckoutForm from '@/components/Checkout/CheckoutForm';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, cartTotal, setCustomerInfo, placeOrder, clearCart } = useStore();
+  const { cart, cartTotal } = useStore();
   const { t, direction } = useLanguage();
-  
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Create a schema for form validation
-  const formSchema = z.object({
-    name: z.string().min(2, { message: t('nameRequired', { default: 'Name is required' }) }),
-    phone: z.string().min(8, { message: t('phoneRequired', { default: 'Valid phone number is required' }) }),
-    city: z.string().min(1, { message: t('cityRequired', { default: 'City is required' }) }),
-  });
-  
-  // Initialize the form with react-hook-form
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      phone: '',
-      city: 'Casablanca'
-    }
-  });
   
   // Empty cart redirect
   useEffect(() => {
@@ -46,76 +21,6 @@ const Checkout = () => {
       navigate('/shop');
     }
   }, [cart, navigate, t]);
-  
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (cart.length === 0) {
-      toast.error(t('emptyCart', { default: 'Your cart is empty' }));
-      navigate('/shop');
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      
-      // Create a complete customer info object with all required fields
-      const customerInfo: CustomerInfo = {
-        name: values.name,
-        phone: values.phone,
-        city: values.city,
-        country: 'Morocco',
-        firstName: values.name.split(' ')[0] || '',
-        lastName: values.name.split(' ').slice(1).join(' ') || '',
-        email: 'customer@example.com', // Default email to prevent null values
-        address: `${values.city}, Morocco`, // Default address using city
-        postalCode: '00000' // Default postal code
-      };
-      
-      console.log('Setting customer info before order placement:', customerInfo);
-      
-      // First set the customer info - this operation is synchronous
-      setCustomerInfo(customerInfo);
-      
-      // NOW place the order - making sure we have all required fields already set
-      try {
-        console.log('Attempting to place order with valid customer info');
-        const orderResult = await placeOrder();
-        
-        console.log('Order result received:', orderResult);
-        
-        if (!orderResult || !orderResult.id) {
-          throw new Error('Order creation failed');
-        }
-        
-        // Clear cart after successful order placement
-        clearCart();
-        
-        // Navigate to confirmation page with order details
-        navigate('/confirmation', { 
-          state: { 
-            orderId: orderResult.id, 
-            orderTotal: orderResult.total,
-            orderDate: orderResult.date
-          } 
-        });
-        
-        toast.success(t('orderSuccessful', { default: 'Order placed successfully!' }));
-      } catch (error) {
-        console.error('Error during order placement:', error);
-        const errorMessage = error instanceof Error 
-          ? error.message 
-          : t('orderFailed', { default: 'Failed to place order' });
-        toast.error(errorMessage);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error('Error during checkout form processing:', error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : t('orderFailed', { default: 'Failed to process checkout form' });
-      toast.error(errorMessage);
-      setIsLoading(false);
-    }
-  };
   
   if (cart.length === 0) {
     return (
@@ -138,79 +43,8 @@ const Checkout = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h2 className="text-xl font-semibold mb-4">{t('shippingInfo')}</h2>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('fullName')}*</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t('fullName')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('phone')}*</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t('phone')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('city')}*</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t('city')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {cities.map((city) => (
-                              <SelectItem key={city.id} value={city.name}>
-                                {city.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="pt-4">
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? t('processing') : t('placeOrder')}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
+            {/* New CheckoutForm component */}
+            <CheckoutForm />
             
             <div className="mt-6 bg-gray-50 p-6 rounded-lg border">
               <h3 className="font-medium mb-4 text-gray-800">{t('shippingAndReturns', { default: 'Shipping & Returns Policy' })}</h3>
@@ -288,16 +122,6 @@ const Checkout = () => {
                 <p>* {t('cashOnDelivery')}</p>
                 <p>* {t('free')} {t('shipping')}</p>
                 <p>* {t('deliveryTime', { default: 'Delivery in 1-3 business days' })}</p>
-              </div>
-              
-              <div className="mt-4 pt-4 border-t">
-                <Button 
-                  className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue" 
-                  disabled={isLoading}
-                  onClick={form.handleSubmit(onSubmit)}
-                >
-                  {isLoading ? t('processing') : t('placeOrder')}
-                </Button>
               </div>
             </div>
           </div>
