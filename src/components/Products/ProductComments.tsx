@@ -48,7 +48,6 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [productVerified, setProductVerified] = useState(false);
   const { products } = useStore();
   
   // Initialize form with react-hook-form and zod validation
@@ -62,50 +61,12 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     }
   });
 
-  // First verify that the product exists both in our local store and in the database
+  // Fetch comments when component mounts
   useEffect(() => {
     if (productId) {
-      verifyProductExists();
       fetchComments();
     }
   }, [productId]);
-  
-  // Verify product exists in both local store and database
-  const verifyProductExists = async () => {
-    try {
-      // First check if product exists in our local store
-      const storeProduct = products.find(p => p.id === productId);
-      if (!storeProduct) {
-        console.warn('Product not found in local store:', productId);
-        setProductVerified(false);
-        return;
-      }
-      
-      // Then verify product exists in the database
-      const { data, error } = await supabase
-        .from('products')
-        .select('id')
-        .eq('id', productId)
-        .single();
-      
-      if (error) {
-        console.error('Error verifying product in database:', error);
-        setProductVerified(false);
-        return;
-      }
-      
-      if (data) {
-        console.log('Product verified in database:', data.id);
-        setProductVerified(true);
-      } else {
-        console.warn('Product not found in database:', productId);
-        setProductVerified(false);
-      }
-    } catch (error) {
-      console.error('Error in verifyProductExists:', error);
-      setProductVerified(false);
-    }
-  };
 
   const fetchComments = async () => {
     if (!productId) return;
@@ -136,16 +97,18 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     try {
       setSubmitting(true);
       
-      // Double check that product is verified before submitting
-      if (!productVerified) {
-        toast.error('Cannot comment on this product - it may no longer exist in our catalog');
+      // Verify product exists in our store
+      const storeProduct = products.find(p => p.id === productId);
+      if (!storeProduct) {
+        toast.error('Product not found. Cannot submit comment.');
         return;
       }
       
-      // Submit comment with additional console logging for debugging
+      // Log information for debugging
       console.log('Submitting comment for product:', productId);
       console.log('Comment data:', values);
       
+      // Submit comment directly, without checking the database first
       const { data, error } = await supabase
         .from('product_comments')
         .insert({
@@ -255,25 +218,6 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       <p className="mt-1 text-sm text-gray-500">Be the first to leave a comment on this product.</p>
     </div>
   );
-  
-  // Handle the case where product verification failed
-  if (!productVerified && !loading) {
-    return (
-      <div className="mt-8">
-        <h3 className="text-xl font-bold mb-6 flex items-center">
-          <MessageCircle className="mr-2" size={20} />
-          Product Comments
-        </h3>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-400" />
-          <h3 className="mt-2 text-lg font-semibold text-red-800">Product Not Available</h3>
-          <p className="mt-1 text-red-600">
-            We couldn't verify this product in our database. Comments are unavailable.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-8">
@@ -356,7 +300,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
             <Button 
               type="submit" 
               className="bg-smartplug-blue hover:bg-smartplug-lightblue"
-              disabled={submitting || !productVerified}
+              disabled={submitting}
             >
               {submitting ? (
                 <>
