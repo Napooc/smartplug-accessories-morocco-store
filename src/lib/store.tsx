@@ -474,7 +474,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .eq('id', id);
       
       if (error) {
-        console.error('Error deleting product from Supabase:', error);
+        console.error('Error deleting product from Supababase:', error);
         toast.warning("Product deleted locally but not from database");
       } else {
         toast.success('Product deleted successfully');
@@ -586,11 +586,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Created new order object:", newOrder);
       
+      // Convert CustomerInfo and CartItem[] to plain objects for database compatibility
+      // This fixes the TypeScript error with Json type compatibility
+      const customerInfoJson = JSON.parse(JSON.stringify(customerInfo));
+      const cartItemsJson = JSON.parse(JSON.stringify(cart));
+      
       // Prepare the data for Supabase
       const orderData = {
         id: orderId,
-        customer_info: customerInfo,
-        items: cart,
+        customer_info: customerInfoJson,
+        items: cartItemsJson,
         status: 'pending',
         total: cartTotal,
         date: new Date().toISOString()
