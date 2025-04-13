@@ -297,7 +297,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   }, []);
-  
+
   // Computed properties
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
