@@ -95,6 +95,14 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       ...prev,
       placement: value
     }));
+    
+    // If placement is "deals", automatically set onSale to true
+    if (value === 'deals') {
+      setProduct(prev => ({
+        ...prev,
+        onSale: true
+      }));
+    }
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,7 +177,15 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     try {
       setIsSubmitting(true);
       
-      await addProduct(product);
+      // Make sure onSale is true if placement is "deals"
+      const productToAdd = {
+        ...product,
+        onSale: product.placement === 'deals' ? true : product.onSale
+      };
+      
+      // Use a timeout to prevent UI freezing
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await addProduct(productToAdd);
       
       // Reset form
       setProduct({
@@ -188,7 +204,11 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       });
       
       toast.success("Product added successfully");
-      onProductAdded(); // Call the callback function after successfully adding a product
+      
+      // Delay calling the callback to ensure UI updates properly
+      setTimeout(() => {
+        onProductAdded(); // Call the callback function after successfully adding a product
+      }, 300);
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error("Error adding product");
@@ -315,10 +335,16 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="onSale"
-              checked={product.onSale}
+              checked={product.onSale || product.placement === 'deals'}
               onCheckedChange={(checked) => handleCheckboxChange('onSale', checked as boolean)}
+              disabled={product.placement === 'deals'}
             />
-            <Label htmlFor="onSale">On Sale</Label>
+            <Label htmlFor="onSale">
+              On Sale
+              {product.placement === 'deals' && (
+                <span className="text-xs text-gray-500 ml-1">(Auto-enabled for Discount items)</span>
+              )}
+            </Label>
           </div>
         </div>
 
