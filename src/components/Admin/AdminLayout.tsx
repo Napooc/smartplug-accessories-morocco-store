@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   Package,
   Settings,
-  MessageSquare,
   LogOut,
   ChevronRight
 } from 'lucide-react';
@@ -54,11 +53,6 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       title: 'Products',
       path: '/admin/products',
       icon: <Package size={20} />
-    },
-    {
-      title: 'Messages',
-      path: '/admin/messages',
-      icon: <MessageSquare size={20} />
     }
   ];
   
