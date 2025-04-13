@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Rating } from '@/components/Products/Rating';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useStore } from '@/lib/store';
 
 interface Comment {
   id: string;
@@ -31,10 +32,24 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     comment: '',
     rating: 5
   });
+  const { products } = useStore();
 
   useEffect(() => {
     fetchComments();
   }, [productId]);
+
+  // Verify if the product exists in our database
+  const validateProductId = () => {
+    // First check if the product exists in our local store
+    const storeProduct = products.find(p => p.id === productId);
+    if (storeProduct) {
+      return true;
+    }
+    
+    // If not in local store, we're likely dealing with a invalid product ID
+    console.log("Product ID not found in store:", productId);
+    return false;
+  };
 
   const fetchComments = async () => {
     try {
@@ -78,8 +93,27 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       return;
     }
 
+    // Validate product ID before attempting to submit
+    if (!validateProductId()) {
+      toast.error('Invalid product ID. Cannot submit comment.');
+      return;
+    }
+
     try {
       setSubmitting(true);
+      
+      // First check if this product actually exists in Supabase
+      const { data: productExists, error: productCheckError } = await supabase
+        .from('products')
+        .select('id')
+        .eq('id', productId)
+        .single();
+        
+      if (productCheckError || !productExists) {
+        console.error('Product does not exist in database:', productId);
+        toast.error('Cannot comment on this product - it may have been removed');
+        return;
+      }
       
       const { error } = await supabase
         .from('product_comments')
