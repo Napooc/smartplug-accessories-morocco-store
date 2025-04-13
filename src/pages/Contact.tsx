@@ -2,96 +2,77 @@
 import { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { toast } from 'sonner';
 import { useStore } from '@/lib/store';
 import { useLanguage } from '@/lib/languageContext';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+
+// Define form schema with Zod for validation
+const contactFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  subject: z.string().optional(),
+  message: z.string().min(10, {
+    message: "Message must be at least 10 characters.",
+  }),
+});
+
+type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 const ContactPage = () => {
   const { addContactMessage } = useStore();
   const { t, direction } = useLanguage();
   useScrollToTop();
   
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-  
-  const [errors, setErrors] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
   
-  const validateForm = () => {
-    const newErrors = {
-      name: formData.name.trim() ? '' : t('nameRequired'),
-      email: formData.email.trim() ? (
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '' : t('validEmail')
-      ) : t('emailRequired'),
-      message: formData.message.trim() ? '' : t('messageRequired')
-    };
-    
-    setErrors(newErrors);
-    
-    return !newErrors.name && !newErrors.email && !newErrors.message;
-  };
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when user types
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      toast.error(t('pleaseFixErrors', { default: 'Veuillez corriger les erreurs' }));
-      return;
-    }
-    
+  // Initialize form with react-hook-form and zod validation
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    },
+  });
+
+  const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     
     try {
-      console.log("Submitting contact form with data:", formData);
+      console.log("Submitting contact form with data:", data);
       
-      // Make sure to trim all form fields
       await addContactMessage({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        subject: formData.subject.trim(),
-        message: formData.message.trim()
+        name: data.name.trim(),
+        email: data.email.trim(),
+        subject: data.subject?.trim() || "",
+        message: data.message.trim()
       });
       
       console.log("Message sent successfully");
       
       // Reset form after successful submission
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
+      form.reset();
       
       setMessageSent(true);
       toast.success(t('messageSent'));
@@ -101,6 +82,10 @@ const ContactPage = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSendAnother = () => {
+    setMessageSent(false);
   };
   
   return (
@@ -167,91 +152,99 @@ const ContactPage = () => {
                   </div>
                   <h2 className="text-2xl font-bold mb-4">{t('thankYou')}</h2>
                   <p className="text-gray-600 mb-6">
-                    {t('messageSent')}
+                    {t('messageSentLong', { default: "Thank you for your message. We'll get in touch with you as soon as possible." })}
                   </p>
                   <Button 
-                    onClick={() => {
-                      setMessageSent(false);
-                    }}
+                    onClick={handleSendAnother}
                     className="bg-smartplug-blue hover:bg-smartplug-lightblue"
                   >
-                    {t('sendAnotherMessage', { default: 'Envoyer un autre message' })}
+                    {t('sendAnotherMessage', { default: 'Send another message' })}
                   </Button>
                 </div>
               ) : (
                 <>
                   <h2 className="text-2xl font-bold mb-6">{t('sendMessage')}</h2>
                   
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">{t('fullName')}</Label>
-                        <Input
-                          id="name"
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
                           name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder={t('yourName')}
-                          className={errors.name ? 'border-red-500' : ''}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('fullName')}</FormLabel>
+                              <FormControl>
+                                <Input placeholder={t('yourName')} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                        
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('emailTitle')}</FormLabel>
+                              <FormControl>
+                                <Input placeholder={t('yourEmail')} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor="email">{t('emailTitle')}</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder={t('yourEmail')}
-                          className={errors.email ? 'border-red-500' : ''}
-                        />
-                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">{t('subjectOptional')}</Label>
-                      <Input
-                        id="subject"
+                      <FormField
+                        control={form.control}
                         name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        placeholder={t('subjectPlaceholder')}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('subjectOptional')}</FormLabel>
+                            <FormControl>
+                              <Input placeholder={t('subjectPlaceholder')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="message">{t('message', { default: 'Message' })}</Label>
-                      <Textarea
-                        id="message"
+                      
+                      <FormField
+                        control={form.control}
                         name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        placeholder={t('messagePlaceholder')}
-                        rows={5}
-                        className={errors.message ? 'border-red-500' : ''}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('message', { default: 'Message' })}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder={t('messagePlaceholder')} 
+                                {...field} 
+                                rows={5}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                      {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                      className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
-                    >
-                      {isSubmitting ? (
-                        <span className="animate-pulse">{t('processing', { default: 'Envoi en cours...' })}</span>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          {t('sendMessageButton')}
-                        </>
-                      )}
-                    </Button>
-                  </form>
+                      
+                      <Button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="bg-smartplug-blue hover:bg-smartplug-lightblue flex items-center"
+                      >
+                        {isSubmitting ? (
+                          <span className="animate-pulse">{t('processing', { default: 'Sending...' })}</span>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            {t('sendMessageButton')}
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
                 </>
               )}
             </div>
