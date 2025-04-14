@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '@/lib/store';
@@ -8,7 +7,6 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Package,
-  Settings,
   LogOut,
   ChevronRight
 } from 'lucide-react';

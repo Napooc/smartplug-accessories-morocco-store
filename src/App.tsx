@@ -36,7 +36,10 @@ const RouteChangeHandler = () => {
   
   useEffect(() => {
     // When route changes, ensure all links have language params
-    updatePageLinks(language);
+    // Skip for admin routes
+    if (!location.pathname.startsWith('/admin')) {
+      updatePageLinks(language);
+    }
   }, [location, language]);
   
   return null; // This component doesn't render anything
