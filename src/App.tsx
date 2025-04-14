@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +7,10 @@ import {
   QueryClient, 
   QueryClientProvider 
 } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { LanguageLinkInjector } from "@/components/ui/language-link-injector";
+import { useLanguage } from "@/lib/languageContext";
+import { updatePageLinks } from "@/lib/languageUtils";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
@@ -26,10 +29,29 @@ import NotFound from "./pages/NotFound";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
+// Route Change Handler Component
+const RouteChangeHandler = () => {
+  const { language } = useLanguage();
+  const location = useLocation();
+  
+  useEffect(() => {
+    // When route changes, ensure all links have language params
+    updatePageLinks(language);
+  }, [location, language]);
+  
+  return null; // This component doesn't render anything
+};
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        {/* Add LanguageLinkInjector to handle link updates */}
+        <LanguageLinkInjector />
+        
+        {/* Add RouteChangeHandler to handle route changes */}
+        <RouteChangeHandler />
+        
         <Routes>
           {/* Customer Routes */}
           <Route path="/" element={<Index />} />

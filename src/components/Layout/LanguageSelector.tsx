@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { getLocalizedUrl } from '@/lib/languageUtils';
 
 const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useLanguage();
@@ -20,18 +21,13 @@ const LanguageSelector: React.FC = () => {
   ];
   
   const handleLanguageChange = (lang: Language) => {
-    // Set the language in context
+    // This will update localStorage, URL params, and all links on the page
     setLanguage(lang);
     
-    // Ensure all links on the page have the language parameter
-    document.querySelectorAll('a').forEach(link => {
-      // Only modify internal links (not external ones)
-      if (link.href.startsWith(window.location.origin)) {
-        const url = new URL(link.href);
-        url.searchParams.set('lang', lang);
-        link.href = url.toString();
-      }
-    });
+    // If we're in a development environment, log the language change
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Language changed to: ${lang}`);
+    }
   };
   
   const currentLanguage = languages.find(lang => lang.code === language);

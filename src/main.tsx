@@ -6,24 +6,26 @@ import App from './App.tsx'
 import './index.css'
 import { LanguageProvider } from './lib/languageContext.tsx'
 import { StoreProvider } from './lib/store'
-
-// Function to get language parameter from URL
-const getLanguageFromUrl = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const langParam = urlParams.get('lang');
-  return langParam && ['en', 'fr', 'ar'].includes(langParam) ? langParam : null;
-};
+import { getUserLanguagePreference, setUserLanguagePreference } from './lib/languageUtils'
 
 // Initialize language before rendering
-const initialLanguage = getLanguageFromUrl() || localStorage.getItem('ma7alkom-language') || 'en';
-localStorage.setItem('ma7alkom-language', initialLanguage);
+const initialLanguage = getUserLanguagePreference();
+setUserLanguagePreference(initialLanguage);
 
-// Update URL if language param is missing but exists in localStorage
-if (!getLanguageFromUrl() && initialLanguage) {
-  const url = new URL(window.location.href);
-  url.searchParams.set('lang', initialLanguage);
-  window.history.replaceState(null, '', url);
-}
+// Add a listener for storage events to sync language between tabs
+window.addEventListener('storage', (event) => {
+  if (event.key === 'ma7alkom-language' && event.newValue) {
+    // Only reload if the language is different from current URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentLang = urlParams.get('lang');
+    
+    if (currentLang !== event.newValue) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', event.newValue);
+      window.location.href = url.toString(); // Hard reload with new language
+    }
+  }
+});
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

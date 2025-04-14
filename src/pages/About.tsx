@@ -3,43 +3,36 @@ import React, { useEffect } from 'react';
 import Layout from '@/components/Layout/Layout';
 import { ExternalLink, Users, Award, Clock, MapPin } from 'lucide-react';
 import { useLanguage } from '@/lib/languageContext';
-import { Link } from 'react-router-dom';
+import { LocalizedLink } from '@/components/ui/localized-link';
+import { updatePageMetadata, updatePageLinks } from '@/lib/languageUtils';
 
 const AboutPage = () => {
   const { t, direction, language } = useLanguage();
   
-  // Update page title and meta description
+  // Update page title, meta description, and links
   useEffect(() => {
-    // Update document title
-    document.title = t('seoTitles.about');
-    
-    // Update meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', t('seoDescriptions.about'));
-    }
-    
-    // Update OG title
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) {
-      ogTitle.setAttribute('content', t('seoTitles.about'));
-    }
-    
-    // Update OG description
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) {
-      ogDescription.setAttribute('content', t('seoDescriptions.about'));
-    }
-    
-    // Ensure all links on the page have the language parameter
-    document.querySelectorAll('a').forEach(link => {
-      // Only modify internal links (not external ones)
-      if (link.href.startsWith(window.location.origin)) {
-        const url = new URL(link.href);
-        url.searchParams.set('lang', language);
-        link.href = url.toString();
-      }
+    // Update metadata
+    updatePageMetadata(language, 'about', {
+      seoTitles: { about: t('seoTitles.about') },
+      seoDescriptions: { about: t('seoDescriptions.about') }
     });
+    
+    // Update links on the page
+    updatePageLinks(language);
+    
+    // Add event listener for dynamic content
+    const observer = new MutationObserver(() => {
+      updatePageLinks(language);
+    });
+    
+    // Start observing
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true 
+    });
+    
+    // Clean up
+    return () => observer.disconnect();
   }, [t, language]);
   
   return (
@@ -48,7 +41,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4" dir={direction}>
           <h1 className="text-3xl font-bold">{t('about')}</h1>
           <div className="flex items-center text-sm mt-2">
-            <Link to={`/?lang=${language}`} className="text-gray-500 hover:text-smartplug-blue">{t('home')}</Link>
+            <LocalizedLink to="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</LocalizedLink>
             <span className="mx-2">/</span>
             <span className="font-medium">{t('about')}</span>
           </div>
