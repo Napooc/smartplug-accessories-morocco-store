@@ -13,13 +13,15 @@ export const LocalizedLink: React.FC<LocalizedLinkProps> = ({ to, children, ...p
   // Convert 'to' to string if it's an object
   const toStr = typeof to === 'string' ? to : to.pathname || '/';
   
-  // Create URL object to manipulate the query params
-  const url = new URL(toStr, window.location.origin);
+  // Handle admin routes differently - don't add language parameter
+  if (toStr.startsWith('/admin')) {
+    return <RouterLink to={to} {...props}>{children}</RouterLink>;
+  }
   
-  // Add language parameter
+  // For non-admin routes, add language parameter
+  const url = new URL(toStr, window.location.origin);
   url.searchParams.set('lang', language);
   
-  // Create the final path for the Link
   const finalTo = {
     pathname: url.pathname,
     search: url.search,
