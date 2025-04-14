@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Share2, Check } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import Layout from '@/components/Layout/Layout';
 import { Rating } from '@/components/Products/Rating';
 import ProductGrid from '@/components/Products/ProductGrid';
@@ -92,7 +92,7 @@ const ProductDetail = () => {
             
             <div className="flex items-center space-x-2 mb-4">
               <Rating value={product.rating} />
-              <span className="text-gray-500 text-sm">(Customer reviews)</span>
+              <span className="text-gray-500 text-sm">(Customer ratings)</span>
             </div>
             
             <div className="flex items-center mb-6">
@@ -111,7 +111,6 @@ const ProductDetail = () => {
             {/* Stock status */}
             <div className="flex items-center mb-6">
               <div className="flex items-center">
-                <Check size={16} className="text-green-500 mr-1" />
                 <span className="text-sm font-medium">
                   {product.stock > 0 
                     ? `In Stock (${product.stock} available)` 
@@ -148,14 +147,6 @@ const ProductDetail = () => {
                 <ShoppingCart size={18} className="mr-2" />
                 Add to Cart
               </Button>
-              
-              <Button variant="outline" size="icon" className="ml-4">
-                <Heart size={18} />
-              </Button>
-              
-              <Button variant="outline" size="icon" className="ml-2">
-                <Share2 size={18} />
-              </Button>
             </div>
             
             <hr className="my-6" />
@@ -173,10 +164,9 @@ const ProductDetail = () => {
         {/* Product tabs */}
         <div className="mt-12">
           <Tabs defaultValue="description">
-            <TabsList className="w-full border-b border-gray-200 grid grid-cols-3 max-w-md">
+            <TabsList className="w-full border-b border-gray-200 grid grid-cols-2 max-w-md">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
             </TabsList>
             <div className="p-4 border rounded-b-lg bg-white">
               <TabsContent value="description">
@@ -202,23 +192,6 @@ const ProductDetail = () => {
                     <span className="font-medium">Warranty:</span> 1 year
                   </div>
                 </div>
-              </TabsContent>
-              <TabsContent value="reviews">
-                <h3 className="text-lg font-medium mb-2">Customer Reviews</h3>
-                <div className="flex items-center mb-6">
-                  <div className="mr-4">
-                    <span className="text-3xl font-bold">{product.rating}</span>
-                    <span className="text-gray-500">/5</span>
-                  </div>
-                  <div>
-                    <Rating value={product.rating} />
-                    <p className="text-sm text-gray-500">Based on customer reviews</p>
-                  </div>
-                </div>
-                
-                <p className="text-gray-600">
-                  Be the first to review this product!
-                </p>
               </TabsContent>
             </div>
           </Tabs>
