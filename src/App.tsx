@@ -7,7 +7,7 @@ import {
   QueryClient, 
   QueryClientProvider 
 } from "@tanstack/react-query";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { LanguageLinkInjector } from "@/components/ui/language-link-injector";
 import { useLanguage } from "@/lib/languageContext";
 import { updatePageLinks } from "@/lib/languageUtils";
@@ -25,6 +25,7 @@ import AdminProducts from "./pages/AdminProducts";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import { useStore } from "@/lib/store";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -43,6 +44,19 @@ const RouteChangeHandler = () => {
   }, [location, language]);
   
   return null; // This component doesn't render anything
+};
+
+// Admin Route Guard Component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAdmin } = useStore();
+  const location = useLocation();
+  
+  if (!isAdmin) {
+    // Redirect to admin login if not authenticated
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  }
+  
+  return <>{children}</>;
 };
 
 const App = () => {
@@ -69,9 +83,21 @@ const App = () => {
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/orders" element={
+            <AdminRoute>
+              <AdminOrders />
+            </AdminRoute>
+          } />
+          <Route path="/admin/products" element={
+            <AdminRoute>
+              <AdminProducts />
+            </AdminRoute>
+          } />
           
           {/* Catch-all Route */}
           <Route path="*" element={<NotFound />} />
