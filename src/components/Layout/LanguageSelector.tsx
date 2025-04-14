@@ -2,7 +2,6 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
 import { useLanguage, Language } from '@/lib/languageContext';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +12,6 @@ import { Button } from '@/components/ui/button';
 
 const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useLanguage();
-  const location = useLocation();
-  const navigate = useNavigate();
   
   const languages = [
     { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -25,10 +22,8 @@ const LanguageSelector: React.FC = () => {
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
     
-    // Update URL with language parameter without full page reload
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('lang', lang);
-    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+    // The URL update is now handled in the context to ensure consistency
+    // and avoid issues when opening in new tabs
   };
   
   const currentLanguage = languages.find(lang => lang.code === language);

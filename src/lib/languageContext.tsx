@@ -159,7 +159,7 @@ export const translations: Translations = {
   noItemsAdded: {
     en: 'Looks like you haven\'t added any items to your cart yet.',
     fr: 'Il semble que vous n\'ayez pas encore ajouté d\'articles à votre panier.',
-    ar: 'يبدو أنك لم تضف أي منتجات إلى عربة التسوق بعد.'
+    ar: 'يبدو ��نك لم تضف أي منتجات إلى عربة التسوق بعد.'
   },
   continueShopping: {
     en: 'Continue Shopping',
@@ -692,12 +692,21 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with browser language or default to English
   const [language, setLanguage] = useState<Language>(() => {
+    // First check URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang');
+    
+    if (langParam && ['en', 'fr', 'ar'].includes(langParam)) {
+      return langParam as Language;
+    }
+    
+    // Then check localStorage
     const savedLang = localStorage.getItem('ma7alkom-language');
     if (savedLang && ['en', 'fr', 'ar'].includes(savedLang)) {
       return savedLang as Language;
     }
     
-    // Check browser language
+    // Finally check browser language
     const browserLang = navigator.language.split('-')[0];
     if (browserLang === 'fr') return 'fr';
     if (browserLang === 'ar') return 'ar';
@@ -711,12 +720,23 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const updateLanguage = (newLanguage: Language) => {
     setLanguage(newLanguage);
     localStorage.setItem('ma7alkom-language', newLanguage);
+    
+    // Also update URL parameter
+    const { pathname, search } = window.location;
+    const params = new URLSearchParams(search);
+    params.set('lang', newLanguage);
+    
+    // Use history API to update URL without full page reload
+    window.history.replaceState(null, '', `${pathname}?${params}`);
   };
   
   // Update document direction and save language to localStorage
   useEffect(() => {
     document.documentElement.setAttribute('dir', direction);
     document.documentElement.setAttribute('lang', language);
+    
+    // Always ensure localStorage is updated
+    localStorage.setItem('ma7alkom-language', language);
     
     // Update the HTML title and meta tags
     const updateMetaTags = () => {
@@ -745,26 +765,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     };
     
     updateMetaTags();
-    localStorage.setItem('ma7alkom-language', language);
-    
-    // Change the URL to include the language parameter
-    const { pathname, search } = window.location;
-    const params = new URLSearchParams(search);
-    params.set('lang', language);
-    const newUrl = `${pathname}?${params.toString()}`;
-    window.history.replaceState(null, '', newUrl);
-    
   }, [language, direction]);
-  
-  // Get URL parameters on initial load
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const langParam = urlParams.get('lang');
-    
-    if (langParam && ['en', 'fr', 'ar'].includes(langParam)) {
-      setLanguage(langParam as Language);
-    }
-  }, []);
   
   // Translation function with parameter support
   const t = (key: string, params?: Record<string, string | number>): string => {
