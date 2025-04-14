@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { additionalTranslations } from './additionalTranslations';
@@ -6,12 +5,16 @@ import { additionalTranslations } from './additionalTranslations';
 // Available languages
 export type Language = 'en' | 'fr' | 'ar';
 
-// Translation dictionary type
+// Translation dictionary type - modified to be more flexible
+export type TranslationSet = {
+  en: string;
+  fr: string;
+  ar: string;
+};
+
 export type Translations = {
-  [key: string]: {
-    en: string;
-    fr: string;
-    ar: string;
+  [key: string]: TranslationSet | {
+    [nestedKey: string]: TranslationSet | any;
   };
 };
 
@@ -211,7 +214,7 @@ export const translations: Translations = {
   weAccept: {
     en: 'We Accept',
     fr: 'Nous acceptons',
-    ar: 'نحن نقبل'
+    ar: 'Nous acceptons'
   },
   cashOnDelivery: {
     en: 'Cash on Delivery',
@@ -221,12 +224,12 @@ export const translations: Translations = {
   applyDiscount: {
     en: 'Apply Coupon',
     fr: 'Appliquer un coupon',
-    ar: 'تطبيق الكوبون'
+    ar: 'Appliquer un coupon'
   },
   discountCode: {
     en: 'Coupon code',
     fr: 'Code de coupon',
-    ar: 'رمز الكوبون'
+    ar: 'Code de coupon'
   },
   
   // Featured Section
@@ -666,8 +669,11 @@ export const translations: Translations = {
   }
 };
 
+// Create a merged translations type that includes both translation objects
+type MergedTranslationsType = typeof translations & typeof additionalTranslations;
+
 // Merge with additional translations
-const mergedTranslations = {
+const mergedTranslations: MergedTranslationsType = {
   ...translations,
   ...additionalTranslations
 };
@@ -763,12 +769,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Translation function with parameter support
   const t = (key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
-    let translation = mergedTranslations;
+    let translation: any = mergedTranslations;
     
     // Try to get nested translation
     for (let i = 0; i < keys.length - 1; i++) {
       if (translation[keys[i]]) {
-        translation = translation[keys[i]] as unknown as Translations;
+        translation = translation[keys[i]];
       } else {
         return params?.default as string || key; // Key not found, use default or key itself
       }
