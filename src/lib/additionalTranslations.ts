@@ -1,3 +1,4 @@
+
 // Additional translations for comprehensive website coverage
 export const additionalTranslations = {
   // Product details page translations
@@ -229,18 +230,6 @@ export const additionalTranslations = {
       en: 'Checkout - Ma7alkom',
       fr: 'Paiement - Ma7alkom',
       ar: 'الدفع - محلكم'
-    }
-  },
-  seoDescriptions: {
-    home: {
-      en: 'Your One-Stop Shop for Quality Accessories and Home Products',
-      fr: 'Votre guichet unique pour des accessoires et des produits de maison de qualité',
-      ar: 'متجرك الشامل للإكسسوارات ومنتجات المنزل ذات الجودة'
-    },
-    shop: {
-      en: 'Browse our extensive collection of quality products for your home and lifestyle',
-      fr: 'Parcourez notre vaste collection de produits de qualité pour votre maison et votre style de vie',
-      ar: 'تصفح مجموعتنا الواسعة من المنتجات عالية الجودة لمنزلك ونمط حياتك'
     }
   },
   
