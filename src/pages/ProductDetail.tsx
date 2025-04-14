@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import Layout from '@/components/Layout/Layout';
-import { Rating } from '@/components/Products/Rating';
 import ProductGrid from '@/components/Products/ProductGrid';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -90,11 +89,6 @@ const ProductDetail = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             
-            <div className="flex items-center space-x-2 mb-4">
-              <Rating value={product.rating} />
-              <span className="text-gray-500 text-sm">(Customer ratings)</span>
-            </div>
-            
             <div className="flex items-center mb-6">
               <span className="text-3xl font-bold text-smartplug-blue">{product.price} DH</span>
               {product.oldPrice && (
@@ -164,9 +158,8 @@ const ProductDetail = () => {
         {/* Product tabs */}
         <div className="mt-12">
           <Tabs defaultValue="description">
-            <TabsList className="w-full border-b border-gray-200 grid grid-cols-2 max-w-md">
+            <TabsList className="w-full border-b border-gray-200">
               <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="specifications">Specifications</TabsTrigger>
             </TabsList>
             <div className="p-4 border rounded-b-lg bg-white">
               <TabsContent value="description">
@@ -175,23 +168,6 @@ const ProductDetail = () => {
                 <p className="text-gray-600">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.
                 </p>
-              </TabsContent>
-              <TabsContent value="specifications">
-                <h3 className="text-lg font-medium mb-2">Product Specifications</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border-b pb-2">
-                    <span className="font-medium">Brand:</span> SmartPlug
-                  </div>
-                  <div className="border-b pb-2">
-                    <span className="font-medium">Model:</span> {product.sku}
-                  </div>
-                  <div className="border-b pb-2">
-                    <span className="font-medium">Category:</span> {product.category}
-                  </div>
-                  <div className="border-b pb-2">
-                    <span className="font-medium">Warranty:</span> 1 year
-                  </div>
-                </div>
               </TabsContent>
             </div>
           </Tabs>
