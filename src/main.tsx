@@ -18,6 +18,13 @@ const getLanguageFromUrl = () => {
 const initialLanguage = getLanguageFromUrl() || localStorage.getItem('ma7alkom-language') || 'en';
 localStorage.setItem('ma7alkom-language', initialLanguage);
 
+// Update URL if language param is missing but exists in localStorage
+if (!getLanguageFromUrl() && initialLanguage) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('lang', initialLanguage);
+  window.history.replaceState(null, '', url);
+}
+
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

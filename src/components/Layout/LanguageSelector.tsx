@@ -20,10 +20,18 @@ const LanguageSelector: React.FC = () => {
   ];
   
   const handleLanguageChange = (lang: Language) => {
+    // Set the language in context
     setLanguage(lang);
     
-    // The URL update is now handled in the context to ensure consistency
-    // and avoid issues when opening in new tabs
+    // Ensure all links on the page have the language parameter
+    document.querySelectorAll('a').forEach(link => {
+      // Only modify internal links (not external ones)
+      if (link.href.startsWith(window.location.origin)) {
+        const url = new URL(link.href);
+        url.searchParams.set('lang', lang);
+        link.href = url.toString();
+      }
+    });
   };
   
   const currentLanguage = languages.find(lang => lang.code === language);
