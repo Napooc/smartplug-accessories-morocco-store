@@ -1,4 +1,3 @@
-
 // Additional translations for comprehensive website coverage
 export const additionalTranslations = {
   // Product details page translations
