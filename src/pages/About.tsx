@@ -143,7 +143,7 @@ const AboutPage = () => {
                   <MapPin className="h-5 w-5 text-smartplug-blue mr-3 mt-1" />
                   <div>
                     <h4 className="font-medium">{t('location')}</h4>
-                    <p className="text-gray-600">Baydi 2, Berrechide, Morocco</p>
+                    <p className="text-gray-600">{t('storeAddress')}</p>
                   </div>
                 </div>
                 

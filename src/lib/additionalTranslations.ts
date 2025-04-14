@@ -324,6 +324,11 @@ export const additionalTranslations = {
     fr: 'Emplacement',
     ar: 'الموقع'
   },
+  storeAddress: {
+    en: 'Baydi 2, Berrechide, Morocco',
+    fr: 'Baydi 2, Berrechide, Maroc',
+    ar: 'بايدي 2، برشيد، المغرب'
+  },
   storeHours: {
     en: 'Store Hours',
     fr: 'Heures d\'ouverture',
