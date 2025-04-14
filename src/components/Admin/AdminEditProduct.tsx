@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -16,8 +17,9 @@ import {
 } from '@/components/ui/select';
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
-import { Product } from '@/lib/types';
+import { Product, ColorVariant } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import ColorVariantManager from './ColorVariantManager';
 
 interface AdminEditProductProps {
   product: Product;
@@ -89,6 +91,14 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     
+    processFiles(files);
+  };
+
+  const handleColorVariantImageUpload = (files: FileList, variantId: string) => {
+    processFiles(files, variantId);
+  };
+  
+  const processFiles = (files: FileList, variantId?: string) => {
     setIsUploading(true);
     
     Array.from(files).forEach(file => {
@@ -98,18 +108,36 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         if (event.target?.result) {
           const base64Image = event.target.result as string;
           
-          setProductData(prev => {
-            const updatedProduct = {
-              ...prev,
-              images: [...prev.images, base64Image]
-            };
-            
-            if (errors.images) {
-              setErrors(prev => ({ ...prev, images: '' }));
-            }
-            
-            return updatedProduct;
-          });
+          if (variantId) {
+            // Add to specific color variant
+            setProductData(prev => {
+              // Make sure colorVariants exists
+              const colorVariants = prev.colorVariants || [];
+              
+              return {
+                ...prev,
+                colorVariants: colorVariants.map(variant => 
+                  variant.id === variantId 
+                    ? { ...variant, images: [...variant.images, base64Image] } 
+                    : variant
+                )
+              };
+            });
+          } else {
+            // Add to main product images
+            setProductData(prev => {
+              const updatedProduct = {
+                ...prev,
+                images: [...prev.images, base64Image]
+              };
+              
+              if (errors.images) {
+                setErrors(prev => ({ ...prev, images: '' }));
+              }
+              
+              return updatedProduct;
+            });
+          }
         }
         setIsUploading(false);
       };
@@ -139,6 +167,13 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     setProductData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleColorVariantsChange = (colorVariants: ColorVariant[]) => {
+    setProductData(prev => ({
+      ...prev,
+      colorVariants
     }));
   };
   
@@ -317,8 +352,9 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           </RadioGroup>
         </div>
         
-        <div className="space-y-4">
-          <Label>Product Images</Label>
+        <div className="space-y-4 border-t pt-4">
+          <Label>Default Product Images</Label>
+          <p className="text-sm text-gray-500">These images will be shown when no color variant is selected.</p>
           
           <div className="flex">
             <input
@@ -379,6 +415,16 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               </div>
             )}
           </div>
+        </div>
+        
+        {/* Color Variants Section */}
+        <div className="border-t pt-4">
+          <ColorVariantManager
+            variants={productData.colorVariants || []}
+            onChange={handleColorVariantsChange}
+            onImageUpload={handleColorVariantImageUpload}
+            isUploading={isUploading}
+          />
         </div>
         
         <div className="flex space-x-3 justify-end pt-4">
