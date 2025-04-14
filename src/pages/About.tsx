@@ -30,16 +30,6 @@ const AboutPage = () => {
     if (ogDescription) {
       ogDescription.setAttribute('content', t('seoDescriptions.about'));
     }
-    
-    // Ensure all links on the page have the language parameter
-    document.querySelectorAll('a').forEach(link => {
-      // Only modify internal links (not external ones)
-      if (link.href.startsWith(window.location.origin)) {
-        const url = new URL(link.href);
-        url.searchParams.set('lang', language);
-        link.href = url.toString();
-      }
-    });
   }, [t, language]);
   
   return (
@@ -48,7 +38,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4" dir={direction}>
           <h1 className="text-3xl font-bold">{t('about')}</h1>
           <div className="flex items-center text-sm mt-2">
-            <Link to={`/?lang=${language}`} className="text-gray-500 hover:text-smartplug-blue">{t('home')}</Link>
+            <Link to="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</Link>
             <span className="mx-2">/</span>
             <span className="font-medium">{t('about')}</span>
           </div>
