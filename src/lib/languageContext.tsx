@@ -28,14 +28,29 @@ export type Translations = {
   };
 };
 
-// Create a merged translations type that includes both translation objects
-type MergedTranslationsType = typeof translations & typeof additionalTranslations;
+// Create a merged translations type that combines both translation objects
+// instead of trying to enforce an exact match, we'll use a more flexible approach
+export type MergedTranslationsType = typeof translations & Partial<typeof additionalTranslations>;
 
-// Merge the translations
-const mergedTranslations: MergedTranslationsType = {
-  ...translations,
-  ...additionalTranslations
+// Merge the translations with a deep merge function to handle nested structures properly
+const mergeTranslations = (target: any, source: any): any => {
+  const result = { ...target };
+  
+  for (const key in source) {
+    // If property is an object and not a translation set (which has en, fr, ar keys)
+    if (source[key] && typeof source[key] === 'object' && 
+        !('en' in source[key] && 'fr' in source[key] && 'ar' in source[key])) {
+      result[key] = result[key] ? mergeTranslations(result[key], source[key]) : { ...source[key] };
+    } else {
+      result[key] = source[key];
+    }
+  }
+  
+  return result;
 };
+
+// Merge the translations using our custom deep merge function
+const mergedTranslations = mergeTranslations(translations, additionalTranslations);
 
 // Define the language context type
 interface LanguageContextType {
