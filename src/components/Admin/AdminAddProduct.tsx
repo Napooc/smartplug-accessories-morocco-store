@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -134,7 +135,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
                 variant.id === variantId 
                   ? { ...variant, images: [...variant.images, base64Image] } 
                   : variant
-              ))
+              )
             }));
           } else {
             setProduct(prev => ({
