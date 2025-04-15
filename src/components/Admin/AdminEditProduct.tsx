@@ -108,9 +108,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           const base64Image = event.target.result as string;
           
           if (variantId) {
-            // Add to specific color variant
             setProductData(prev => {
-              // Make sure colorVariants exists
               const colorVariants = prev.colorVariants || [];
               
               return {
@@ -123,7 +121,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
               };
             });
           } else {
-            // Add to main product images
             setProductData(prev => {
               const updatedProduct = {
                 ...prev,
@@ -332,7 +329,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
         <div className="space-y-2 border-t pt-4">
           <Label>Product Placement</Label>
           <RadioGroup 
-            value={currentPlacement} 
+            value={productData.placement || 'regular'} 
             onValueChange={(value) => handlePlacementChange(value as 'best_selling' | 'deals' | 'regular')}
             className="flex flex-col space-y-2 mt-2"
           >
