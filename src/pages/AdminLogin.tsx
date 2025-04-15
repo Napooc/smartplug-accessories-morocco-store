@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useLanguage } from '@/lib/languageContext';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { login, isAdmin } = useStore();
+  const { t, direction } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,7 +29,7 @@ const AdminLogin = () => {
     
     // Validate form
     if (!username.trim() || !password.trim()) {
-      setError('Please enter both username and password');
+      setError(t('requiredField', { default: 'Please enter both username and password' }));
       return;
     }
     
@@ -35,24 +37,24 @@ const AdminLogin = () => {
     const success = login(username, password);
     
     if (success) {
-      toast.success('Login successful');
+      toast.success(t('successMessages.login', { default: 'Login successful' }));
       navigate('/admin');
     } else {
-      setError('Invalid username or password');
-      toast.error('Invalid credentials');
+      setError(t('errorMessages.invalidCredentials', { default: 'Invalid username or password' }));
+      toast.error(t('errorMessages.invalidCredentials', { default: 'Invalid credentials' }));
     }
   };
   
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12" dir={direction}>
         <div className="max-w-md mx-auto">
           <div className="bg-white rounded-lg shadow-md border p-8">
             <div className="text-center mb-6">
               <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
                 <Lock size={24} className="text-smartplug-blue" />
               </div>
-              <h1 className="text-2xl font-bold">Admin Login</h1>
+              <h1 className="text-2xl font-bold">{t('admin')} {t('login')}</h1>
             </div>
             
             {error && (
@@ -64,23 +66,23 @@ const AdminLogin = () => {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username">{t('username', { default: 'Username' })}</Label>
                   <Input
                     id="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter username"
+                    placeholder={t('enterUsername', { default: 'Enter username' })}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('password', { default: 'Password' })}</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
+                    placeholder={t('enterPassword', { default: 'Enter password' })}
                   />
                 </div>
                 
@@ -88,7 +90,7 @@ const AdminLogin = () => {
                   type="submit"
                   className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue"
                 >
-                  Login
+                  {t('login')}
                 </Button>
               </div>
             </form>

@@ -7,10 +7,12 @@ import ProductGrid from '@/components/Products/ProductGrid';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLanguage } from '@/lib/languageContext';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { getProductById, addToCart, products } = useStore();
+  const { t, direction } = useLanguage();
   const [quantity, setQuantity] = useState(1);
   
   const product = getProductById(id || '');
@@ -19,9 +21,9 @@ const ProductDetail = () => {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-16 text-center">
-          <h2 className="text-2xl font-bold">Product not found</h2>
+          <h2 className="text-2xl font-bold">{t('productNotFound', { default: 'Product not found' })}</h2>
           <Link to="/shop" className="text-smartplug-blue hover:underline mt-4 inline-block">
-            Return to shop
+            {t('returnToShop', { default: 'Return to shop' })}
           </Link>
         </div>
       </Layout>
@@ -58,15 +60,15 @@ const ProductDetail = () => {
   
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" dir={direction}>
         {/* Breadcrumb */}
         <nav className="flex mb-8 text-sm">
-          <Link to="/" className="text-gray-500 hover:text-smartplug-blue">Home</Link>
+          <Link to="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</Link>
           <span className="mx-2 text-gray-500">/</span>
-          <Link to="/shop" className="text-gray-500 hover:text-smartplug-blue">Shop</Link>
+          <Link to="/shop" className="text-gray-500 hover:text-smartplug-blue">{t('shop')}</Link>
           <span className="mx-2 text-gray-500">/</span>
           <Link to={`/categories/${product.category}`} className="text-gray-500 hover:text-smartplug-blue capitalize">
-            {product.category}
+            {t(`categories.${product.category}`, { default: product.category })}
           </Link>
           <span className="mx-2 text-gray-500">/</span>
           <span className="text-gray-900 font-medium">{product.name}</span>
@@ -96,7 +98,7 @@ const ProductDetail = () => {
               )}
               
               {product.onSale && (
-                <span className="sale-badge ml-4">Sale</span>
+                <span className="sale-badge ml-4">{t('sale')}</span>
               )}
             </div>
             
@@ -107,12 +109,12 @@ const ProductDetail = () => {
               <div className="flex items-center">
                 <span className="text-sm font-medium">
                   {product.stock > 0 
-                    ? `In Stock (${product.stock} available)` 
-                    : "Out of Stock"}
+                    ? t('inStock', { count: product.stock, default: `In Stock (${product.stock} available)` })
+                    : t('outOfStock', { default: "Out of Stock" })}
                 </span>
               </div>
               <div className="ml-6 text-sm text-gray-600">
-                SKU: <span className="font-medium">{product.sku}</span>
+                {t('sku', { default: 'SKU' })}: <span className="font-medium">{product.sku}</span>
               </div>
             </div>
             
@@ -139,7 +141,7 @@ const ProductDetail = () => {
                 className="ml-4 flex items-center bg-smartplug-blue hover:bg-smartplug-lightblue"
               >
                 <ShoppingCart size={18} className="mr-2" />
-                Add to Cart
+                {t('addToCart')}
               </Button>
             </div>
             
@@ -147,9 +149,9 @@ const ProductDetail = () => {
             
             {/* Category */}
             <div className="text-gray-600">
-              <span className="font-medium">Category:</span>{" "}
+              <span className="font-medium">{t('category', { default: 'Category' })}:</span>{" "}
               <Link to={`/categories/${product.category}`} className="hover:text-smartplug-blue capitalize">
-                {product.category}
+                {t(`categories.${product.category}`, { default: product.category })}
               </Link>
             </div>
           </div>
@@ -159,14 +161,14 @@ const ProductDetail = () => {
         <div className="mt-12">
           <Tabs defaultValue="description">
             <TabsList className="w-full border-b border-gray-200">
-              <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="description">{t('description', { default: 'Description' })}</TabsTrigger>
             </TabsList>
             <div className="p-4 border rounded-b-lg bg-white">
               <TabsContent value="description">
-                <h3 className="text-lg font-medium mb-2">Product Description</h3>
+                <h3 className="text-lg font-medium mb-2">{t('productDescription', { default: 'Product Description' })}</h3>
                 <p className="text-gray-600 mb-4">{product.description}</p>
                 <p className="text-gray-600">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.
+                  {t('productExtendedDescription', { default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.'})}
                 </p>
               </TabsContent>
             </div>
@@ -176,7 +178,7 @@ const ProductDetail = () => {
         {/* Related products */}
         {relatedProducts.length > 0 && (
           <div className="mt-16">
-            <ProductGrid products={relatedProducts} title="Related Products" />
+            <ProductGrid products={relatedProducts} title={t('relatedProducts', { default: 'Related Products' })} />
           </div>
         )}
       </div>

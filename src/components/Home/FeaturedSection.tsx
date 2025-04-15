@@ -21,13 +21,13 @@ export default function FeaturedSection({
   imageUrl,
   link
 }: FeaturedSectionProps) {
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
   
   return (
     <div className={`${bgColor} ${textColor} rounded-lg overflow-hidden`}>
-      <div className="container mx-auto p-8 flex flex-col md:flex-row items-center justify-between">
-        <div className="md:w-1/2 mb-6 md:mb-0">
-          <h3 className="text-lg font-medium mb-1">{t('featured')} {categoryName}</h3>
+      <div className="container mx-auto p-8 flex flex-col md:flex-row items-center justify-between" dir={direction}>
+        <div className={`md:w-1/2 mb-6 md:mb-0 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'}`}>
+          <h3 className="text-lg font-medium mb-1">{t('featured')} {t(`categories.${categoryName}`, { default: categoryName })}</h3>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
           {subtitle && <p className="text-lg mb-6">{subtitle}</p>}
           <Link 
@@ -37,7 +37,7 @@ export default function FeaturedSection({
             {t('viewAllProducts')}
           </Link>
         </div>
-        <div className="md:w-1/2 flex justify-center">
+        <div className={`md:w-1/2 flex justify-center ${direction === 'rtl' ? 'md:order-1' : 'md:order-2'}`}>
           <img 
             src={imageUrl} 
             alt={title} 
