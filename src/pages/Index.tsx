@@ -12,9 +12,7 @@ import { useLanguage } from "@/lib/languageContext";
 
 const Index = () => {
   const { 
-    featuredProducts, 
-    bestSellingProducts, 
-    dealsProducts, 
+    products,
     fetchOrders 
   } = useStore();
   
@@ -24,6 +22,11 @@ const Index = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+  
+  // Correctly filter products by their placement
+  const featuredProducts = products.filter(product => product.featured);
+  const bestSellingProducts = products.filter(product => product.placement === 'best_selling');
+  const dealsProducts = products.filter(product => product.placement === 'deals');
   
   return (
     <Layout>
@@ -36,7 +39,8 @@ const Index = () => {
           {bestSellingProducts.length > 0 ? (
             <ProductGrid 
               products={bestSellingProducts} 
-              title={t('bestSellingItems', { default: 'Best Selling Items' })} 
+              title={t('bestSellingItems', { default: 'Best Selling Items' })}
+              emptyMessage={t('noBestSellingItems', { default: 'No best selling items yet' })}
             />
           ) : (
             <TopSellingProducts />
@@ -47,7 +51,8 @@ const Index = () => {
           {dealsProducts.length > 0 && (
             <ProductGrid 
               products={dealsProducts} 
-              title={t('discountDeals', { default: 'Discounts & Deals' })} 
+              title={t('discountDeals', { default: 'Discounts & Deals' })}
+              emptyMessage={t('noDeals', { default: 'No deals available yet' })}
             />
           )}
         </div>
@@ -55,7 +60,8 @@ const Index = () => {
         <div className="my-12">
           <ProductGrid 
             products={featuredProducts} 
-            title={t('featured', { default: 'Featured Products' })} 
+            title={t('featured', { default: 'Featured Products' })}
+            emptyMessage={t('noFeaturedProducts', { default: 'No featured products yet' })}
           />
         </div>
         
