@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -99,7 +98,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       placement: value
     }));
     
-    // If placement is "deals", automatically set onSale to true
     if (value === 'deals') {
       setProduct(prev => ({
         ...prev,
@@ -130,17 +128,15 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           const base64Image = event.target.result as string;
           
           if (variantId) {
-            // Add to specific color variant
             setProduct(prev => ({
               ...prev,
               colorVariants: prev.colorVariants.map(variant => 
                 variant.id === variantId 
                   ? { ...variant, images: [...variant.images, base64Image] } 
                   : variant
-              )
+              ))
             }));
           } else {
-            // Add to main product images
             setProduct(prev => ({
               ...prev,
               images: [...prev.images, base64Image]
@@ -165,7 +161,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       reader.readAsDataURL(file);
     });
     
-    // Clear the file input for future uploads
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -209,17 +204,14 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     try {
       setIsSubmitting(true);
       
-      // Make sure onSale is true if placement is "deals"
       const productToAdd = {
         ...product,
         onSale: product.placement === 'deals' ? true : product.onSale
       };
       
-      // Use a timeout to prevent UI freezing
       await new Promise(resolve => setTimeout(resolve, 100));
       await addProduct(productToAdd);
       
-      // Reset form
       setProduct({
         name: '',
         description: '',
@@ -238,9 +230,8 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       
       toast.success("Product added successfully");
       
-      // Delay calling the callback to ensure UI updates properly
       setTimeout(() => {
-        onProductAdded(); // Call the callback function after successfully adding a product
+        onProductAdded();
       }, 300);
     } catch (error) {
       console.error('Error adding product:', error);
@@ -468,7 +459,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           </div>
         </div>
         
-        {/* Color Variants Section */}
         <div className="border-t pt-4">
           <ColorVariantManager
             variants={product.colorVariants}
