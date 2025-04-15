@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage, ColorVariant } from './types';
+import { CartItem, CustomerInfo, Product, Order, OrderStatus, ContactMessage } from './types';
 import { products as initialProducts } from './data';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,9 +24,9 @@ interface StoreContextType {
   
   // Cart
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number, colorVariant?: ColorVariant) => void;
-  removeFromCart: (productId: string, colorVariantId?: string) => void;
-  updateCartItemQuantity: (productId: string, quantity: number, colorVariantId?: string) => void;
+  addToCart: (product: Product, quantity?: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateCartItemQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   cartTotal: number;
   
@@ -70,7 +70,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Initialize store data on component mount
   useEffect(() => {
+    // Restore cart from localStorage
     const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
     if (savedCart) {
       try {
@@ -80,11 +82,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Check admin status
     const adminLoggedIn = localStorage.getItem(STORAGE_KEYS.ADMIN);
     if (adminLoggedIn === 'true') {
       setIsAdmin(true);
     }
 
+    // Fetch data from sources
     Promise.all([
       fetchProducts(),
       fetchOrders(),
@@ -93,15 +97,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
   }, []);
-
+  
+  // Sync cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
   }, [cart]);
 
+  /**
+   * Fetches products from Supabase and handles fallback to localStorage if needed
+   */
   const fetchProducts = async () => {
     try {
       console.log('Fetching products from Supabase...');
       
+      // First try to get products from localStorage for immediate display
       const localProductsJson = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       let localProducts: Product[] = [];
       
@@ -115,6 +124,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
       }
       
+      // Then try to fetch from Supabase for fresh data
       const { data, error } = await supabase
         .from('products')
         .select('*');
@@ -123,6 +133,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error('Error fetching products from Supabase:', error);
         toast.error("Error loading products from database");
         
+        // If we haven't loaded from localStorage yet, use as fallback
         if (localProducts.length === 0 && localProductsJson) {
           try {
             const parsedProducts = JSON.parse(localProductsJson);
@@ -133,6 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
         }
         
+        // Last resort: use initial sample data
         if (localProducts.length === 0) {
           const productsWithUUIDs = initialProducts.map(product => ({
             ...product,
@@ -165,13 +177,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           
           setProducts(formattedProducts);
           
+          // Save to localStorage for offline access
           localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(formattedProducts));
         } else {
+          // No products in DB, initialize with sample data
           console.log('No products found in DB, initializing with sample data');
           
           if (localProducts.length > 0) {
+            // Use already loaded localStorage products
             await syncLocalProductsToSupabase(localProducts);
           } else {
+            // Generate UUIDs for initial products
             const productsWithUUIDs = initialProducts.map(product => ({
               ...product,
               id: uuidv4()
@@ -180,6 +196,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             setProducts(productsWithUUIDs);
             localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
             
+            // Save initial products to database
             await syncLocalProductsToSupabase(productsWithUUIDs);
           }
         }
@@ -188,6 +205,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error('Error in fetchProducts:', error);
       toast.error("Error loading products");
       
+      // Try to get products from localStorage as a fallback
       const localProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (localProducts) {
         try {
@@ -196,6 +214,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         } catch (parseError) {
           console.error('Error parsing local products:', parseError);
           
+          // Use initial products as last resort
           const productsWithUUIDs = initialProducts.map(product => ({
             ...product,
             id: uuidv4()
@@ -205,6 +224,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
         }
       } else {
+        // Initialize with sample data if nothing else works
         const productsWithUUIDs = initialProducts.map(product => ({
           ...product,
           id: uuidv4()
@@ -215,12 +235,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     }
   };
-
+  
+  /**
+   * Syncs local products to Supabase database
+   */
   const syncLocalProductsToSupabase = async (localProducts: Product[]) => {
     try {
       for (const product of localProducts) {
-        const colorVariantsJson = product.colorVariants ? JSON.stringify(product.colorVariants) : null;
-        
         await supabase
           .from('products')
           .upsert({
@@ -235,8 +256,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             on_sale: product.onSale,
             stock: product.stock,
             rating: product.rating,
-            sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`,
-            color_variants: colorVariantsJson
+            sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
           }, { onConflict: 'id' });
       }
       console.log(`Successfully synced ${localProducts.length} products to Supabase`);
@@ -245,7 +265,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toast.warning('Some products may not be synced to the database');
     }
   };
-
+  
   const fetchContactMessages = useCallback(async () => {
     try {
       console.log("Fetching contact messages...");
@@ -278,6 +298,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Computed properties
   const featuredProducts = products.filter(product => product.featured);
   const saleProducts = products.filter(product => product.onSale);
   const bestSellingProducts = products.filter(product => product.placement === 'best_selling');
@@ -312,14 +333,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
   
+  /**
+   * Adds a new product to the store and syncs to all storage
+   */
   const addProduct = async (product: Omit<Product, 'id'>) => {
     try {
       const newProductId = uuidv4();
-      
-      const colorVariants = product.colorVariants?.map(variant => ({
-        ...variant,
-        id: variant.id || uuidv4()
-      }));
       
       const newProduct: Product = {
         id: newProductId,
@@ -333,18 +352,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         onSale: product.onSale || false,
         stock: product.stock || 0,
         rating: product.rating || 0,
-        sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`,
-        colorVariants: colorVariants
+        sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`
       };
       
       console.log('Adding new product:', newProduct);
       
+      // Update local state and localStorage first for immediate feedback
       const updatedProducts = [...products, newProduct];
       setProducts(updatedProducts);
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
-      const colorVariantsJson = colorVariants ? JSON.stringify(colorVariants) : null;
-      
+      // Then, update the database
       const { error } = await supabase
         .from('products')
         .insert({
@@ -359,8 +377,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           on_sale: newProduct.onSale,
           stock: newProduct.stock,
           rating: newProduct.rating,
-          sku: newProduct.sku,
-          color_variants: colorVariantsJson
+          sku: newProduct.sku
         });
       
       if (error) {
@@ -376,30 +393,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  /**
+   * Updates an existing product and syncs changes to all storage
+   */
   const updateProduct = async (id: string, productUpdate: Partial<Product>) => {
     try {
       console.log("Updating product with ID:", id);
       console.log("Update data:", productUpdate);
       
-      let colorVariants = productUpdate.colorVariants;
-      if (colorVariants) {
-        colorVariants = colorVariants.map(variant => ({
-          ...variant,
-          id: variant.id || uuidv4()
-        }));
-      }
-      
+      // First, update local state and localStorage
       const updatedProducts = products.map(product => 
-        product.id === id ? { 
-          ...product, 
-          ...productUpdate,
-          colorVariants: colorVariants || product.colorVariants 
-        } : product
+        product.id === id ? { ...product, ...productUpdate } : product
       );
       
       setProducts(updatedProducts);
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
+      // Then, update the database with proper field mapping
       const dbUpdate: Record<string, any> = {
         name: productUpdate.name,
         description: productUpdate.description,
@@ -412,10 +422,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         stock: productUpdate.stock,
         rating: productUpdate.rating,
         sku: productUpdate.sku,
-        placement: productUpdate.placement,
-        color_variants: colorVariants ? JSON.stringify(colorVariants) : undefined
+        placement: productUpdate.placement // Include placement in database update
       };
       
+      // Remove undefined fields
       Object.keys(dbUpdate).forEach(key => {
         if (dbUpdate[key] === undefined) {
           delete dbUpdate[key];
@@ -445,14 +455,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  /**
+   * Deletes a product and syncs changes to all storage
+   */
   const deleteProduct = async (id: string) => {
     try {
       console.log("Deleting product with ID:", id);
       
+      // Update local state and localStorage first for immediate feedback
       const updatedProducts = products.filter(product => product.id !== id);
       setProducts(updatedProducts);
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
+      // Then, delete from the database
       const { error } = await supabase
         .from('products')
         .delete()
@@ -472,49 +487,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const addToCart = (product: Product, quantity: number = 1, colorVariant?: ColorVariant) => {
+  // Cart operations
+  const addToCart = (product: Product, quantity: number = 1) => {
     setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(item => 
-        item.product.id === product.id && 
-        (!colorVariant || item.selectedColorVariant?.id === colorVariant.id)
-      );
+      const existingItem = prevCart.find(item => item.product.id === product.id);
       
-      if (existingItemIndex >= 0) {
-        const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex] = {
-          ...updatedCart[existingItemIndex],
-          quantity: updatedCart[existingItemIndex].quantity + quantity
-        };
-        return updatedCart;
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
       } else {
-        return [...prevCart, { 
-          product, 
-          quantity, 
-          selectedColorVariant: colorVariant 
-        }];
+        return [...prevCart, { product, quantity }];
       }
     });
     
-    const colorInfo = colorVariant ? ` - ${colorVariant.name}` : '';
-    toast.success(`${product.name}${colorInfo} added to cart`);
+    toast.success(`${product.name} added to cart`);
   };
   
-  const removeFromCart = (productId: string, colorVariantId?: string) => {
-    setCart(prevCart => prevCart.filter(item => 
-      item.product.id !== productId || 
-      (colorVariantId && item.selectedColorVariant?.id !== colorVariantId)
-    ));
-    
+  const removeFromCart = (productId: string) => {
+    setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
     toast.info("Item removed from cart");
   };
   
-  const updateCartItemQuantity = (productId: string, quantity: number, colorVariantId?: string) => {
+  const updateCartItemQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;
     
     setCart(prevCart =>
       prevCart.map(item =>
-        item.product.id === productId && 
-        (!colorVariantId || item.selectedColorVariant?.id === colorVariantId)
+        item.product.id === productId
           ? { ...item, quantity }
           : item
       )
@@ -525,6 +527,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
   
+  // Order operations
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -554,8 +557,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  /**
+   * Places an order with the given customer information and cart items
+   */
   const placeOrder = async (customerData: CustomerInfo): Promise<Order | undefined> => {
     try {
+      // Validate customer data
       if (!customerData || !customerData.name || !customerData.phone || !customerData.city) {
         console.error("Cannot place order: missing customer info", customerData);
         throw new Error("Complete customer information is required");
@@ -570,10 +577,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("Cart items to be ordered:", cart);
       console.log("Order total:", cartTotal);
       
+      // Set customer info to state for record-keeping
       setCustomerInfo(customerData);
       
+      // Generate a unique order ID
       const orderId = uuidv4();
       
+      // Create the order object that will be used in the app logic
       const newOrder: Order = {
         id: orderId,
         items: [...cart],
@@ -585,9 +595,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Created new order object:", newOrder);
       
+      // Convert CustomerInfo and CartItem[] to plain JSON objects for database storage
+      // This prevents type issues with Supabase's JSON column
       const customerInfoJson = JSON.parse(JSON.stringify(customerData));
       const cartItemsJson = JSON.parse(JSON.stringify(cart));
       
+      // Prepare the data object for Supabase
       const orderData = {
         id: orderId,
         customer_info: customerInfoJson,
@@ -599,6 +612,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Sending order data to Supabase:", orderData);
       
+      // Insert the order into Supabase
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
@@ -617,8 +631,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Order saved successfully to Supabase:', data);
       
+      // Update local orders state
       setOrders(prevOrders => [...prevOrders, newOrder]);
       
+      // Return the complete order object
       return newOrder;
     } catch (error) {
       console.error('Error in placeOrder function:', error);
@@ -654,6 +670,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Contact message operations
   const addContactMessage = async (message: Omit<ContactMessage, 'id' | 'date'>): Promise<void> => {
     try {
       console.log("Adding contact message:", message);
@@ -724,6 +741,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Admin operations
   const login = (username: string, password: string) => {
     if (username === 'admin' && password === 'admin123') {
       setIsAdmin(true);
@@ -738,6 +756,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEYS.ADMIN);
   };
   
+  // Create store context value
   const value: StoreContextType = {
     products,
     featuredProducts,

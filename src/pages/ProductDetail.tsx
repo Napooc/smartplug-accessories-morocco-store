@@ -1,58 +1,29 @@
 
-import { useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import Layout from '@/components/Layout/Layout';
+import { Rating } from '@/components/Products/Rating';
 import ProductGrid from '@/components/Products/ProductGrid';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLanguage } from '@/lib/languageContext';
-import { ColorVariant } from '@/lib/types';
-import { LocalizedLink } from '@/components/ui/localized-link';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { getProductById, addToCart, products } = useStore();
-  const { t, direction } = useLanguage();
   const [quantity, setQuantity] = useState(1);
-  const [searchParams, setSearchParams] = useSearchParams();
   
   const product = getProductById(id || '');
-  
-  // Get color variant from URL param
-  const colorParam = searchParams.get('color');
-  const [selectedColorVariant, setSelectedColorVariant] = useState<ColorVariant | undefined>(
-    product?.colorVariants?.find(c => c.id === colorParam)
-  );
-  
-  // Update selected color when URL param changes or product loads
-  useEffect(() => {
-    if (product?.colorVariants?.length) {
-      // Try to get variant from URL param
-      const variantFromParam = product.colorVariants.find(c => c.id === colorParam);
-      
-      // If URL param is valid, use it, otherwise use first variant
-      setSelectedColorVariant(variantFromParam || product.colorVariants[0]);
-    }
-  }, [product, colorParam]);
-  
-  // Set URL when selected color changes
-  useEffect(() => {
-    if (selectedColorVariant && selectedColorVariant.id !== colorParam) {
-      searchParams.set('color', selectedColorVariant.id);
-      setSearchParams(searchParams);
-    }
-  }, [selectedColorVariant]);
   
   if (!product) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-16 text-center">
-          <h2 className="text-2xl font-bold">{t('productNotFound', { default: 'Product not found' })}</h2>
-          <LocalizedLink to="/shop" className="text-smartplug-blue hover:underline mt-4 inline-block">
-            {t('returnToShop', { default: 'Return to shop' })}
-          </LocalizedLink>
+          <h2 className="text-2xl font-bold">Product not found</h2>
+          <Link to="/shop" className="text-smartplug-blue hover:underline mt-4 inline-block">
+            Return to shop
+          </Link>
         </div>
       </Layout>
     );
@@ -71,69 +42,33 @@ const ProductDetail = () => {
   };
   
   const increaseQuantity = () => {
-    const maxStock = selectedColorVariant 
-      ? selectedColorVariant.stock 
-      : product.stock;
-      
-    if (quantity < maxStock) {
+    if (quantity < product.stock) {
       setQuantity(quantity + 1);
     }
   };
   
   // Handle add to cart
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedColorVariant);
+    addToCart(product, quantity);
   };
   
-  // Get the current price accounting for color variants
-  const getCurrentPrice = () => {
-    if (selectedColorVariant) {
-      return product.price + selectedColorVariant.priceAdjustment;
-    }
-    return product.price;
-  };
-  
-  // Get the current old price accounting for color variants
-  const getCurrentOldPrice = () => {
-    if (selectedColorVariant && product.oldPrice) {
-      return product.oldPrice + selectedColorVariant.priceAdjustment;
-    }
-    return product.oldPrice;
-  };
-  
-  // Get current stock level
-  const getCurrentStock = () => {
-    return selectedColorVariant ? selectedColorVariant.stock : product.stock;
-  };
-  
-  // Get product images - use color variant images if selected
-  const getProductImages = () => {
-    if (selectedColorVariant && selectedColorVariant.images.length > 0) {
-      return selectedColorVariant.images;
-    }
-    return product.images;
-  };
-  
-  // Get main product image
-  const productImage = getProductImages()[0] || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80`;
-  
-  // Handle color selection
-  const handleColorSelect = (colorVariant: ColorVariant) => {
-    setSelectedColorVariant(colorVariant);
-  };
+  // Get product image - use the first image if available or find a suitable placeholder
+  let productImage = product.images && product.images.length > 0 
+    ? product.images[0] 
+    : `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80`;
   
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8" dir={direction}>
+      <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-8 text-sm">
-          <LocalizedLink to="/" className="text-gray-500 hover:text-smartplug-blue">{t('home')}</LocalizedLink>
+          <Link to="/" className="text-gray-500 hover:text-smartplug-blue">Home</Link>
           <span className="mx-2 text-gray-500">/</span>
-          <LocalizedLink to="/shop" className="text-gray-500 hover:text-smartplug-blue">{t('shop')}</LocalizedLink>
+          <Link to="/shop" className="text-gray-500 hover:text-smartplug-blue">Shop</Link>
           <span className="mx-2 text-gray-500">/</span>
-          <LocalizedLink to={`/categories/${product.category}`} className="text-gray-500 hover:text-smartplug-blue capitalize">
-            {t(`categories.${product.category}`, { default: product.category })}
-          </LocalizedLink>
+          <Link to={`/categories/${product.category}`} className="text-gray-500 hover:text-smartplug-blue capitalize">
+            {product.category}
+          </Link>
           <span className="mx-2 text-gray-500">/</span>
           <span className="text-gray-900 font-medium">{product.name}</span>
         </nav>
@@ -149,92 +84,41 @@ const ProductDetail = () => {
               style={{ maxHeight: '400px' }}
               loading="eager"
             />
-            
-            {/* Color variant image gallery */}
-            {getProductImages().length > 1 && (
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {getProductImages().map((img, index) => (
-                  <div 
-                    key={index} 
-                    className="border rounded cursor-pointer hover:border-smartplug-blue"
-                    onClick={() => {
-                      // In a more complex implementation, this would switch the main image
-                      // without changing the variant
-                    }}
-                  >
-                    <img 
-                      src={img} 
-                      alt={`${product.name} ${index+1}`} 
-                      className="h-16 w-16 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           
           {/* Product info */}
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             
+            <div className="flex items-center space-x-2 mb-4">
+              <Rating value={product.rating} />
+              <span className="text-gray-500 text-sm">(Customer ratings)</span>
+            </div>
+            
             <div className="flex items-center mb-6">
-              <span className="text-3xl font-bold text-smartplug-blue">{getCurrentPrice()} DH</span>
-              {getCurrentOldPrice() && (
-                <span className="line-through text-gray-500 ml-2">{getCurrentOldPrice()} DH</span>
+              <span className="text-3xl font-bold text-smartplug-blue">{product.price} DH</span>
+              {product.oldPrice && (
+                <span className="line-through text-gray-500 ml-2">{product.oldPrice} DH</span>
               )}
               
               {product.onSale && (
-                <span className="sale-badge ml-4">{t('sale')}</span>
+                <span className="sale-badge ml-4">Sale</span>
               )}
             </div>
             
             <p className="text-gray-700 mb-6">{product.description}</p>
             
-            {/* Color variants */}
-            {product.colorVariants && product.colorVariants.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-medium mb-3">{t('selectColor', { default: 'Select Color' })}</h3>
-                <div className="flex flex-wrap gap-3">
-                  {product.colorVariants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      type="button"
-                      onClick={() => handleColorSelect(variant)}
-                      className={`
-                        w-10 h-10 rounded-full border-2 flex items-center justify-center
-                        ${selectedColorVariant?.id === variant.id ? 'border-smartplug-blue' : 'border-gray-200'}
-                      `}
-                      style={{ backgroundColor: variant.hexValue }}
-                      title={variant.name}
-                      aria-label={`Select color ${variant.name}`}
-                    >
-                      {selectedColorVariant?.id === variant.id && (
-                        <div className="w-4 h-4 rounded-full border-2 border-white" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                {selectedColorVariant && (
-                  <p className="text-sm mt-2">
-                    {selectedColorVariant.name}
-                    {selectedColorVariant.priceAdjustment > 0 && ` (+${selectedColorVariant.priceAdjustment} DH)`}
-                  </p>
-                )}
-              </div>
-            )}
-            
             {/* Stock status */}
             <div className="flex items-center mb-6">
               <div className="flex items-center">
                 <span className="text-sm font-medium">
-                  {getCurrentStock() > 0 
-                    ? t('inStock', { count: getCurrentStock(), default: `In Stock (${getCurrentStock()} available)` })
-                    : t('outOfStock', { default: "Out of Stock" })}
+                  {product.stock > 0 
+                    ? `In Stock (${product.stock} available)` 
+                    : "Out of Stock"}
                 </span>
               </div>
               <div className="ml-6 text-sm text-gray-600">
-                {t('sku', { default: 'SKU' })}: <span className="font-medium">{product.sku}</span>
+                SKU: <span className="font-medium">{product.sku}</span>
               </div>
             </div>
             
@@ -244,7 +128,6 @@ const ProductDetail = () => {
                 <button 
                   onClick={decreaseQuantity}
                   className="px-4 py-2 border-r hover:bg-gray-100"
-                  disabled={getCurrentStock() <= 0}
                 >
                   -
                 </button>
@@ -252,7 +135,6 @@ const ProductDetail = () => {
                 <button 
                   onClick={increaseQuantity}
                   className="px-4 py-2 border-l hover:bg-gray-100"
-                  disabled={getCurrentStock() <= 0 || quantity >= getCurrentStock()}
                 >
                   +
                 </button>
@@ -261,10 +143,9 @@ const ProductDetail = () => {
               <Button 
                 onClick={handleAddToCart}
                 className="ml-4 flex items-center bg-smartplug-blue hover:bg-smartplug-lightblue"
-                disabled={getCurrentStock() <= 0}
               >
                 <ShoppingCart size={18} className="mr-2" />
-                {t('addToCart')}
+                Add to Cart
               </Button>
             </div>
             
@@ -272,10 +153,10 @@ const ProductDetail = () => {
             
             {/* Category */}
             <div className="text-gray-600">
-              <span className="font-medium">{t('category', { default: 'Category' })}:</span>{" "}
-              <LocalizedLink to={`/categories/${product.category}`} className="hover:text-smartplug-blue capitalize">
-                {t(`categories.${product.category}`, { default: product.category })}
-              </LocalizedLink>
+              <span className="font-medium">Category:</span>{" "}
+              <Link to={`/categories/${product.category}`} className="hover:text-smartplug-blue capitalize">
+                {product.category}
+              </Link>
             </div>
           </div>
         </div>
@@ -283,16 +164,34 @@ const ProductDetail = () => {
         {/* Product tabs */}
         <div className="mt-12">
           <Tabs defaultValue="description">
-            <TabsList className="w-full border-b border-gray-200">
-              <TabsTrigger value="description">{t('description', { default: 'Description' })}</TabsTrigger>
+            <TabsList className="w-full border-b border-gray-200 grid grid-cols-2 max-w-md">
+              <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="specifications">Specifications</TabsTrigger>
             </TabsList>
             <div className="p-4 border rounded-b-lg bg-white">
               <TabsContent value="description">
-                <h3 className="text-lg font-medium mb-2">{t('productDescription', { default: 'Product Description' })}</h3>
+                <h3 className="text-lg font-medium mb-2">Product Description</h3>
                 <p className="text-gray-600 mb-4">{product.description}</p>
                 <p className="text-gray-600">
-                  {t('productExtendedDescription', { default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.'})}
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.
                 </p>
+              </TabsContent>
+              <TabsContent value="specifications">
+                <h3 className="text-lg font-medium mb-2">Product Specifications</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border-b pb-2">
+                    <span className="font-medium">Brand:</span> SmartPlug
+                  </div>
+                  <div className="border-b pb-2">
+                    <span className="font-medium">Model:</span> {product.sku}
+                  </div>
+                  <div className="border-b pb-2">
+                    <span className="font-medium">Category:</span> {product.category}
+                  </div>
+                  <div className="border-b pb-2">
+                    <span className="font-medium">Warranty:</span> 1 year
+                  </div>
+                </div>
               </TabsContent>
             </div>
           </Tabs>
@@ -301,7 +200,7 @@ const ProductDetail = () => {
         {/* Related products */}
         {relatedProducts.length > 0 && (
           <div className="mt-16">
-            <ProductGrid products={relatedProducts} title={t('relatedProducts', { default: 'Related Products' })} />
+            <ProductGrid products={relatedProducts} title="Related Products" />
           </div>
         )}
       </div>

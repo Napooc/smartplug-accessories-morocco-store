@@ -1,8 +1,8 @@
-
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
+import { Rating } from './Rating';
 import { useLanguage } from '@/lib/languageContext';
 
 interface ProductCardProps {
@@ -122,6 +122,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
       
       <div className="p-4 flex-grow flex flex-col">
+        <div className="mb-2">
+          <Rating value={product.rating} />
+        </div>
+        
         <Link to={`/product/${product.id}`}>
           <h3 className="font-medium text-lg mb-1 hover:text-smartplug-blue transition-colors">
             {getTranslatedProductData('name')}

@@ -1,8 +1,6 @@
-
 export interface CartItem {
   product: Product;
   quantity: number;
-  selectedColorVariant?: ColorVariant;
 }
 
 export interface CustomerInfo {
@@ -31,15 +29,6 @@ export interface Order {
   total: number;
 }
 
-export interface ColorVariant {
-  id: string;
-  name: string;
-  hexValue: string;
-  images: string[];
-  priceAdjustment: number;
-  stock: number;
-}
-
 export interface Product {
   id: string;
   name: string;
@@ -54,7 +43,6 @@ export interface Product {
   rating: number;
   sku: string;
   placement?: 'best_selling' | 'deals' | 'regular';
-  colorVariants?: ColorVariant[];
 }
 
 // Adding the missing interfaces

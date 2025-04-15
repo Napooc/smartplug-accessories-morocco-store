@@ -4,7 +4,6 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import { useStore } from '@/lib/store';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { LocalizedLink } from '@/components/ui/localized-link';
 
 const AdminDashboard = () => {
   const { orders, products, fetchOrders } = useStore();
