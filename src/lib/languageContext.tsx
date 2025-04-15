@@ -1,20 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { additionalTranslations } from './additionalTranslations';
 
 // Available languages
 export type Language = 'en' | 'fr' | 'ar';
 
-// Translation dictionary type - modified to be more flexible
-export type TranslationSet = {
-  en: string;
-  fr: string;
-  ar: string;
-};
-
+// Translation dictionary type
 export type Translations = {
-  [key: string]: TranslationSet | {
-    [nestedKey: string]: TranslationSet | any;
+  [key: string]: {
+    en: string;
+    fr: string;
+    ar: string;
   };
 };
 
@@ -214,7 +209,7 @@ export const translations: Translations = {
   weAccept: {
     en: 'We Accept',
     fr: 'Nous acceptons',
-    ar: 'Nous acceptons'
+    ar: 'نحن نقبل'
   },
   cashOnDelivery: {
     en: 'Cash on Delivery',
@@ -224,12 +219,12 @@ export const translations: Translations = {
   applyDiscount: {
     en: 'Apply Coupon',
     fr: 'Appliquer un coupon',
-    ar: 'Appliquer un coupon'
+    ar: 'تطبيق الكوبون'
   },
   discountCode: {
     en: 'Coupon code',
     fr: 'Code de coupon',
-    ar: 'Code de coupon'
+    ar: 'رمز الكوبون'
   },
   
   // Featured Section
@@ -497,10 +492,26 @@ export const translations: Translations = {
     fr: 'Liens rapides',
     ar: 'روابط سريعة'
   },
-  
-  // Footer additional sections
-  // Removed newsletter section as requested
-  
+  newsletter: {
+    en: 'Newsletter',
+    fr: 'Bulletin d\'information',
+    ar: 'النشرة الإخبارية'
+  },
+  newsletterText: {
+    en: 'Subscribe to our newsletter to get updates on our latest offers!',
+    fr: 'Abonnez-vous à notre newsletter pour recevoir des mises à jour sur nos dernières offres!',
+    ar: 'اشترك في نشرتنا الإخبارية للحصول على تحديثات حول أحدث عروضنا!'
+  },
+  enterEmail: {
+    en: 'Enter your email',
+    fr: 'Entrez votre email',
+    ar: 'أدخل بريدك الإلكتروني'
+  },
+  subscribe: {
+    en: 'Subscribe',
+    fr: 'S\'abonner',
+    ar: 'اشترك'
+  },
   allRightsReserved: {
     en: 'All rights reserved.',
     fr: 'Tous droits réservés.',
@@ -669,15 +680,6 @@ export const translations: Translations = {
   }
 };
 
-// Create a merged translations type that includes both translation objects
-type MergedTranslationsType = typeof translations & typeof additionalTranslations;
-
-// Merge with additional translations
-const mergedTranslations: MergedTranslationsType = {
-  ...translations,
-  ...additionalTranslations
-};
-
 // Create the context
 interface LanguageContextType {
   language: Language;
@@ -717,64 +719,18 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     document.documentElement.setAttribute('dir', direction);
     document.documentElement.setAttribute('lang', language);
-    
-    // Update the HTML title and meta tags
-    const updateMetaTags = () => {
-      // Update meta description
-      const descriptionTag = document.querySelector('meta[name="description"]');
-      if (descriptionTag && mergedTranslations.seoDescriptions?.home) {
-        descriptionTag.setAttribute('content', mergedTranslations.seoDescriptions.home[language]);
-      }
-      
-      // Update OG description
-      const ogDescriptionTag = document.querySelector('meta[property="og:description"]');
-      if (ogDescriptionTag && mergedTranslations.seoDescriptions?.home) {
-        ogDescriptionTag.setAttribute('content', mergedTranslations.seoDescriptions.home[language]);
-      }
-      
-      // Update title
-      if (mergedTranslations.seoTitles?.home) {
-        document.title = mergedTranslations.seoTitles.home[language];
-      }
-      
-      // Update OG title
-      const ogTitleTag = document.querySelector('meta[property="og:title"]');
-      if (ogTitleTag && mergedTranslations.seoTitles?.home) {
-        ogTitleTag.setAttribute('content', mergedTranslations.seoTitles.home[language]);
-      }
-    };
-    
-    updateMetaTags();
     localStorage.setItem('ma7alkom-language', language);
-    
-    // Change the URL to include the language parameter
-    const { pathname, search } = window.location;
-    const params = new URLSearchParams(search);
-    params.set('lang', language);
-    const newUrl = `${pathname}?${params.toString()}`;
-    window.history.replaceState(null, '', newUrl);
-    
   }, [language, direction]);
-  
-  // Get URL parameters on initial load
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const langParam = urlParams.get('lang');
-    
-    if (langParam && ['en', 'fr', 'ar'].includes(langParam)) {
-      setLanguage(langParam as Language);
-    }
-  }, []);
   
   // Translation function with parameter support
   const t = (key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
-    let translation: any = mergedTranslations;
+    let translation = translations;
     
     // Try to get nested translation
     for (let i = 0; i < keys.length - 1; i++) {
       if (translation[keys[i]]) {
-        translation = translation[keys[i]];
+        translation = translation[keys[i]] as unknown as Translations;
       } else {
         return params?.default as string || key; // Key not found, use default or key itself
       }

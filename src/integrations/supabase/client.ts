@@ -13,8 +13,22 @@ export const supabase = createClient<Database>(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false, // Disable auto detection of auth parameters in URL
       storage: localStorage
+    },
+    // Adding global error handlers to prevent silent failures
+    global: {
+      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+        console.log(`Supabase request to: ${typeof input === 'string' ? input : input.toString()}`);
+        return fetch(input, init).then(response => {
+          if (!response.ok) {
+            console.error(`Supabase request failed: ${response.status} ${response.statusText}`);
+          }
+          return response;
+        }).catch(error => {
+          console.error('Supabase request error:', error);
+          throw error;
+        });
+      }
     }
   }
 );

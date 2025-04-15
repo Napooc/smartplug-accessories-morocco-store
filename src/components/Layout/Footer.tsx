@@ -1,6 +1,8 @@
 
 import { Link } from 'react-router-dom';
-import { Headphones, Phone, Mail, Tag } from 'lucide-react';
+import { Headphones, Phone, Mail, Facebook, Instagram, Twitter, Tag } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/lib/languageContext';
 
 export default function Footer() {
@@ -10,7 +12,7 @@ export default function Footer() {
   return (
     <footer className="bg-white pt-12 mt-16 border-t">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Headphones className="h-6 w-6 text-smartplug-blue" />
@@ -59,6 +61,30 @@ export default function Footer() {
               <h4 className="font-medium mb-2">{t('address', { default: 'Address' })}</h4>
               <p className="text-gray-600">Baydi 2, Berrechide, Morocco</p>
               <p className="text-gray-600">{t('storeHours', { default: 'Store Hours' })}: Monday - Saturday: 08:00 AM - 6:00 PM</p>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">{t('newsletter')}</h3>
+            <p className="text-gray-600 mb-4">{t('newsletterText')}</p>
+            <div className="flex space-x-2">
+              <Input type="email" placeholder={t('enterEmail')} className="bg-gray-100" />
+              <Button>{t('subscribe')}</Button>
+            </div>
+            
+            <div className="mt-6">
+              <h4 className="font-medium mb-2">{t('followUs', { default: 'Follow Us' })}</h4>
+              <div className="flex space-x-4">
+                <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                  <Facebook size={18} className="text-gray-600" />
+                </a>
+                <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                  <Instagram size={18} className="text-gray-600" />
+                </a>
+                <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                  <Twitter size={18} className="text-gray-600" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

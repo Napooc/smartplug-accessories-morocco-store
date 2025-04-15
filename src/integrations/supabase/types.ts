@@ -69,44 +69,6 @@ export type Database = {
         }
         Relationships: []
       }
-      product_comments: {
-        Row: {
-          comment: string
-          created_at: string
-          email: string
-          id: string
-          name: string
-          product_id: string
-          rating: number | null
-        }
-        Insert: {
-          comment: string
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          product_id: string
-          rating?: number | null
-        }
-        Update: {
-          comment?: string
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          product_id?: string
-          rating?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_comments_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       products: {
         Row: {
           category: string
