@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -417,7 +416,6 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
           </div>
         </div>
         
-        {/* Color Variants Section */}
         <div className="border-t pt-4">
           <ColorVariantManager
             variants={productData.colorVariants || []}
