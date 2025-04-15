@@ -1,8 +1,8 @@
+
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Eye } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
-import { Rating } from './Rating';
 import { useLanguage } from '@/lib/languageContext';
 
 interface ProductCardProps {
@@ -122,10 +122,6 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
       
       <div className="p-4 flex-grow flex flex-col">
-        <div className="mb-2">
-          <Rating value={product.rating} />
-        </div>
-        
         <Link to={`/product/${product.id}`}>
           <h3 className="font-medium text-lg mb-1 hover:text-smartplug-blue transition-colors">
             {getTranslatedProductData('name')}
@@ -146,20 +142,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex justify-between items-center">
           <button 
             onClick={() => addToCart(product)}
-            className="bg-smartplug-blue hover:bg-smartplug-lightblue text-white px-3 py-1.5 rounded text-sm flex items-center transition-colors"
+            className="bg-smartplug-blue hover:bg-smartplug-lightblue text-white px-3 py-1.5 rounded text-sm flex items-center transition-colors w-full justify-center"
           >
             <ShoppingCart size={16} className="mr-1" />
             {t('addToCart')}
           </button>
-          
-          <div className="flex space-x-2">
-            <button className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
-              <Heart size={16} />
-            </button>
-            <Link to={`/product/${product.id}`} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
-              <Eye size={16} />
-            </Link>
-          </div>
         </div>
       </div>
     </div>

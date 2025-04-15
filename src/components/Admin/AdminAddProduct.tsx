@@ -17,6 +17,8 @@ import {
 import { categories } from '@/lib/data';
 import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ColorVariant } from '@/lib/types';
+import ColorVariantManager from './ColorVariantManager';
 
 interface AdminAddProductProps {
   onProductAdded: () => void;
@@ -38,7 +40,8 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     images: [] as string[],
     rating: 0,
     sku: '',
-    placement: 'regular' as 'best_selling' | 'deals' | 'regular'
+    placement: 'regular' as 'best_selling' | 'deals' | 'regular',
+    colorVariants: [] as ColorVariant[]
   });
   
   const [errors, setErrors] = useState({
@@ -96,7 +99,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       placement: value
     }));
     
-    // If placement is "deals", automatically set onSale to true
     if (value === 'deals') {
       setProduct(prev => ({
         ...prev,
@@ -109,6 +111,14 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     
+    processFiles(files);
+  };
+
+  const handleColorVariantImageUpload = (files: FileList, variantId: string) => {
+    processFiles(files, variantId);
+  };
+  
+  const processFiles = (files: FileList, variantId?: string) => {
     setIsUploading(true);
     
     Array.from(files).forEach(file => {
@@ -117,16 +127,28 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       reader.onload = (event) => {
         if (event.target?.result) {
           const base64Image = event.target.result as string;
-          setProduct(prev => ({
-            ...prev,
-            images: [...prev.images, base64Image]
-          }));
           
-          if (errors.images) {
-            setErrors(prev => ({
+          if (variantId) {
+            setProduct(prev => ({
               ...prev,
-              images: ''
+              colorVariants: prev.colorVariants.map(variant => 
+                variant.id === variantId 
+                  ? { ...variant, images: [...variant.images, base64Image] } 
+                  : variant
+              )
             }));
+          } else {
+            setProduct(prev => ({
+              ...prev,
+              images: [...prev.images, base64Image]
+            }));
+            
+            if (errors.images) {
+              setErrors(prev => ({
+                ...prev,
+                images: ''
+              }));
+            }
           }
         }
         setIsUploading(false);
@@ -140,7 +162,6 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
       reader.readAsDataURL(file);
     });
     
-    // Clear the file input for future uploads
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -150,6 +171,13 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     setProduct(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+  
+  const handleColorVariantsChange = (colorVariants: ColorVariant[]) => {
+    setProduct(prev => ({
+      ...prev,
+      colorVariants
     }));
   };
   
@@ -177,17 +205,14 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     try {
       setIsSubmitting(true);
       
-      // Make sure onSale is true if placement is "deals"
       const productToAdd = {
         ...product,
         onSale: product.placement === 'deals' ? true : product.onSale
       };
       
-      // Use a timeout to prevent UI freezing
       await new Promise(resolve => setTimeout(resolve, 100));
       await addProduct(productToAdd);
       
-      // Reset form
       setProduct({
         name: '',
         description: '',
@@ -200,14 +225,14 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
         images: [],
         rating: 0,
         sku: '',
-        placement: 'regular'
+        placement: 'regular',
+        colorVariants: []
       });
       
       toast.success("Product added successfully");
       
-      // Delay calling the callback to ensure UI updates properly
       setTimeout(() => {
-        onProductAdded(); // Call the callback function after successfully adding a product
+        onProductAdded();
       }, 300);
     } catch (error) {
       console.error('Error adding product:', error);
@@ -370,8 +395,9 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
           </RadioGroup>
         </div>
         
-        <div className="space-y-4">
-          <Label>Product Images</Label>
+        <div className="space-y-4 border-t pt-4">
+          <Label>Default Product Images</Label>
+          <p className="text-sm text-gray-500">These images will be shown when no color variant is selected.</p>
           
           <div className="flex">
             <input
@@ -432,6 +458,15 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
               </div>
             )}
           </div>
+        </div>
+        
+        <div className="border-t pt-4">
+          <ColorVariantManager
+            variants={product.colorVariants}
+            onChange={handleColorVariantsChange}
+            onImageUpload={handleColorVariantImageUpload}
+            isUploading={isUploading}
+          />
         </div>
         
         <Button 

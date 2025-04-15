@@ -14,12 +14,12 @@ export default function TopSellingProducts() {
     .slice(0, 4);
   
   return (
-    <section className="py-10 bg-gray-50 rounded-lg overflow-hidden" dir={direction}>
-      <div className="container mx-auto">
+    <section className="py-10 bg-gray-50 rounded-lg overflow-hidden">
+      <div className="container mx-auto" dir={direction}>
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('bestSellingProducts', { default: 'Best-Selling Products' })}</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('bestSellingProducts')}</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            {t('discoverBestProducts', { default: 'Discover our most loved products with exceptional quality and customer satisfaction' })}
+            {t('discoverBestProducts')}
           </p>
         </div>
         
