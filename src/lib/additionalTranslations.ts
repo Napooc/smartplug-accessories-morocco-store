@@ -1,4 +1,3 @@
-
 // Additional translations for comprehensive website coverage
 export const additionalTranslations = {
   // Product details page translations
@@ -360,5 +359,51 @@ export const additionalTranslations = {
       fr: 'Découvrez l\'histoire, les valeurs et la mission de Ma7alkom pour fournir des accessoires de haute qualité à des prix abordables dans tout le Maroc',
       ar: 'تعرف على قصة محلكم وقيمها ومهمتها لتوفير إكسسوارات عالية الجودة بأسعار معقولة في جميع أنحاء المغرب'
     }
+  }
+};
+
+// Add gallery-specific translations
+export const galleryTranslations = {
+  en: {
+    storeEntranceAlt: "Our Store Entrance",
+    storeEntranceDesc: "Our distinctive blue entrance welcomes customers to explore our wide range of plumbing and bathroom fixtures.",
+    storeBathroomAlt: "Bathroom Fixtures Display",
+    storeBathroomDesc: "Browse our comprehensive collection of high-quality bathroom fixtures and accessories.",
+    storeDisplayAlt: "Product Display Area",
+    storeDisplayDesc: "Our organized display area makes it easy to find exactly what you're looking for.",
+    storeWarehouseAlt: "Our Warehouse",
+    storeWarehouseDesc: "We maintain a well-stocked warehouse to ensure quick availability of all products.",
+    viewGallery: "View Gallery",
+    closeGallery: "Close",
+    nextImage: "Next",
+    previousImage: "Previous",
+  },
+  fr: {
+    storeEntranceAlt: "Entrée de notre magasin",
+    storeEntranceDesc: "Notre entrée bleue distinctive accueille les clients pour explorer notre large gamme d'articles de plomberie et sanitaires.",
+    storeBathroomAlt: "Exposition d'équipements de salle de bain",
+    storeBathroomDesc: "Parcourez notre collection complète d'équipements et d'accessoires de salle de bain de haute qualité.",
+    storeDisplayAlt: "Zone d'exposition des produits",
+    storeDisplayDesc: "Notre zone d'exposition organisée facilite la recherche exacte de ce que vous cherchez.",
+    storeWarehouseAlt: "Notre entrepôt",
+    storeWarehouseDesc: "Nous maintenons un entrepôt bien approvisionné pour assurer la disponibilité rapide de tous les produits.",
+    viewGallery: "Voir la galerie",
+    closeGallery: "Fermer",
+    nextImage: "Suivant",
+    previousImage: "Précédent",
+  },
+  ar: {
+    storeEntranceAlt: "مدخل متجرنا",
+    storeEntranceDesc: "يرحب مدخلنا الأزرق المميز بالعملاء لاستكشاف مجموعتنا الواسعة من تجهيزات السباكة والحمام.",
+    storeBathroomAlt: "عرض تجهيزات الحمام",
+    storeBathroomDesc: "تصفح مجموعتنا الشاملة من تجهيزات وإكسسوارات الحمام عالية الجودة.",
+    storeDisplayAlt: "منطقة عرض المنتجات",
+    storeDisplayDesc: "تجعل منطقة العرض المنظمة لدينا من السهل العثور على ما تبحث عنه بالضبط.",
+    storeWarehouseAlt: "مستودعنا",
+    storeWarehouseDesc: "نحتفظ بمستودع مجهز جيدًا لضمان التوفر السريع لجميع المنتجات.",
+    viewGallery: "عرض المعرض",
+    closeGallery: "إغلاق",
+    nextImage: "التالي",
+    previousImage: "السابق",
   }
 };

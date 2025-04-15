@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import Layout from '@/components/Layout/Layout';
+import StoreGallery from '@/components/About/StoreGallery';
 import { ExternalLink, Users, Award, Clock, MapPin } from 'lucide-react';
 import { useLanguage } from '@/lib/languageContext';
 import { LocalizedLink } from '@/components/ui/localized-link';
@@ -49,20 +50,20 @@ const AboutPage = () => {
       </div>
       
       <div className="container mx-auto px-4 py-12" dir={direction}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+        <div className="mb-16">
           <div className={direction === 'rtl' ? 'lg:order-2' : 'lg:order-1'}>
-            <h2 className="text-3xl font-bold mb-6">{t('storyTitle')}</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-3xl font-bold mb-6 text-center">{t('storyTitle')}</h2>
+            <p className="text-gray-600 mb-4 max-w-3xl mx-auto text-center">
               {t('storyParagraph1')}
             </p>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-4 max-w-3xl mx-auto text-center">
               {t('storyParagraph2')}
             </p>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-6 max-w-3xl mx-auto text-center">
               {t('storyParagraph3')}
             </p>
             
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-wrap gap-6 justify-center mb-10">
               <div className="flex items-center">
                 <div className="p-2 rounded-full bg-blue-100 mr-3">
                   <Users size={20} className="text-smartplug-blue" />
@@ -85,13 +86,8 @@ const AboutPage = () => {
             </div>
           </div>
           
-          <div className={`rounded-lg overflow-hidden shadow-md ${direction === 'rtl' ? 'lg:order-1' : 'lg:order-2'}`}>
-            <img
-              src="https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=2070&auto=format&fit=crop"
-              alt={t('teamMa7alkom')}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          {/* Replace the static image with our interactive gallery */}
+          <StoreGallery />
         </div>
         
         <div className="text-center mb-12">
