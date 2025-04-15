@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import Layout from '@/components/Layout/Layout';
+import StoreGallery from '@/components/About/StoreGallery';
 import { ExternalLink, Users, Award, Clock, MapPin } from 'lucide-react';
 import { useLanguage } from '@/lib/languageContext';
 import { LocalizedLink } from '@/components/ui/localized-link';
@@ -85,12 +86,8 @@ const AboutPage = () => {
             </div>
           </div>
           
-          <div className={`rounded-lg overflow-hidden shadow-md ${direction === 'rtl' ? 'lg:order-1' : 'lg:order-2'}`}>
-            <img
-              src="https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=2070&auto=format&fit=crop"
-              alt={t('teamMa7alkom')}
-              className="w-full h-full object-cover"
-            />
+          <div className={`${direction === 'rtl' ? 'lg:order-1' : 'lg:order-2'}`}>
+            <StoreGallery />
           </div>
         </div>
         

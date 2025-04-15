@@ -1,4 +1,3 @@
-
 // Additional translations for comprehensive website coverage
 export const additionalTranslations = {
   // Product details page translations
@@ -6,88 +5,6 @@ export const additionalTranslations = {
     en: 'Product not found',
     fr: 'Produit non trouvé',
     ar: 'المنتج غير موجود'
-  },
-  returnToShop: {
-    en: 'Return to shop',
-    fr: 'Retourner à la boutique',
-    ar: 'العودة إلى المتجر'
-  },
-  inStock: {
-    en: 'In Stock ({count} available)',
-    fr: 'En stock ({count} disponible)',
-    ar: 'متوفر ({count} متاح)'
-  },
-  outOfStock: {
-    en: 'Out of Stock',
-    fr: 'Rupture de stock',
-    ar: 'نفذ من المخزون'
-  },
-  sku: {
-    en: 'SKU',
-    fr: 'Référence',
-    ar: 'رمز المنتج'
-  },
-  description: {
-    en: 'Description',
-    fr: 'Description',
-    ar: 'الوصف'
-  },
-  productDescription: {
-    en: 'Product Description',
-    fr: 'Description du produit',
-    ar: 'وصف المنتج'
-  },
-  productExtendedDescription: {
-    en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.',
-    fr: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id.',
-    ar: 'هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد هذا النص من مولد النص العربى، حيث يمكنك أن تولد مثل هذا النص أو العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التى يولدها التطبيق.'
-  },
-  relatedProducts: {
-    en: 'Related Products',
-    fr: 'Produits connexes',
-    ar: 'منتجات ذات صلة'
-  },
-  categories: {
-    homeKitchen: {
-      en: 'Home & Kitchen',
-      fr: 'Maison & Cuisine',
-      ar: 'المنزل والمطبخ'
-    },
-    electronics: {
-      en: 'Electronics',
-      fr: 'Électronique',
-      ar: 'الإلكترونيات'
-    },
-    toolsLighting: {
-      en: 'Tools & Lighting',
-      fr: 'Outils & Éclairage',
-      ar: 'أدوات وإضاءة'
-    },
-    plumbing: {
-      en: 'Plumbing',
-      fr: 'Plomberie',
-      ar: 'السباكة'
-    },
-    gardenTerrace: {
-      en: 'Garden & Terrace',
-      fr: 'Jardin & Terrasse',
-      ar: 'الحديقة والشرفة'
-    },
-    paintHardware: {
-      en: 'Paint & Hardware',
-      fr: 'Peinture & Quincaillerie',
-      ar: 'الطلاء والأجهزة'
-    },
-    bathroomToilet: {
-      en: 'Bathroom & Toilet',
-      fr: 'Salle de bain & Toilette',
-      ar: 'الحمام والمرحاض'
-    },
-    heatingAc: {
-      en: 'Heating & AC',
-      fr: 'Chauffage & Climatisation',
-      ar: 'التدفئة والتكييف'
-    }
   },
   
   // Form validations and messages
@@ -360,5 +277,87 @@ export const additionalTranslations = {
       fr: 'Découvrez l\'histoire, les valeurs et la mission de Ma7alkom pour fournir des accessoires de haute qualité à des prix abordables dans tout le Maroc',
       ar: 'تعرف على قصة محلكم وقيمها ومهمتها لتوفير إكسسوارات عالية الجودة بأسعار معقولة في جميع أنحاء المغرب'
     }
+  },
+  
+  // Store gallery translations
+  gallery: {
+    storefrontTab: {
+      en: 'Store Front',
+      fr: 'Devanture',
+      ar: 'واجهة المتجر'
+    },
+    bathroomTab: {
+      en: 'Bathroom Section',
+      fr: 'Section Salle de Bain',
+      ar: 'قسم الحمام'
+    },
+    warehouseTab: {
+      en: 'Warehouse',
+      fr: 'Entrepôt',
+      ar: 'المستودع'
+    },
+    storefront: {
+      en: 'Our Store Entrance',
+      fr: 'Entrée de Notre Magasin',
+      ar: 'مدخل متجرنا'
+    },
+    storefrontDesc: {
+      en: 'The blue container design of our store creates a unique and modern shopping environment',
+      fr: 'La conception en conteneur bleu de notre magasin crée un environnement d\'achat unique et moderne',
+      ar: 'تصميم الحاوية الزرقاء لمتجرنا يخلق بيئة تسوق فريدة وحديثة'
+    },
+    bathroom: {
+      en: 'Bathroom Products Display',
+      fr: 'Présentation des Produits de Salle de Bain',
+      ar: 'عرض م��تجات الحمام'
+    },
+    bathroomDesc: {
+      en: 'Our bathroom fixtures section offers a wide range of quality products for your home',
+      fr: 'Notre section d\'accessoires de salle de bain offre une large gamme de produits de qualité pour votre maison',
+      ar: 'يقدم قسم تجهيزات الحمام لدينا مجموعة واسعة من المنتجات عالية الجودة لمنزلك'
+    },
+    bathroomDisplay: {
+      en: 'Modern Bathroom Solutions',
+      fr: 'Solutions de Salle de Bain Modernes',
+      ar: 'حلول حمام عصرية'
+    },
+    bathroomDisplayDesc: {
+      en: 'Explore our selection of modern bathroom fixtures and accessories for your renovation projects',
+      fr: 'Explorez notre sélection d\'accessoires et de fixtures de salle de bain modernes pour vos projets de rénovation',
+      ar: 'استكشف مجموعتنا من تجهيزات وإكسسوارات الحمام العصرية لمشاريع التجديد الخاصة بك'
+    },
+    warehouse: {
+      en: 'Our Warehouse',
+      fr: 'Notre Entrepôt',
+      ar: 'مستودعنا'
+    },
+    warehouseDesc: {
+      en: 'Our well-stocked warehouse ensures we always have the products you need',
+      fr: 'Notre entrepôt bien approvisionné nous assure de toujours avoir les produits dont vous avez besoin',
+      ar: 'يضمن مستودعنا المجهز جيدًا أن لدينا دائمًا المنتجات التي تحتاجها'
+    },
+    viewLarger: {
+      en: 'View Larger',
+      fr: 'Voir Plus Grand',
+      ar: 'عرض أكبر'
+    },
+    closeGallery: {
+      en: 'Close Gallery',
+      fr: 'Fermer la Galerie',
+      ar: 'إغلاق المعرض'
+    }
   }
+};
+
+// Extract gallery translations for easier access
+export const galleryTranslations = {
+  en: additionalTranslations.gallery,
+  fr: Object.entries(additionalTranslations.gallery).reduce((acc, [key, item]) => {
+    acc[key] = item.fr;
+    return acc;
+  }, {} as Record<string, string>),
+  ar: Object.entries(additionalTranslations.gallery).reduce((acc, [key, item]) => {
+    acc[key] = item.ar;
+    return acc;
+  }, {} as Record<string, string>)
 };
