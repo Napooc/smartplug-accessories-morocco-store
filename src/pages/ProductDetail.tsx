@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
@@ -82,7 +81,7 @@ const ProductDetail = () => {
   
   // Handle add to cart
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedColorVariant);
+    addToCart(product);
   };
   
   // Get the current price accounting for color variants
