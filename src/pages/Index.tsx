@@ -35,10 +35,10 @@ const Index = () => {
     <Layout>
       <Hero />
       
-      <div className="container mx-auto px-4 py-8" dir={direction}>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8" dir={direction}>
         <CategoryGrid />
         
-        <div className="my-12">
+        <div className="my-8 md:my-12">
           {bestSellingProducts.length > 0 ? (
             <ProductGrid 
               products={bestSellingProducts} 
@@ -50,7 +50,7 @@ const Index = () => {
           )}
         </div>
         
-        <div className="my-12">
+        <div className="my-8 md:my-12">
           {dealsProducts.length > 0 && (
             <ProductGrid 
               products={dealsProducts} 
@@ -60,7 +60,7 @@ const Index = () => {
           )}
         </div>
         
-        <div className="my-12">
+        <div className="my-8 md:my-12">
           <ProductGrid 
             products={featuredProducts} 
             title={t('featured', { default: 'Featured Products' })}
@@ -68,11 +68,11 @@ const Index = () => {
           />
         </div>
         
-        <div className="my-12">
+        <div className="my-8 md:my-12">
           <InnovationShowcase />
         </div>
         
-        <div className="my-12">
+        <div className="my-8 md:my-12">
           <CustomerBenefits />
         </div>
       </div>

@@ -92,6 +92,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply break-words;
+  }
 }
 
 @layer components {
@@ -104,19 +108,19 @@
   }
   
   .product-card-image {
-    @apply w-full h-48 object-contain p-4 bg-gray-50;
+    @apply w-full h-36 sm:h-40 md:h-48 object-contain p-4 bg-gray-50;
   }
   
   .product-card-content {
-    @apply p-4;
+    @apply p-3 sm:p-4;
   }
   
   .product-price {
-    @apply text-lg font-bold text-smartplug-blue;
+    @apply text-base md:text-lg font-bold text-smartplug-blue;
   }
   
   .product-old-price {
-    @apply line-through text-gray-500 text-sm ml-2;
+    @apply line-through text-gray-500 text-xs sm:text-sm ml-2;
   }
   
   .button-primary {
@@ -129,5 +133,50 @@
   
   .product-rating {
     @apply flex text-yellow-400 text-sm mb-2;
+  }
+  
+  /* Responsive container */
+  .responsive-container {
+    @apply w-full px-4 mx-auto;
+    @apply sm:max-w-[640px];
+    @apply md:max-w-[768px];
+    @apply lg:max-w-[1024px];
+    @apply xl:max-w-[1280px];
+  }
+  
+  /* Responsive typography */
+  .text-responsive {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+  
+  .heading-responsive {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold;
+  }
+  
+  /* Responsive grid */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  /* Responsive padding */
+  .py-responsive {
+    @apply py-4 sm:py-6 md:py-8 lg:py-10;
+  }
+  
+  .px-responsive {
+    @apply px-4 sm:px-6 md:px-8 lg:px-10;
+  }
+}
+
+#root {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Media queries for responsive adjustments */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
