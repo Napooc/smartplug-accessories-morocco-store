@@ -5,7 +5,6 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { LanguageProvider } from './lib/languageContext.tsx'
-import { StoreProvider } from './lib/store'
 import { getUserLanguagePreference, setUserLanguagePreference } from './lib/languageUtils'
 
 // Initialize language before rendering
@@ -31,9 +30,7 @@ createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <LanguageProvider>
-        <StoreProvider>
-          <App />
-        </StoreProvider>
+        <App />
       </LanguageProvider>
     </BrowserRouter>
   </React.StrictMode>
