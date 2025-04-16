@@ -24,7 +24,8 @@ import Logo from './Logo';
 const Navbar = () => {
   const isMobile = useIsMobile();
   const { t, direction } = useLanguage();
-  const { cart } = useStore();
+  const storeState = useStore();
+  const cart = storeState.cart || []; // Provide default empty array if cart is undefined
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,6 +70,9 @@ const Navbar = () => {
   const navbarClass = isScrolled 
     ? 'bg-white shadow-md' 
     : 'bg-transparent';
+
+  // Calculate cart items count safely
+  const cartItemsCount = cart.length;
 
   return (
     <>
@@ -146,9 +150,9 @@ const Navbar = () => {
                 aria-label="Cart"
               >
                 <ShoppingCart className="h-5 w-5" />
-                {cart.length > 0 && (
+                {cartItemsCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-smartplug-blue text-white text-xs h-5 w-5 flex items-center justify-center rounded-full">
-                    {cart.length}
+                    {cartItemsCount}
                   </span>
                 )}
               </Link>

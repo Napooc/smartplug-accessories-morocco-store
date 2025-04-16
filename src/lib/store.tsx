@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Product, Order, OrderStatus, CustomerInfo } from './types';
+import { Product, Order, OrderStatus, CustomerInfo, CartItem } from './types';
 
 interface StoreState {
   products: Product[];
@@ -9,6 +9,8 @@ interface StoreState {
   dealsProducts: Product[];
   featuredProducts: Product[];
   isAdmin: boolean;
+  cart: CartItem[];
+  cartTotal: number;
   
   fetchProducts: () => Promise<void>;
   fetchOrders: () => Promise<void>;
@@ -27,6 +29,17 @@ interface StoreState {
   updateCustomer: (id: string, updates: Partial<CustomerInfo>) => Promise<void>;
   deleteCustomer: (id: string) => Promise<void>;
 
+  addToCart: (product: Product, quantity?: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateCartItemQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+
+  placeOrder: (customerInfo: CustomerInfo) => Promise<Order | null>;
+
+  getProductById: (id: string) => Product | undefined;
+  getProductsByCategory: (category: string) => Product[];
+  getProductsByPlacement: (placement: string) => Product[];
+  
   login: (username: string, password: string) => boolean;
   logout: () => void;
   checkAdminSession: () => Promise<boolean>;
@@ -40,6 +53,8 @@ const useStoreBase = create<StoreState>((set, get) => ({
   dealsProducts: [],
   featuredProducts: [],
   isAdmin: false,
+  cart: [],
+  cartTotal: 0,
   
   fetchProducts: async () => {
     try {
@@ -103,7 +118,7 @@ const useStoreBase = create<StoreState>((set, get) => ({
       )
     }));
   },
-
+  
   updateOrderStatus: async (id: string, status: OrderStatus) => {
     set(state => ({
       orders: state.orders.map(order =>
@@ -130,6 +145,107 @@ const useStoreBase = create<StoreState>((set, get) => ({
   
   deleteCustomer: async (id) => {
     set(state => ({ customers: state.customers.filter(customer => customer.id !== id) }));
+  },
+  
+  addToCart: (product, quantity = 1) => {
+    set(state => {
+      const existingItemIndex = state.cart.findIndex(item => item.product.id === product.id);
+      let newCart = [...state.cart];
+      
+      if (existingItemIndex >= 0) {
+        newCart[existingItemIndex] = {
+          ...newCart[existingItemIndex],
+          quantity: newCart[existingItemIndex].quantity + quantity
+        };
+      } else {
+        newCart.push({
+          product,
+          quantity
+        });
+      }
+      
+      const newTotal = newCart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+      
+      return {
+        cart: newCart,
+        cartTotal: newTotal
+      };
+    });
+  },
+  
+  removeFromCart: (productId) => {
+    set(state => {
+      const newCart = state.cart.filter(item => item.product.id !== productId);
+      const newTotal = newCart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+      
+      return {
+        cart: newCart,
+        cartTotal: newTotal
+      };
+    });
+  },
+  
+  updateCartItemQuantity: (productId, quantity) => {
+    set(state => {
+      if (quantity <= 0) {
+        return state;
+      }
+      
+      const newCart = state.cart.map(item => 
+        item.product.id === productId 
+          ? { ...item, quantity } 
+          : item
+      );
+      
+      const newTotal = newCart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+      
+      return {
+        cart: newCart,
+        cartTotal: newTotal
+      };
+    });
+  },
+  
+  clearCart: () => {
+    set({ cart: [], cartTotal: 0 });
+  },
+  
+  getProductById: (id) => {
+    return get().products.find(product => product.id === id);
+  },
+  
+  getProductsByCategory: (category) => {
+    return get().products.filter(product => product.category === category);
+  },
+  
+  getProductsByPlacement: (placement) => {
+    return get().products.filter(product => product.placement === placement);
+  },
+  
+  placeOrder: async (customerInfo) => {
+    const { cart, cartTotal } = get();
+    
+    if (cart.length === 0) {
+      console.error("Cannot place empty order");
+      return null;
+    }
+    
+    const newOrder: Order = {
+      id: Math.random().toString(),
+      items: [...cart],
+      status: 'pending',
+      customer: customerInfo,
+      date: new Date().toISOString(),
+      total: cartTotal
+    };
+    
+    try {
+      await get().addOrder(newOrder);
+      return newOrder;
+    } catch (error) {
+      console.error("Failed to place order:", error);
+      return null;
+    }
   },
   
   login: (username: string, password: string) => {
