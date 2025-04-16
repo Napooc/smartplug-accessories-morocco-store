@@ -1,8 +1,10 @@
+
 import { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
+import LanguageSelector from '@/components/Layout/LanguageSelector';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -117,7 +119,8 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             </Link>
           </div>
           
-          <div className="flex items-center ml-auto">
+          <div className="flex items-center ml-auto gap-2">
+            <LanguageSelector />
             <Button
               onClick={handleLogout}
               variant="ghost"
