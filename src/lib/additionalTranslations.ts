@@ -25,6 +25,11 @@ export const additionalTranslations = {
   },
   
   // Admin section translations
+  admin: {
+    en: 'Admin',
+    fr: 'Admin',
+    ar: 'المشرف'
+  },
   dashboard: {
     en: 'Dashboard',
     fr: 'Tableau de bord',
@@ -49,6 +54,114 @@ export const additionalTranslations = {
     en: 'Settings',
     fr: 'Paramètres',
     ar: 'الإعدادات'
+  },
+  logout: {
+    en: 'Logout',
+    fr: 'Déconnexion',
+    ar: 'تسجيل الخروج'
+  },
+  
+  // Admin dashboard translations
+  admin: {
+    en: 'Admin',
+    fr: 'Admin',
+    ar: 'مشرف',
+    
+    // Dashboard cards
+    totalOrders: {
+      en: 'Total Orders',
+      fr: 'Commandes Totales',
+      ar: 'إجمالي الطلبات'
+    },
+    totalProducts: {
+      en: 'Total Products',
+      fr: 'Produits Totaux',
+      ar: 'إجمالي المنتجات'
+    },
+    totalRevenue: {
+      en: 'Total Revenue',
+      fr: 'Revenu Total',
+      ar: 'إجمالي الإيرادات'
+    },
+    viewAllOrders: {
+      en: 'View all orders',
+      fr: 'Voir toutes les commandes',
+      ar: 'عرض جميع الطلبات'
+    },
+    viewAllProducts: {
+      en: 'View all products',
+      fr: 'Voir tous les produits',
+      ar: 'عرض جميع المنتجات'
+    },
+    viewDetails: {
+      en: 'View details',
+      fr: 'Voir les détails',
+      ar: 'عرض التفاصيل'
+    },
+    
+    // Order table
+    recentOrders: {
+      en: 'Recent Orders',
+      fr: 'Commandes Récentes',
+      ar: 'الطلبات الأخيرة'
+    },
+    noOrders: {
+      en: 'No orders yet',
+      fr: 'Pas encore de commandes',
+      ar: 'لا توجد طلبات حتى الآن'
+    },
+    orderId: {
+      en: 'Order ID',
+      fr: 'ID Commande',
+      ar: 'رقم الطلب'
+    },
+    customer: {
+      en: 'Customer',
+      fr: 'Client',
+      ar: 'العميل'
+    },
+    date: {
+      en: 'Date',
+      fr: 'Date',
+      ar: 'التاريخ'
+    },
+    status: {
+      en: 'Status',
+      fr: 'Statut',
+      ar: 'الحالة'
+    },
+    total: {
+      en: 'Total',
+      fr: 'Total',
+      ar: 'المجموع'
+    },
+    
+    // Order status section
+    orderStatus: {
+      en: 'Order Status',
+      fr: 'Statut des Commandes',
+      ar: 'حالة الطلب'
+    },
+    pendingOrders: {
+      en: 'Pending Orders',
+      fr: 'Commandes en Attente',
+      ar: 'الطلبات المعلقة'
+    },
+    shippedOrders: {
+      en: 'Shipped Orders',
+      fr: 'Commandes Expédiées',
+      ar: 'الطلبات المشحونة'
+    },
+    deliveredOrders: {
+      en: 'Delivered Orders',
+      fr: 'Commandes Livrées',
+      ar: 'الطلبات المسلمة'
+    },
+    cancelledOrders: {
+      en: 'Cancelled Orders',
+      fr: 'Commandes Annulées',
+      ar: 'الطلبات الملغاة'
+    }
   },
   
   // Order status translations
@@ -147,6 +260,11 @@ export const additionalTranslations = {
       en: 'Checkout - Ma7alkom',
       fr: 'Paiement - Ma7alkom',
       ar: 'الدفع - محلكم'
+    },
+    admin: {
+      en: 'Admin Dashboard - Ma7alkom',
+      fr: 'Tableau de Bord Admin - Ma7alkom',
+      ar: 'لوحة تحكم المشرف - محلكم'
     }
   },
   

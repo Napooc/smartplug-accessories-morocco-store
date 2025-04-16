@@ -5,6 +5,7 @@ import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 import LanguageSelector from '@/components/Layout/LanguageSelector';
+import { useLanguage } from '@/lib/languageContext';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -22,6 +23,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const { isAdmin, logout } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   
   // Use the hook for scrolling to top on navigation
   useScrollToTop();
@@ -40,17 +42,17 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   
   const navItems = [
     {
-      title: 'Dashboard',
+      title: t('dashboard'),
       path: '/admin',
       icon: <LayoutDashboard size={20} />
     },
     {
-      title: 'Orders',
+      title: t('orders'),
       path: '/admin/orders',
       icon: <ShoppingBag size={20} />
     },
     {
-      title: 'Products',
+      title: t('products'),
       path: '/admin/products',
       icon: <Package size={20} />
     }
@@ -68,7 +70,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           <div className="px-4 pb-4 border-b">
             <Link to="/" className="flex items-center">
               <span className="text-xl font-bold tracking-widest text-smartplug-blue">Ma7alkom</span>
-              <span className="ml-2 text-sm text-gray-500">Admin</span>
+              <span className="ml-2 text-sm text-gray-500">{t('admin')}</span>
             </Link>
           </div>
           
@@ -102,7 +104,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
               className="flex items-center justify-center w-full"
             >
               <LogOut size={16} className="mr-2" />
-              <span>Logout</span>
+              <span>{t('logout')}</span>
             </Button>
           </div>
         </div>
@@ -115,7 +117,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           <div className="md:hidden">
             <Link to="/" className="flex items-center">
               <span className="text-xl font-bold tracking-widest text-smartplug-blue">Ma7alkom</span>
-              <span className="ml-2 text-sm text-gray-500">Admin</span>
+              <span className="ml-2 text-sm text-gray-500">{t('admin')}</span>
             </Link>
           </div>
           
@@ -128,7 +130,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
               size="sm"
             >
               <LogOut size={16} className="mr-2" />
-              <span className="hidden md:inline">Logout</span>
+              <span className="hidden md:inline">{t('logout')}</span>
             </Button>
           </div>
         </div>
