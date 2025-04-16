@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { additionalTranslations } from './additionalTranslations';
@@ -81,10 +80,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     if (langParam && ['en', 'fr', 'ar'].includes(langParam) && langParam !== language) {
       setLanguage(langParam as Language);
     } else if (!langParam && language) {
-      // Update URL if language param is missing
-      const url = new URL(window.location.href);
-      url.searchParams.set('lang', language);
-      window.history.replaceState(null, '', url);
+      // Update URL if language param is missing - using History API instead of direct URL modification
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', language);
+        window.history.replaceState(null, '', url.toString());
+      } catch (error) {
+        console.error("Failed to update URL with language parameter:", error);
+      }
     }
   }, [location.search, location.pathname]);
   
@@ -94,11 +97,15 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       // Update state
       setLanguage(newLanguage);
       
-      // Update localStorage and URL
+      // Update localStorage and URL safely
       setUserLanguagePreference(newLanguage);
       
       // Update all links with new language parameter
-      updatePageLinks(newLanguage);
+      try {
+        updatePageLinks(newLanguage);
+      } catch (error) {
+        console.error("Error updating page links:", error);
+      }
       
       // Log language change (in development)
       if (process.env.NODE_ENV === 'development') {
@@ -113,26 +120,30 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.setAttribute('lang', language);
     
     // Update all links with current language
-    updatePageLinks(language);
-    
-    // Try to determine current page for metadata updates
-    const pathname = window.location.pathname;
-    let pageName = 'home';
-    
-    if (pathname.includes('/about')) {
-      pageName = 'about';
-    } else if (pathname.includes('/shop')) {
-      pageName = 'shop';
-    } else if (pathname.includes('/contact')) {
-      pageName = 'contact';
-    } else if (pathname.includes('/cart')) {
-      pageName = 'cart';
-    } else if (pathname.includes('/checkout')) {
-      pageName = 'checkout';
+    try {
+      updatePageLinks(language);
+      
+      // Try to determine current page for metadata updates
+      const pathname = window.location.pathname;
+      let pageName = 'home';
+      
+      if (pathname.includes('/about')) {
+        pageName = 'about';
+      } else if (pathname.includes('/shop')) {
+        pageName = 'shop';
+      } else if (pathname.includes('/contact')) {
+        pageName = 'contact';
+      } else if (pathname.includes('/cart')) {
+        pageName = 'cart';
+      } else if (pathname.includes('/checkout')) {
+        pageName = 'checkout';
+      }
+      
+      // Update metadata based on current page
+      updatePageMetadata(language, pageName, mergedTranslations);
+    } catch (error) {
+      console.error("Error in language effect:", error);
     }
-    
-    // Update metadata based on current page
-    updatePageMetadata(language, pageName, mergedTranslations);
   }, [language, direction]);
   
   // Translation function with parameter support

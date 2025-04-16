@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link as RouterLink, LinkProps } from 'react-router-dom';
+import { Link as RouterLink, LinkProps, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/languageContext';
 
 type LocalizedLinkProps = LinkProps & {
@@ -19,13 +19,30 @@ export const LocalizedLink: React.FC<LocalizedLinkProps> = ({ to, children, ...p
   }
   
   // For non-admin routes, add language parameter
-  const url = new URL(toStr, window.location.origin);
-  url.searchParams.set('lang', language);
+  // Create a safe copy of the URL for manipulation without actually setting window.location
+  let pathname = toStr;
+  let search = '';
+  let hash = '';
+  
+  // Handle hash and search parts if present
+  if (toStr.includes('#')) {
+    [pathname, hash] = toStr.split('#');
+    hash = `#${hash}`;
+  }
+  
+  if (pathname.includes('?')) {
+    [pathname, search] = pathname.split('?');
+    search = `?${search}`;
+  }
+  
+  // Create new URLSearchParams without using window.location
+  const searchParams = new URLSearchParams(search);
+  searchParams.set('lang', language);
   
   const finalTo = {
-    pathname: url.pathname,
-    search: url.search,
-    hash: url.hash
+    pathname,
+    search: searchParams.toString() ? `?${searchParams.toString()}` : '',
+    hash
   };
   
   return (

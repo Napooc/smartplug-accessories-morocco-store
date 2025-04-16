@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { Product, Order, OrderStatus, CustomerInfo, CartItem } from './types';
 
@@ -132,7 +133,9 @@ const useStoreBase = create<StoreState>((set, get) => ({
   },
   
   addCustomer: async (customer) => {
-    set(state => ({ customers: [...state.customers, { ...customer, id: Math.random().toString() }] }));
+    // Make sure customer has an id property by creating a unique one
+    const customerWithId = { ...customer, id: Math.random().toString() };
+    set(state => ({ customers: [...state.customers, customerWithId] }));
   },
   
   updateCustomer: async (id, updates) => {

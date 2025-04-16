@@ -10,23 +10,35 @@ import { Language } from "./languageContext";
  */
 export const getUserLanguagePreference = (): Language => {
   // Check URL parameter first
-  const urlParams = new URLSearchParams(window.location.search);
-  const langParam = urlParams.get('lang');
-  
-  if (langParam && ['en', 'fr', 'ar'].includes(langParam)) {
-    return langParam as Language;
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang');
+    
+    if (langParam && ['en', 'fr', 'ar'].includes(langParam)) {
+      return langParam as Language;
+    }
+  } catch (error) {
+    console.error("Error checking URL for language:", error);
   }
   
   // Then check localStorage
-  const savedLang = localStorage.getItem('ma7alkom-language');
-  if (savedLang && ['en', 'fr', 'ar'].includes(savedLang)) {
-    return savedLang as Language;
+  try {
+    const savedLang = localStorage.getItem('ma7alkom-language');
+    if (savedLang && ['en', 'fr', 'ar'].includes(savedLang)) {
+      return savedLang as Language;
+    }
+  } catch (error) {
+    console.error("Error checking localStorage for language:", error);
   }
   
   // Then check browser language
-  const browserLang = navigator.language.split('-')[0];
-  if (browserLang === 'fr') return 'fr';
-  if (browserLang === 'ar') return 'ar';
+  try {
+    const browserLang = navigator.language.split('-')[0];
+    if (browserLang === 'fr') return 'fr';
+    if (browserLang === 'ar') return 'ar';
+  } catch (error) {
+    console.error("Error checking browser language:", error);
+  }
   
   // Default to English
   return 'en';
@@ -37,12 +49,20 @@ export const getUserLanguagePreference = (): Language => {
  */
 export const setUserLanguagePreference = (language: Language): void => {
   // Update localStorage
-  localStorage.setItem('ma7alkom-language', language);
+  try {
+    localStorage.setItem('ma7alkom-language', language);
+  } catch (error) {
+    console.error("Error saving language to localStorage:", error);
+  }
   
-  // Update URL parameter without page reload
-  const url = new URL(window.location.href);
-  url.searchParams.set('lang', language);
-  window.history.replaceState(null, '', url);
+  // Update URL parameter without page reload, using history API
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('lang', language);
+    window.history.replaceState(null, '', url.toString());
+  } catch (error) {
+    console.error("Error updating URL with language:", error);
+  }
 };
 
 /**
@@ -56,27 +76,31 @@ export const getTextDirection = (language: Language): 'ltr' | 'rtl' => {
  * Updates page metadata based on language and current page
  */
 export const updatePageMetadata = (language: Language, pageName: string, translations: any): void => {
-  // Update document title
-  if (translations.seoTitles?.[pageName]) {
-    document.title = translations.seoTitles[pageName][language];
-  }
-  
-  // Update meta description
-  const metaDescription = document.querySelector('meta[name="description"]');
-  if (metaDescription && translations.seoDescriptions?.[pageName]) {
-    metaDescription.setAttribute('content', translations.seoDescriptions[pageName][language]);
-  }
-  
-  // Update OG title
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle && translations.seoTitles?.[pageName]) {
-    ogTitle.setAttribute('content', translations.seoTitles[pageName][language]);
-  }
-  
-  // Update OG description
-  const ogDescription = document.querySelector('meta[property="og:description"]');
-  if (ogDescription && translations.seoDescriptions?.[pageName]) {
-    ogDescription.setAttribute('content', translations.seoDescriptions[pageName][language]);
+  try {
+    // Update document title
+    if (translations.seoTitles?.[pageName]) {
+      document.title = translations.seoTitles[pageName][language];
+    }
+    
+    // Update meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription && translations.seoDescriptions?.[pageName]) {
+      metaDescription.setAttribute('content', translations.seoDescriptions[pageName][language]);
+    }
+    
+    // Update OG title
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle && translations.seoTitles?.[pageName]) {
+      ogTitle.setAttribute('content', translations.seoTitles[pageName][language]);
+    }
+    
+    // Update OG description
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription && translations.seoDescriptions?.[pageName]) {
+      ogDescription.setAttribute('content', translations.seoDescriptions[pageName][language]);
+    }
+  } catch (error) {
+    console.error("Error updating page metadata:", error);
   }
 };
 
@@ -84,21 +108,31 @@ export const updatePageMetadata = (language: Language, pageName: string, transla
  * Adds language parameter to all internal links on the page
  */
 export const updatePageLinks = (language: Language): void => {
-  document.querySelectorAll('a').forEach(link => {
-    // Only modify internal links (not external ones)
-    if (link.href.startsWith(window.location.origin)) {
-      const url = new URL(link.href);
-      url.searchParams.set('lang', language);
-      link.href = url.toString();
-    }
-  });
+  try {
+    document.querySelectorAll('a').forEach(link => {
+      // Only modify internal links (not external ones)
+      if (link.href && link.href.startsWith(window.location.origin)) {
+        const url = new URL(link.href);
+        url.searchParams.set('lang', language);
+        link.href = url.toString();
+      }
+    });
+  } catch (error) {
+    console.error("Error updating page links:", error);
+  }
 };
 
 /**
  * Returns a URL with the current language parameter
  */
 export const getLocalizedUrl = (path: string, language: Language): string => {
-  const url = new URL(path, window.location.origin);
-  url.searchParams.set('lang', language);
-  return url.toString();
+  try {
+    const url = new URL(path, window.location.origin);
+    url.searchParams.set('lang', language);
+    return url.toString();
+  } catch (error) {
+    console.error("Error creating localized URL:", error);
+    // Return the original path with a query parameter
+    return `${path}${path.includes('?') ? '&' : '?'}lang=${language}`;
+  }
 };

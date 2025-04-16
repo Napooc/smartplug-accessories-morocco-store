@@ -14,38 +14,36 @@ const Layout = ({ children }: LayoutProps) => {
   
   // Apply security measures on component mount
   useEffect(() => {
-    // Set security meta tags (would be better implemented server-side)
-    const metaTags = [
-      { name: 'Content-Security-Policy', content: "default-src 'self'; img-src 'self' https://images.unsplash.com data:; style-src 'self' 'unsafe-inline'; script-src 'self'" },
-      { name: 'X-Frame-Options', content: 'DENY' },
-      { name: 'X-Content-Type-Options', content: 'nosniff' },
-      { name: 'Referrer-Policy', content: 'strict-origin-when-cross-origin' },
-      { name: 'Permissions-Policy', content: 'geolocation=(), camera=(), microphone=()' }
-    ];
-    
-    // Remove any existing security meta tags
-    document.querySelectorAll('meta[name^="Content-Security-Policy"], meta[name^="X-Frame-Options"], meta[name^="X-Content-Type-Options"], meta[name^="Referrer-Policy"], meta[name^="Permissions-Policy"]')
-      .forEach(tag => tag.remove());
-    
-    // Add new security meta tags
-    metaTags.forEach(tagInfo => {
-      const tag = document.createElement('meta');
-      tag.name = tagInfo.name;
-      tag.content = tagInfo.content;
-      document.head.appendChild(tag);
-    });
-    
-    // Prevent clickjacking
-    if (window.self !== window.top) {
-      window.top.location = window.self.location;
+    try {
+      // Set security meta tags (would be better implemented server-side)
+      const metaTags = [
+        { name: 'Content-Security-Policy', content: "default-src 'self'; img-src 'self' https://images.unsplash.com data:; style-src 'self' 'unsafe-inline'; script-src 'self'" },
+        { name: 'X-Frame-Options', content: 'DENY' },
+        { name: 'X-Content-Type-Options', content: 'nosniff' },
+        { name: 'Referrer-Policy', content: 'strict-origin-when-cross-origin' },
+        { name: 'Permissions-Policy', content: 'geolocation=(), camera=(), microphone=()' }
+      ];
+      
+      // Remove any existing security meta tags
+      document.querySelectorAll('meta[name^="Content-Security-Policy"], meta[name^="X-Frame-Options"], meta[name^="X-Content-Type-Options"], meta[name^="Referrer-Policy"], meta[name^="Permissions-Policy"]')
+        .forEach(tag => tag.remove());
+      
+      // Add new security meta tags
+      metaTags.forEach(tagInfo => {
+        const tag = document.createElement('meta');
+        tag.name = tagInfo.name;
+        tag.content = tagInfo.content;
+        document.head.appendChild(tag);
+      });
+      
+      // Removed clickjacking prevention code that was trying to modify top window
+      // This was causing security errors when running in an iframe
+    } catch (error) {
+      console.error("Error setting security headers:", error);
     }
     
     return () => {
-      // Clean up meta tags on unmount
-      metaTags.forEach(tagInfo => {
-        const tags = document.querySelectorAll(`meta[name="${tagInfo.name}"]`);
-        tags.forEach(tag => tag.remove());
-      });
+      // No cleanup needed since we're not setting intervals or timeouts
     };
   }, []);
   
