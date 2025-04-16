@@ -160,7 +160,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             onSale: product.on_sale,
             stock: product.stock,
             rating: product.rating || 0,
-            sku: product.sku
+            sku: product.sku,
+            placement: product.placement || 'regular'
           }));
           
           setProducts(formattedProducts);
@@ -236,6 +237,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             stock: product.stock,
             rating: product.rating,
             sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`,
+            placement: product.placement || 'regular',
             color_variants: colorVariantsJson
           }, { onConflict: 'id' });
       }
@@ -334,6 +336,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         stock: product.stock || 0,
         rating: product.rating || 0,
         sku: product.sku || `SKU-${Math.floor(Math.random() * 10000)}`,
+        placement: product.placement || 'regular',
         colorVariants: colorVariants
       };
       
@@ -360,6 +363,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           stock: newProduct.stock,
           rating: newProduct.rating,
           sku: newProduct.sku,
+          placement: newProduct.placement,
           color_variants: colorVariantsJson
         });
       

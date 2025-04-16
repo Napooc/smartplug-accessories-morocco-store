@@ -82,7 +82,8 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
     console.log("Setting placement to:", value);
     setProductData(prev => ({
       ...prev,
-      placement: value
+      placement: value,
+      onSale: value === 'deals' ? true : prev.onSale
     }));
   };
   
@@ -343,7 +344,7 @@ const AdminEditProduct = ({ product, onClose }: AdminEditProductProps) => {
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="deals" id="edit-placement-deals" />
-              <Label htmlFor="edit-placement-deals">Add to "Discounts & Deals" section</Label>
+              <Label htmlFor="edit-placement-deals">Add to "Discounts & Deals" section {productData.placement === 'deals' && "(Auto-enables 'On Sale')"}</Label>
             </div>
           </RadioGroup>
         </div>

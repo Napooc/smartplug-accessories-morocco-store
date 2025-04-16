@@ -13,6 +13,9 @@ import { useLanguage } from "@/lib/languageContext";
 const Index = () => {
   const { 
     products,
+    bestSellingProducts,
+    dealsProducts,
+    featuredProducts,
     fetchOrders 
   } = useStore();
   
@@ -23,10 +26,10 @@ const Index = () => {
     fetchOrders();
   }, [fetchOrders]);
   
-  // Correctly filter products by their placement
-  const featuredProducts = products.filter(product => product.featured);
-  const bestSellingProducts = products.filter(product => product.placement === 'best_selling');
-  const dealsProducts = products.filter(product => product.placement === 'deals');
+  // Log for debugging
+  console.log("Best Selling Products:", bestSellingProducts.length, bestSellingProducts.map(p => p.name));
+  console.log("Deals Products:", dealsProducts.length, dealsProducts.map(p => p.name));
+  console.log("Featured Products:", featuredProducts.length, featuredProducts.map(p => p.name));
   
   return (
     <Layout>

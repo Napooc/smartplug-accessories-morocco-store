@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Input } from '@/components/ui/input';
@@ -94,17 +93,12 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
   };
 
   const handlePlacementChange = (value: 'best_selling' | 'deals' | 'regular') => {
+    console.log("Setting placement to:", value);
     setProduct(prev => ({
       ...prev,
-      placement: value
+      placement: value,
+      onSale: value === 'deals' ? true : prev.onSale
     }));
-    
-    if (value === 'deals') {
-      setProduct(prev => ({
-        ...prev,
-        onSale: true
-      }));
-    }
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,12 +199,13 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     try {
       setIsSubmitting(true);
       
+      console.log("Adding product with placement:", product.placement);
+      
       const productToAdd = {
         ...product,
         onSale: product.placement === 'deals' ? true : product.onSale
       };
       
-      await new Promise(resolve => setTimeout(resolve, 100));
       await addProduct(productToAdd);
       
       setProduct({
@@ -390,7 +385,7 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="deals" id="placement-deals" />
-              <Label htmlFor="placement-deals">Add to "Discounts & Deals" section</Label>
+              <Label htmlFor="placement-deals">Add to "Discounts & Deals" section {product.placement === 'deals' && "(Auto-enables 'On Sale')"}</Label>
             </div>
           </RadioGroup>
         </div>

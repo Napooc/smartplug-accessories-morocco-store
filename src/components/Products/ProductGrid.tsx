@@ -12,6 +12,10 @@ interface ProductGridProps {
 export default function ProductGrid({ products, title, emptyMessage }: ProductGridProps) {
   const { t, direction } = useLanguage();
   
+  // Debugging log to verify the products being rendered
+  console.log(`Rendering ProductGrid with title "${title}" and ${products.length} products:`, 
+    products.map(p => ({ id: p.id, name: p.name, placement: p.placement })));
+  
   return (
     <div className="py-8" dir={direction}>
       {title && (
