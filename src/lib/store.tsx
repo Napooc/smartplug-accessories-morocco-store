@@ -26,9 +26,9 @@ interface StoreState {
   updateOrderStatus: (id: string, status: OrderStatus) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   
-  addCustomer: (customer: Omit<CustomerInfo, 'id'>) => Promise<void>;
-  updateCustomer: (id: string, updates: Partial<CustomerInfo>) => Promise<void>;
-  deleteCustomer: (id: string) => Promise<void>;
+  addCustomer: (customer: CustomerInfo) => Promise<void>;
+  updateCustomer: (email: string, updates: Partial<CustomerInfo>) => Promise<void>;
+  deleteCustomer: (email: string) => Promise<void>;
 
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
@@ -132,22 +132,21 @@ const useStoreBase = create<StoreState>((set, get) => ({
     set(state => ({ orders: state.orders.filter(order => order.id !== id) }));
   },
   
+  // Fixed to use email as the identifier instead of id for CustomerInfo
   addCustomer: async (customer) => {
-    // Make sure customer has an id property by creating a unique one
-    const customerWithId = { ...customer, id: Math.random().toString() };
-    set(state => ({ customers: [...state.customers, customerWithId] }));
+    set(state => ({ customers: [...state.customers, customer] }));
   },
   
-  updateCustomer: async (id, updates) => {
+  updateCustomer: async (email, updates) => {
     set(state => ({
       customers: state.customers.map(customer =>
-        customer.id === id ? { ...customer, ...updates } : customer
+        customer.email === email ? { ...customer, ...updates } : customer
       )
     }));
   },
   
-  deleteCustomer: async (id) => {
-    set(state => ({ customers: state.customers.filter(customer => customer.id !== id) }));
+  deleteCustomer: async (email) => {
+    set(state => ({ customers: state.customers.filter(customer => customer.email !== email) }));
   },
   
   addToCart: (product, quantity = 1) => {

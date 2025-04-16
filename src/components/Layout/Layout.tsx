@@ -36,15 +36,10 @@ const Layout = ({ children }: LayoutProps) => {
         document.head.appendChild(tag);
       });
       
-      // Removed clickjacking prevention code that was trying to modify top window
-      // This was causing security errors when running in an iframe
+      // Removed clickjacking prevention code that was causing security issues
     } catch (error) {
       console.error("Error setting security headers:", error);
     }
-    
-    return () => {
-      // No cleanup needed since we're not setting intervals or timeouts
-    };
   }, []);
   
   return (

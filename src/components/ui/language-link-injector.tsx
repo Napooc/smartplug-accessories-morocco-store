@@ -6,6 +6,7 @@ import { updatePageLinks } from '@/lib/languageUtils';
 /**
  * This component automatically adds language parameters to all links on the page.
  * It should be used in the Layout component to ensure all links have the language parameter.
+ * Modified to use a safer approach for iframe environments.
  */
 export const LanguageLinkInjector: React.FC = () => {
   const { language } = useLanguage();

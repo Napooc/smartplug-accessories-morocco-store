@@ -1,10 +1,11 @@
 
 import { useEffect } from 'react';
 import { Language } from '@/lib/languageContext';
-import { getUserLanguagePreference, setUserLanguagePreference } from '@/lib/languageUtils';
+import { getUserLanguagePreference } from '@/lib/languageUtils';
 
 /**
  * This hook syncs language settings across tabs and handles browser back/forward navigation.
+ * Modified to avoid direct window.location manipulation.
  */
 export const useLanguageSync = (
   language: Language, 
@@ -13,11 +14,15 @@ export const useLanguageSync = (
   // Listen for popstate events (browser back/forward)
   useEffect(() => {
     const handlePopState = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const langParam = urlParams.get('lang');
-      
-      if (langParam && ['en', 'fr', 'ar'].includes(langParam) && langParam !== language) {
-        setLanguage(langParam as Language);
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const langParam = urlParams.get('lang');
+        
+        if (langParam && ['en', 'fr', 'ar'].includes(langParam) && langParam !== language) {
+          setLanguage(langParam as Language);
+        }
+      } catch (error) {
+        console.error("Error handling popstate event:", error);
       }
     };
     
@@ -28,11 +33,15 @@ export const useLanguageSync = (
   // Listen for storage events (other tabs)
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'ma7alkom-language' && event.newValue) {
-        const newLang = event.newValue as Language;
-        if (newLang !== language) {
-          setLanguage(newLang);
+      try {
+        if (event.key === 'ma7alkom-language' && event.newValue) {
+          const newLang = event.newValue as Language;
+          if (newLang !== language) {
+            setLanguage(newLang);
+          }
         }
+      } catch (error) {
+        console.error("Error handling storage event:", error);
       }
     };
     
@@ -43,9 +52,13 @@ export const useLanguageSync = (
   // Handle window focus events to check for language changes in other tabs
   useEffect(() => {
     const handleWindowFocus = () => {
-      const storedLang = localStorage.getItem('ma7alkom-language') as Language;
-      if (storedLang && storedLang !== language) {
-        setLanguage(storedLang);
+      try {
+        const storedLang = localStorage.getItem('ma7alkom-language') as Language;
+        if (storedLang && storedLang !== language) {
+          setLanguage(storedLang);
+        }
+      } catch (error) {
+        console.error("Error handling window focus event:", error);
       }
     };
     

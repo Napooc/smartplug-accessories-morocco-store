@@ -19,7 +19,7 @@ export const LocalizedLink: React.FC<LocalizedLinkProps> = ({ to, children, ...p
   }
   
   // For non-admin routes, add language parameter
-  // Create a safe copy of the URL for manipulation without actually setting window.location
+  // Create a safe copy of the URL for manipulation
   let pathname = toStr;
   let search = '';
   let hash = '';
@@ -39,6 +39,7 @@ export const LocalizedLink: React.FC<LocalizedLinkProps> = ({ to, children, ...p
   const searchParams = new URLSearchParams(search);
   searchParams.set('lang', language);
   
+  // Create the full to object for React Router without manipulating window.location
   const finalTo = {
     pathname,
     search: searchParams.toString() ? `?${searchParams.toString()}` : '',

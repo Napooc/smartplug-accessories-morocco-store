@@ -1,5 +1,6 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { additionalTranslations } from './additionalTranslations';
 import { translations } from './translations';
 import { 
@@ -65,6 +66,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 // Provider component
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState<Language>(getUserLanguagePreference);
   const direction = getTextDirection(language);
   
@@ -82,14 +84,18 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     } else if (!langParam && language) {
       // Update URL if language param is missing - using History API instead of direct URL modification
       try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('lang', language);
-        window.history.replaceState(null, '', url.toString());
+        // Create a new URLSearchParams based on current search
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set('lang', language);
+        
+        // Use history.replaceState to update URL without page reload
+        const newUrl = `${window.location.pathname}?${searchParams.toString()}${window.location.hash}`;
+        window.history.replaceState(null, '', newUrl);
       } catch (error) {
         console.error("Failed to update URL with language parameter:", error);
       }
     }
-  }, [location.search, location.pathname]);
+  }, [location.search, location.pathname, language]);
   
   // Handle language change
   function updateLanguage(newLanguage: Language) {
@@ -97,8 +103,18 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       // Update state
       setLanguage(newLanguage);
       
-      // Update localStorage and URL safely
+      // Update localStorage safely
       setUserLanguagePreference(newLanguage);
+      
+      // Update URL using History API
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set('lang', newLanguage);
+        const newUrl = `${window.location.pathname}?${searchParams.toString()}${window.location.hash}`;
+        window.history.replaceState(null, '', newUrl);
+      } catch (error) {
+        console.error("Failed to update URL with language parameter:", error);
+      }
       
       // Update all links with new language parameter
       try {

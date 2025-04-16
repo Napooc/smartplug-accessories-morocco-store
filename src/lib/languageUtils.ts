@@ -45,7 +45,8 @@ export const getUserLanguagePreference = (): Language => {
 };
 
 /**
- * Updates the language in both localStorage and URL
+ * Updates the language in localStorage and returns a URL with the updated lang parameter
+ * (Instead of directly modifying location.href which causes security errors in an iframe)
  */
 export const setUserLanguagePreference = (language: Language): void => {
   // Update localStorage
@@ -55,14 +56,7 @@ export const setUserLanguagePreference = (language: Language): void => {
     console.error("Error saving language to localStorage:", error);
   }
   
-  // Update URL parameter without page reload, using history API
-  try {
-    const url = new URL(window.location.href);
-    url.searchParams.set('lang', language);
-    window.history.replaceState(null, '', url.toString());
-  } catch (error) {
-    console.error("Error updating URL with language:", error);
-  }
+  // Don't modify URL here - we'll use React Router and history.replaceState instead
 };
 
 /**
@@ -106,15 +100,17 @@ export const updatePageMetadata = (language: Language, pageName: string, transla
 
 /**
  * Adds language parameter to all internal links on the page
+ * (Modified to use a safer approach)
  */
 export const updatePageLinks = (language: Language): void => {
   try {
     document.querySelectorAll('a').forEach(link => {
       // Only modify internal links (not external ones)
       if (link.href && link.href.startsWith(window.location.origin)) {
+        // Use URLSearchParams instead of directly manipulating href
         const url = new URL(link.href);
         url.searchParams.set('lang', language);
-        link.href = url.toString();
+        link.setAttribute('href', url.toString());
       }
     });
   } catch (error) {
