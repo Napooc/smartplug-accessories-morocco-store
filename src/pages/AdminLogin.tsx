@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Lock, AlertTriangle } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import Layout from '@/components/Layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -17,15 +17,56 @@ const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockTimer, setLockTimer] = useState(0);
+  
+  // Check for stored login attempts
+  useEffect(() => {
+    const storedAttempts = sessionStorage.getItem('loginAttempts');
+    const lockTime = sessionStorage.getItem('lockUntil');
+    
+    if (storedAttempts) {
+      setLoginAttempts(parseInt(storedAttempts));
+    }
+    
+    if (lockTime && parseInt(lockTime) > Date.now()) {
+      setIsLocked(true);
+      const remainingTime = Math.ceil((parseInt(lockTime) - Date.now()) / 1000);
+      setLockTimer(remainingTime);
+      
+      // Start countdown
+      const interval = setInterval(() => {
+        setLockTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setIsLocked(false);
+            sessionStorage.removeItem('lockUntil');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, []);
   
   // If already logged in, redirect to admin dashboard
-  if (isAdmin) {
-    navigate('/admin');
-    return null;
-  }
+  useEffect(() => {
+    if (isAdmin) {
+      navigate('/admin');
+    }
+  }, [isAdmin, navigate]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Security: Check if account is temporarily locked
+    if (isLocked) {
+      setError(t('accountLocked', { default: `Account is locked. Try again in ${lockTimer} seconds.` }));
+      return;
+    }
     
     // Validate form
     if (!username.trim() || !password.trim()) {
@@ -33,17 +74,66 @@ const AdminLogin = () => {
       return;
     }
     
-    // Attempt login
-    const success = login(username, password);
-    
-    if (success) {
-      toast.success(t('successMessages.login', { default: 'Login successful' }));
-      navigate('/admin');
-    } else {
-      setError(t('errorMessages.invalidCredentials', { default: 'Invalid username or password' }));
-      toast.error(t('errorMessages.invalidCredentials', { default: 'Invalid credentials' }));
-    }
+    // Prevent timing attacks by adding a small random delay
+    const randomDelay = Math.floor(Math.random() * 500) + 500;
+    setTimeout(() => {
+      // Attempt login
+      const success = login(username, password);
+      
+      if (success) {
+        // Reset login attempts on successful login
+        setLoginAttempts(0);
+        sessionStorage.removeItem('loginAttempts');
+        sessionStorage.removeItem('lockUntil');
+        
+        toast.success(t('successMessages.login', { default: 'Login successful' }));
+        navigate('/admin');
+      } else {
+        // Increment login attempts
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        sessionStorage.setItem('loginAttempts', newAttempts.toString());
+        
+        // Lock account temporarily after 5 failed attempts
+        if (newAttempts >= 5) {
+          const lockDuration = 5 * 60 * 1000; // 5 minutes
+          const lockUntil = Date.now() + lockDuration;
+          sessionStorage.setItem('lockUntil', lockUntil.toString());
+          setIsLocked(true);
+          setLockTimer(300); // 5 minutes in seconds
+          
+          setError(t('accountLocked', { default: 'Too many failed attempts. Account locked for 5 minutes.' }));
+          toast.error(t('errorMessages.accountLocked', { default: 'Account locked for 5 minutes' }));
+          
+          // Start countdown
+          const interval = setInterval(() => {
+            setLockTimer(prev => {
+              if (prev <= 1) {
+                clearInterval(interval);
+                setIsLocked(false);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        } else {
+          setError(t('errorMessages.invalidCredentials', { default: 'Invalid username or password' }));
+          toast.error(t('errorMessages.invalidCredentials', { default: 'Invalid credentials' }));
+        }
+      }
+    }, randomDelay);
   };
+  
+  // Format countdown timer
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+  
+  if (isAdmin) {
+    return null;
+  }
   
   return (
     <Layout>
@@ -58,20 +148,31 @@ const AdminLogin = () => {
             </div>
             
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded mb-6">
-                {error}
+              <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded mb-6 flex items-start">
+                <AlertTriangle size={18} className="mr-2 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
             
-            <form onSubmit={handleSubmit}>
+            {isLocked && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-600 p-3 rounded mb-6 text-center">
+                <p className="font-medium">{t('accountLocked', { default: 'Account temporarily locked' })}</p>
+                <p>{t('tryAgainIn', { default: 'Try again in' })} {formatTime(lockTimer)}</p>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} autoComplete="off">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="username">{t('username', { default: 'Username' })}</Label>
                   <Input
                     id="username"
+                    name="username" // Using name to make it harder for password managers to recognize
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder={t('enterUsername', { default: 'Enter username' })}
+                    disabled={isLocked}
+                    autoComplete="off" // Disable browser autofill
                   />
                 </div>
                 
@@ -79,18 +180,22 @@ const AdminLogin = () => {
                   <Label htmlFor="password">{t('password', { default: 'Password' })}</Label>
                   <Input
                     id="password"
+                    name="admin-password" // Non-standard name to prevent autofill
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t('enterPassword', { default: 'Enter password' })}
+                    disabled={isLocked}
+                    autoComplete="new-password" // Trick browsers to not autofill
                   />
                 </div>
                 
                 <Button
                   type="submit"
                   className="w-full bg-smartplug-blue hover:bg-smartplug-lightblue"
+                  disabled={isLocked}
                 >
-                  {t('login')}
+                  {isLocked ? formatTime(lockTimer) : t('login')}
                 </Button>
               </div>
             </form>
