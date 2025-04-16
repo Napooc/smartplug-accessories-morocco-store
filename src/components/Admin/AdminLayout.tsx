@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '@/lib/store';
@@ -11,7 +10,6 @@ import {
   LogOut,
   ChevronRight
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,7 +17,7 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children, title }: AdminLayoutProps) => {
-  const { isAdmin, logout, checkAdminSession } = useStore();
+  const { isAdmin, logout } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -27,58 +25,11 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   useScrollToTop();
   
   useEffect(() => {
-    // Security: Add session verification
-    const verifyAdminSession = async () => {
-      const isValidSession = await checkAdminSession();
-      
-      if (!isValidSession) {
-        toast.error("Your session has expired or is invalid");
-        logout();
-        navigate('/admin/login');
-      }
-    };
-    
-    // Check if user is admin
+    // Redirect to login if not admin
     if (!isAdmin) {
       navigate('/admin/login');
-      return;
     }
-    
-    // Verify admin session on mount and when location changes
-    verifyAdminSession();
-    
-    // Set CSP headers (this is just for demonstration, actual CSP headers should be set server-side)
-    document.title = `Admin Dashboard - ${title}`;
-    
-    // Set up session timeout - automatically logout after 30 minutes of inactivity
-    let inactivityTimer: number;
-    
-    const resetInactivityTimer = () => {
-      window.clearTimeout(inactivityTimer);
-      inactivityTimer = window.setTimeout(() => {
-        toast.warning("You have been logged out due to inactivity");
-        logout();
-        navigate('/admin/login');
-      }, 30 * 60 * 1000); // 30 minutes
-    };
-    
-    // Reset timer on user activity
-    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    activityEvents.forEach(event => {
-      document.addEventListener(event, resetInactivityTimer);
-    });
-    
-    // Initialize timer
-    resetInactivityTimer();
-    
-    // Cleanup
-    return () => {
-      window.clearTimeout(inactivityTimer);
-      activityEvents.forEach(event => {
-        document.removeEventListener(event, resetInactivityTimer);
-      });
-    };
-  }, [isAdmin, navigate, logout, location.pathname, checkAdminSession, title]);
+  }, [isAdmin, navigate]);
   
   const handleLogout = () => {
     logout();
