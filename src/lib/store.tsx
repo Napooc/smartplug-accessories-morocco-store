@@ -161,7 +161,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             stock: product.stock,
             rating: product.rating || 0,
             sku: product.sku,
-            placement: product.placement || 'regular'
+            placement: 'placement' in product ? product.placement as 'best_selling' | 'deals' | 'regular' : 'regular'
           }));
           
           setProducts(formattedProducts);
