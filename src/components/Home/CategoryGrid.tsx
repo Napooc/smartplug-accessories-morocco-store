@@ -26,14 +26,14 @@ const categoryIcons: Record<string, JSX.Element> = {
 };
 
 const categoryBackgrounds: Record<string, string> = {
-  'home-kitchen': 'url("https://images.unsplash.com/photo-1556911220-bff31c812dba?w=500&auto=format&fit=crop&q=80")',
-  'electronics': 'url("https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop&q=80")',
-  'tools-lighting': 'url("https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=500&auto=format&fit=crop&q=80")',
-  'plumbing': 'url("https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=500&auto=format&fit=crop&q=80")',
-  'garden-terrace': 'url("https://images.unsplash.com/photo-1558904541-efa5a24e6850?w=500&auto=format&fit=crop&q=80")',
-  'paint-hardware': 'url("https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500&auto=format&fit=crop&q=80")',
-  'bathroom-toilet': 'url("https://images.unsplash.com/photo-1620626011761-996317b8d101?w=500&auto=format&fit=crop&q=80")',
-  'heating-ac': 'url("https://images.unsplash.com/photo-1581076827786-8e43ae8f3P0?w=500&auto=format&fit=crop&q=80")',
+  'home-kitchen': 'url("https://plus.unsplash.com/premium_photo-1680382578857-c331ead9ed51?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8a2l0Y2hlbnxlbnwwfHwwfHx8MA%3D%3D")',
+  'electronics': 'url("https://t4.ftcdn.net/jpg/03/64/41/07/360_F_364410756_Ev3WoDfNyxO9c9n4tYIsU5YBQWAP3UF8.jpg")',
+  'tools-lighting': 'url("https://plus.unsplash.com/premium_photo-1667925014057-49c73ab2b181?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
+  'plumbing': 'url("https://plus.unsplash.com/premium_photo-1683141410787-c4dbd2220487?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
+  'garden-terrace': 'url("https://5.imimg.com/data5/SELLER/Default/2024/3/405401849/FO/VF/UZ/52179850/residential-terrace-garden-designing-500x500.jpg")',
+  'paint-hardware': 'url("https://paintshardware.co.ke/wp-content/uploads/2020/09/Paints-_-hardware-supermarket-75-1024x683.jpg")',
+  'bathroom-toilet': 'url("https://www.bathroommountain.co.uk/img/1900/1900/resize/catalog/product/c/6/c66037-1000-traditional-toilet-high-level-cistern-soft-seat_1.jpg")',
+  'heating-ac': 'url("https://logicoolair.com.au/wp-content/uploads/2021/04/Air-Conditioning-Heating-Everything-You-Need-To-Know.png")',
   'discounts-deals': 'linear-gradient(135deg, #ff4e50 0%, #f9d423 100%)'
 };
 
