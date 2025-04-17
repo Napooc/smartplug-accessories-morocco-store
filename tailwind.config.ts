@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -120,8 +119,16 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
         'marquee': 'marquee 25s linear infinite',
         'marquee2': 'marquee2 25s linear infinite'
+			},
+			textShadow: {
+				sm: '0 1px 2px var(--tw-shadow-color)',
+				DEFAULT: '0 2px 4px var(--tw-shadow-color)',
+				lg: '0 8px 16px var(--tw-shadow-color)',
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		require('tailwindcss-textshadow'),
+	],
 } satisfies Config;

@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { 
   Home, 
@@ -14,7 +13,6 @@ import {
 import { categories } from '@/lib/data';
 import { useLanguage } from '@/lib/languageContext';
 
-// Map category IDs to their respective icons
 const categoryIcons: Record<string, JSX.Element> = {
   'home-kitchen': <Home className="h-6 w-6 text-smartplug-blue" />,
   'electronics': <Headphones className="h-6 w-6 text-smartplug-blue" />,
@@ -27,23 +25,21 @@ const categoryIcons: Record<string, JSX.Element> = {
   'discounts-deals': <Tag className="h-6 w-6 text-red-500" />
 };
 
-// Map category IDs to background images
 const categoryBackgrounds: Record<string, string> = {
-  'home-kitchen': 'url("/lovable-uploads/510962dd-e810-4cd9-9b41-1e0a46b8d38c.png")',
-  'electronics': 'url("/lovable-uploads/563a1834-b7fa-40eb-8a01-96162ae40d11.png")',
-  'tools-lighting': 'url("/lovable-uploads/630c44e5-1c0c-4664-8ac2-18390ad254fb.png")',
-  'plumbing': 'url("/lovable-uploads/6bfd59e2-26e4-406d-9e31-d41eb1f05a9e.png")',
-  'garden-terrace': 'url("/lovable-uploads/bab8df4b-bc99-4788-b6d6-9d1fc02f7989.png")',
-  'paint-hardware': 'url("/lovable-uploads/cef5ff18-965d-4340-b406-174f5540da6e.png")',
-  'bathroom-toilet': 'url("/lovable-uploads/e93b813d-dd74-40cc-a282-dc0a2ee841e8.png")',
-  'heating-ac': 'url("/lovable-uploads/eadfa6b1-267d-4782-914f-c0c339dba27d.png")',
+  'home-kitchen': 'url("https://images.unsplash.com/photo-1556911220-bff31c812dba?w=500&auto=format&fit=crop&q=80")',
+  'electronics': 'url("https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop&q=80")',
+  'tools-lighting': 'url("https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=500&auto=format&fit=crop&q=80")',
+  'plumbing': 'url("https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=500&auto=format&fit=crop&q=80")',
+  'garden-terrace': 'url("https://images.unsplash.com/photo-1558904541-efa5a24e6850?w=500&auto=format&fit=crop&q=80")',
+  'paint-hardware': 'url("https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500&auto=format&fit=crop&q=80")',
+  'bathroom-toilet': 'url("https://images.unsplash.com/photo-1620626011761-996317b8d101?w=500&auto=format&fit=crop&q=80")',
+  'heating-ac': 'url("https://images.unsplash.com/photo-1581076827786-8e43ae8f3P0?w=500&auto=format&fit=crop&q=80")',
   'discounts-deals': 'linear-gradient(135deg, #ff4e50 0%, #f9d423 100%)'
 };
 
 export default function CategoryGrid() {
   const { t, direction } = useLanguage();
   
-  // Map of category IDs to translation keys
   const categoryTranslationKeys: Record<string, string> = {
     'home-kitchen': 'homeKitchen',
     'electronics': 'electronics',
@@ -75,20 +71,21 @@ export default function CategoryGrid() {
             <Link 
               key={category.id}
               to={`/categories/${category.id}`}
-              className="group relative overflow-hidden"
+              className="group relative overflow-hidden rounded-lg"
             >
               <div 
-                className={`flex flex-col items-center p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 h-full transform hover:-translate-y-1 relative z-10 bg-white/90 backdrop-blur-sm ${category.id === 'discounts-deals' ? 'border-red-100' : ''}`}
+                className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300"
                 style={{
                   backgroundImage: categoryBackgrounds[category.id],
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}
-              >
-                <div className={`mb-4 p-3 rounded-full transition-colors ${category.id === 'discounts-deals' ? 'bg-red-50 group-hover:bg-red-100' : 'bg-gray-50 group-hover:bg-smartplug-blue/10'}`}>
+              />
+              <div className="relative z-10 flex flex-col items-center p-6 h-full">
+                <div className={`mb-4 p-3 rounded-full bg-white/90 backdrop-blur-sm transition-transform group-hover:scale-110 ${category.id === 'discounts-deals' ? 'bg-red-50' : ''}`}>
                   {categoryIcons[category.id]}
                 </div>
-                <h3 className={`text-center font-medium transition-colors ${category.id === 'discounts-deals' ? 'text-red-600 group-hover:text-red-700' : 'text-gray-800 group-hover:text-smartplug-blue'}`}>
+                <h3 className={`text-center font-medium text-white text-shadow-sm ${category.id === 'discounts-deals' ? 'text-red-100' : ''}`}>
                   {t(categoryTranslationKeys[category.id] || category.id, { default: category.name })}
                 </h3>
               </div>
