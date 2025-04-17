@@ -27,6 +27,19 @@ const categoryIcons: Record<string, JSX.Element> = {
   'discounts-deals': <Tag className="h-6 w-6 text-red-500" />
 };
 
+// Map category IDs to background images
+const categoryBackgrounds: Record<string, string> = {
+  'home-kitchen': 'url("/lovable-uploads/510962dd-e810-4cd9-9b41-1e0a46b8d38c.png")',
+  'electronics': 'url("/lovable-uploads/563a1834-b7fa-40eb-8a01-96162ae40d11.png")',
+  'tools-lighting': 'url("/lovable-uploads/630c44e5-1c0c-4664-8ac2-18390ad254fb.png")',
+  'plumbing': 'url("/lovable-uploads/6bfd59e2-26e4-406d-9e31-d41eb1f05a9e.png")',
+  'garden-terrace': 'url("/lovable-uploads/bab8df4b-bc99-4788-b6d6-9d1fc02f7989.png")',
+  'paint-hardware': 'url("/lovable-uploads/cef5ff18-965d-4340-b406-174f5540da6e.png")',
+  'bathroom-toilet': 'url("/lovable-uploads/e93b813d-dd74-40cc-a282-dc0a2ee841e8.png")',
+  'heating-ac': 'url("/lovable-uploads/eadfa6b1-267d-4782-914f-c0c339dba27d.png")',
+  'discounts-deals': 'linear-gradient(135deg, #ff4e50 0%, #f9d423 100%)'
+};
+
 export default function CategoryGrid() {
   const { t, direction } = useLanguage();
   
@@ -43,11 +56,9 @@ export default function CategoryGrid() {
     'discounts-deals': 'discountsDeals'
   };
 
-  // Customize the additional discounts category that might not be in the data
   const allCategories = [...categories, 
     {id: 'discounts-deals', name: 'Discounts & Deals'}
   ].filter((cat, index, self) => 
-    // Remove duplicates if the category already exists in data
     index === self.findIndex((c) => c.id === cat.id)
   );
   
@@ -64,9 +75,16 @@ export default function CategoryGrid() {
             <Link 
               key={category.id}
               to={`/categories/${category.id}`}
-              className="group"
+              className="group relative overflow-hidden"
             >
-              <div className={`flex flex-col items-center bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 h-full transform hover:-translate-y-1 ${category.id === 'discounts-deals' ? 'border-red-100' : ''}`}>
+              <div 
+                className={`flex flex-col items-center p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 h-full transform hover:-translate-y-1 relative z-10 bg-white/90 backdrop-blur-sm ${category.id === 'discounts-deals' ? 'border-red-100' : ''}`}
+                style={{
+                  backgroundImage: categoryBackgrounds[category.id],
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              >
                 <div className={`mb-4 p-3 rounded-full transition-colors ${category.id === 'discounts-deals' ? 'bg-red-50 group-hover:bg-red-100' : 'bg-gray-50 group-hover:bg-smartplug-blue/10'}`}>
                   {categoryIcons[category.id]}
                 </div>
