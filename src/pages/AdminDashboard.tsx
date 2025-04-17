@@ -25,7 +25,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">{t('admin.totalOrders')}</p>
+              <p className="text-gray-500 mb-1">{t('adminDashboard.totalOrders')}</p>
               <h3 className="text-3xl font-bold">{totalOrders}</h3>
             </div>
             <div className="p-2 bg-blue-100 rounded-md">
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-4">
             <Link to="/admin/orders" className="text-sm text-smartplug-blue hover:underline">
-              {t('admin.viewAllOrders')}
+              {t('adminDashboard.viewAllOrders')}
             </Link>
           </div>
         </div>
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">{t('admin.totalProducts')}</p>
+              <p className="text-gray-500 mb-1">{t('adminDashboard.totalProducts')}</p>
               <h3 className="text-3xl font-bold">{totalProducts}</h3>
             </div>
             <div className="p-2 bg-green-100 rounded-md">
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-4">
             <Link to="/admin/products" className="text-sm text-smartplug-blue hover:underline">
-              {t('admin.viewAllProducts')}
+              {t('adminDashboard.viewAllProducts')}
             </Link>
           </div>
         </div>
@@ -59,7 +59,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 mb-1">{t('admin.totalRevenue')}</p>
+              <p className="text-gray-500 mb-1">{t('adminDashboard.totalRevenue')}</p>
               <h3 className="text-3xl font-bold">{totalRevenue.toFixed(2)} DH</h3>
             </div>
             <div className="p-2 bg-purple-100 rounded-md">
@@ -68,7 +68,7 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-4">
             <Link to="/admin/orders" className="text-sm text-smartplug-blue hover:underline">
-              {t('admin.viewDetails')}
+              {t('adminDashboard.viewDetails')}
             </Link>
           </div>
         </div>
@@ -77,24 +77,24 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-bold">{t('admin.recentOrders')}</h3>
+            <h3 className="text-lg font-bold">{t('adminDashboard.recentOrders')}</h3>
           </div>
           
           <div className="p-0">
             {orders.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
-                {t('admin.noOrders')}
+                {t('adminDashboard.noOrders')}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 text-left text-gray-600 text-sm">
                     <tr>
-                      <th className="p-4">{t('admin.orderId')}</th>
-                      <th className="p-4">{t('admin.customer')}</th>
-                      <th className="p-4">{t('admin.date')}</th>
-                      <th className="p-4">{t('admin.status')}</th>
-                      <th className="p-4">{t('admin.total')}</th>
+                      <th className="p-4">{t('adminDashboard.orderId')}</th>
+                      <th className="p-4">{t('adminDashboard.customer')}</th>
+                      <th className="p-4">{t('adminDashboard.date')}</th>
+                      <th className="p-4">{t('adminDashboard.status')}</th>
+                      <th className="p-4">{t('adminDashboard.total')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -127,21 +127,21 @@ const AdminDashboard = () => {
           
           <div className="p-4 border-t">
             <Link to="/admin/orders" className="text-smartplug-blue hover:underline text-sm">
-              {t('admin.viewAllOrders')}
+              {t('adminDashboard.viewAllOrders')}
             </Link>
           </div>
         </div>
         
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-bold">{t('admin.orderStatus')}</h3>
+            <h3 className="text-lg font-bold">{t('adminDashboard.orderStatus')}</h3>
           </div>
           
           <div className="p-6">
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">{t('admin.pendingOrders')}</span>
+                  <span className="text-sm font-medium">{t('adminDashboard.pendingOrders')}</span>
                   <span className="text-sm font-medium text-gray-500">{pendingOrders}/{totalOrders}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -154,7 +154,7 @@ const AdminDashboard = () => {
               
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">{t('admin.shippedOrders')}</span>
+                  <span className="text-sm font-medium">{t('adminDashboard.shippedOrders')}</span>
                   <span className="text-sm font-medium text-gray-500">
                     {orders.filter(order => order.status === 'shipped').length}/{totalOrders}
                   </span>
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
               
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">{t('admin.deliveredOrders')}</span>
+                  <span className="text-sm font-medium">{t('adminDashboard.deliveredOrders')}</span>
                   <span className="text-sm font-medium text-gray-500">
                     {orders.filter(order => order.status === 'delivered').length}/{totalOrders}
                   </span>
@@ -184,7 +184,7 @@ const AdminDashboard = () => {
               
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">{t('admin.cancelledOrders')}</span>
+                  <span className="text-sm font-medium">{t('adminDashboard.cancelledOrders')}</span>
                   <span className="text-sm font-medium text-gray-500">
                     {orders.filter(order => order.status === 'cancelled').length}/{totalOrders}
                   </span>

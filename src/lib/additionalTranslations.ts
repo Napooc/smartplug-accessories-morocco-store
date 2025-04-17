@@ -1,3 +1,4 @@
+
 // Additional translations for comprehensive website coverage
 export const additionalTranslations = {
   // Product details page translations
@@ -62,7 +63,7 @@ export const additionalTranslations = {
   },
   
   // Admin dashboard translations
-  admin: {
+  adminDashboard: {
     en: 'Admin',
     fr: 'Admin',
     ar: 'مشرف',
