@@ -26,6 +26,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { useStore } from "@/lib/store";
+import { toast } from "sonner";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -46,10 +47,54 @@ const RouteChangeHandler = () => {
   return null; // This component doesn't render anything
 };
 
-// Admin Route Guard Component
+// Admin Route Guard Component with enhanced security
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAdmin } = useStore();
   const location = useLocation();
+  
+  // Check for admin session timeout
+  useEffect(() => {
+    const checkAdminSession = () => {
+      const lastActivity = localStorage.getItem('adminLastActivity');
+      if (lastActivity) {
+        const inactiveTime = Date.now() - parseInt(lastActivity, 10);
+        // Auto logout after 30 minutes of inactivity
+        if (inactiveTime > 30 * 60 * 1000) {
+          localStorage.removeItem('adminLastActivity');
+          localStorage.removeItem('smartplug-admin');
+          window.location.href = '/admin/login';
+          toast.warning("Session expired due to inactivity");
+        }
+      }
+    };
+    
+    // Run check on mount
+    checkAdminSession();
+  }, []);
+  
+  // Update last activity timestamp
+  useEffect(() => {
+    if (isAdmin) {
+      const updateActivity = () => {
+        localStorage.setItem('adminLastActivity', Date.now().toString());
+      };
+      
+      // Update on initial render
+      updateActivity();
+      
+      // Set up event listeners for user activity
+      const events = ['mousedown', 'keypress', 'scroll', 'touchstart'];
+      events.forEach(event => {
+        window.addEventListener(event, updateActivity);
+      });
+      
+      return () => {
+        events.forEach(event => {
+          window.removeEventListener(event, updateActivity);
+        });
+      };
+    }
+  }, [isAdmin]);
   
   if (!isAdmin) {
     // Redirect to admin login if not authenticated
