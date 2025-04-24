@@ -7,21 +7,51 @@ import fs from "fs";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Check if index.html exists in the project root
-  const indexPath = path.resolve(__dirname, "index.html");
+  // Determine the project root directory
+  const projectRoot = process.cwd();
   
-  // If index.html doesn't exist, try looking in the public directory
-  let finalIndexPath = indexPath;
-  if (!fs.existsSync(indexPath)) {
-    const publicIndexPath = path.resolve(__dirname, "public/index.html");
-    if (fs.existsSync(publicIndexPath)) {
-      finalIndexPath = publicIndexPath;
-      console.log("Found index.html in public directory");
-    } else {
-      console.error("Error: index.html not found in project root or public directory!");
+  // Possible locations for index.html
+  const possiblePaths = [
+    path.resolve(projectRoot, "index.html"),
+    path.resolve(projectRoot, "public/index.html")
+  ];
+  
+  // Find the first existing index.html file
+  let indexHtmlPath = null;
+  for (const filePath of possiblePaths) {
+    if (fs.existsSync(filePath)) {
+      indexHtmlPath = filePath;
+      console.log(`Found index.html at: ${indexHtmlPath}`);
+      break;
     }
   }
-
+  
+  if (!indexHtmlPath) {
+    console.error("ERROR: index.html not found in any expected location!");
+    // Create a minimal index.html in the root to prevent build failure
+    const minimalIndexHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Ma7alkom</title>
+        </head>
+        <body>
+          <div id="root"></div>
+          <script type="module" src="/src/main.tsx"></script>
+        </body>
+      </html>
+    `;
+    const fallbackPath = path.resolve(projectRoot, "index.html");
+    fs.writeFileSync(fallbackPath, minimalIndexHtml);
+    indexHtmlPath = fallbackPath;
+    console.log(`Created fallback index.html at: ${indexHtmlPath}`);
+  }
+  
+  // Determine the root directory based on where index.html was found
+  const rootDir = path.dirname(indexHtmlPath);
+  
   return {
     server: {
       host: "::",
@@ -34,19 +64,19 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(projectRoot, "./src"),
       },
     },
+    root: rootDir,
+    publicDir: path.resolve(projectRoot, "public"),
     build: {
-      outDir: "dist",
+      outDir: path.resolve(projectRoot, "dist"),
       emptyOutDir: true,
       rollupOptions: {
         input: {
-          main: finalIndexPath,
+          main: indexHtmlPath,
         },
       },
     },
-    // Explicitly set the root directory to ensure index.html is found
-    root: process.cwd(),
   };
 });
