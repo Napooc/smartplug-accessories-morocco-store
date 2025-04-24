@@ -47,6 +47,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     // Explicitly set the root directory to ensure index.html is found
-    root: __dirname,
+    root: process.cwd(),
   };
 });
