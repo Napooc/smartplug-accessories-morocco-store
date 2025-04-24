@@ -10,8 +10,16 @@ export default defineConfig(({ mode }) => {
   // Check if index.html exists in the project root
   const indexPath = path.resolve(__dirname, "index.html");
   
+  // If index.html doesn't exist, try looking in the public directory
+  let finalIndexPath = indexPath;
   if (!fs.existsSync(indexPath)) {
-    console.error("Error: index.html not found at project root!");
+    const publicIndexPath = path.resolve(__dirname, "public/index.html");
+    if (fs.existsSync(publicIndexPath)) {
+      finalIndexPath = publicIndexPath;
+      console.log("Found index.html in public directory");
+    } else {
+      console.error("Error: index.html not found in project root or public directory!");
+    }
   }
 
   return {
@@ -34,7 +42,7 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       rollupOptions: {
         input: {
-          main: indexPath,
+          main: finalIndexPath,
         },
       },
     },
