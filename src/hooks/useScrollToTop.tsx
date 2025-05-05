@@ -9,9 +9,12 @@ export function useScrollToTop() {
   const { pathname } = useLocation();
   
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    // Add a small timeout to ensure the DOM has updated before scrolling
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
   }, [pathname]);
 }
