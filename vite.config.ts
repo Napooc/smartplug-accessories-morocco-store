@@ -10,47 +10,53 @@ export default defineConfig(({ mode }) => {
   // Determine the project root directory
   const projectRoot = process.cwd();
   
-  // Possible locations for index.html
+  // Define possible paths for index.html
   const possiblePaths = [
     path.resolve(projectRoot, "index.html"),
     path.resolve(projectRoot, "public/index.html")
   ];
   
-  // Find the first existing index.html file
+  // Find the first valid index.html file
   let indexHtmlPath = null;
   for (const filePath of possiblePaths) {
-    if (fs.existsSync(filePath)) {
-      indexHtmlPath = filePath;
-      console.log(`Found index.html at: ${indexHtmlPath}`);
-      break;
+    try {
+      // Use statSync to check if the file exists and is a file (not a directory)
+      const stats = fs.statSync(filePath);
+      if (stats.isFile()) {
+        indexHtmlPath = filePath;
+        console.log(`Found valid index.html at: ${indexHtmlPath}`);
+        break;
+      }
+    } catch (error) {
+      // File doesn't exist or can't be accessed, try next path
+      console.log(`Index.html not found at: ${filePath}`);
     }
   }
   
+  // If no valid index.html found, create one in the project root
   if (!indexHtmlPath) {
-    console.error("ERROR: index.html not found in any expected location!");
-    // Create a minimal index.html in the root to prevent build failure
-    const minimalIndexHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Ma7alkom</title>
-        </head>
-        <body>
-          <div id="root"></div>
-          <script type="module" src="/src/main.tsx"></script>
-        </body>
-      </html>
-    `;
+    console.error("No valid index.html found, creating one in project root");
+    const minimalIndexHtml = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ma7alkom - Accessories & Home Store</title>
+    <meta name="description" content="Ma7alkom - Your One-Stop Shop for Quality Accessories and Home Products" />
+    <meta name="author" content="Ma7alkom" />
+    <link rel="icon" href="/lovable-uploads/510962dd-e810-4cd9-9b41-1e0a46b8d38c.png" type="image/png">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`;
+    
     const fallbackPath = path.resolve(projectRoot, "index.html");
     fs.writeFileSync(fallbackPath, minimalIndexHtml);
     indexHtmlPath = fallbackPath;
     console.log(`Created fallback index.html at: ${indexHtmlPath}`);
   }
-  
-  // Determine the root directory based on where index.html was found
-  const rootDir = path.dirname(indexHtmlPath);
   
   return {
     server: {
@@ -67,8 +73,6 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(projectRoot, "./src"),
       },
     },
-    root: rootDir,
-    publicDir: path.resolve(projectRoot, "public"),
     build: {
       outDir: path.resolve(projectRoot, "dist"),
       emptyOutDir: true,
