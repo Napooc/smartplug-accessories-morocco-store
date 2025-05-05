@@ -10,6 +10,18 @@ export default defineConfig(({ mode }) => {
   // Determine the project root directory
   const projectRoot = process.cwd();
   
+  // First, ensure any existing index.html directory is renamed
+  const indexHtmlDir = path.resolve(projectRoot, "index.html");
+  try {
+    const stats = fs.statSync(indexHtmlDir);
+    if (stats.isDirectory()) {
+      console.log("Found directory named index.html, renaming it to _index.html_dir");
+      fs.renameSync(indexHtmlDir, path.resolve(projectRoot, "_index.html_dir"));
+    }
+  } catch (error) {
+    // File doesn't exist or can't be accessed, which is fine
+  }
+  
   // Define possible paths for index.html
   const possiblePaths = [
     path.resolve(projectRoot, "index.html"),
@@ -35,7 +47,7 @@ export default defineConfig(({ mode }) => {
   
   // If no valid index.html found, create one in the project root
   if (!indexHtmlPath) {
-    console.error("No valid index.html found, creating one in project root");
+    console.log("No valid index.html found, creating one in project root");
     const minimalIndexHtml = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -48,6 +60,8 @@ export default defineConfig(({ mode }) => {
   </head>
   <body>
     <div id="root"></div>
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>`;
