@@ -10,16 +10,17 @@ export default defineConfig(({ mode }) => {
   // Determine the project root directory
   const projectRoot = process.cwd();
   
-  // Handle index.html
+  // Force remove and recreate index.html if it's a directory
   const indexHtmlPath = path.resolve(projectRoot, "index.html");
   
-  // Check if index.html exists and is a directory (error case)
   try {
+    // Check if path exists and what type it is
     const stats = fs.statSync(indexHtmlPath);
+    
+    // If it's a directory, remove it and create a file
     if (stats.isDirectory()) {
-      // If index.html is a directory, rename it
-      console.log("Found directory named index.html, renaming it");
-      fs.renameSync(indexHtmlPath, path.resolve(projectRoot, "_index.html_dir"));
+      console.log("Removing index.html directory and creating file instead");
+      fs.rmSync(indexHtmlPath, { recursive: true, force: true });
       
       // Create proper index.html file
       const templateHtml = `<!DOCTYPE html>
@@ -31,6 +32,21 @@ export default defineConfig(({ mode }) => {
     <meta name="description" content="Ma7alkom - Your One-Stop Shop for Quality Accessories and Home Products" />
     <meta name="author" content="Ma7alkom" />
     <link rel="icon" href="/lovable-uploads/510962dd-e810-4cd9-9b41-1e0a46b8d38c.png" type="image/png">
+
+    <meta property="og:title" content="Ma7alkom - Accessories & Home Store" />
+    <meta property="og:description" content="Your One-Stop Shop for Quality Accessories and Home Products" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Language alternates for SEO -->
+    <link rel="alternate" hreflang="en" href="?lang=en" />
+    <link rel="alternate" hreflang="fr" href="?lang=fr" />
+    <link rel="alternate" hreflang="ar" href="?lang=ar" />
+    <link rel="alternate" hreflang="x-default" href="?lang=en" />
   </head>
   <body>
     <div id="root"></div>
@@ -43,7 +59,7 @@ export default defineConfig(({ mode }) => {
       console.log("Created new index.html file");
     }
   } catch (error) {
-    // If index.html doesn't exist, create it
+    // If index.html doesn't exist at all, create it
     if (!fs.existsSync(indexHtmlPath)) {
       const templateHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -54,6 +70,21 @@ export default defineConfig(({ mode }) => {
     <meta name="description" content="Ma7alkom - Your One-Stop Shop for Quality Accessories and Home Products" />
     <meta name="author" content="Ma7alkom" />
     <link rel="icon" href="/lovable-uploads/510962dd-e810-4cd9-9b41-1e0a46b8d38c.png" type="image/png">
+
+    <meta property="og:title" content="Ma7alkom - Accessories & Home Store" />
+    <meta property="og:description" content="Your One-Stop Shop for Quality Accessories and Home Products" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Language alternates for SEO -->
+    <link rel="alternate" hreflang="en" href="?lang=en" />
+    <link rel="alternate" hreflang="fr" href="?lang=fr" />
+    <link rel="alternate" hreflang="ar" href="?lang=ar" />
+    <link rel="alternate" hreflang="x-default" href="?lang=en" />
   </head>
   <body>
     <div id="root"></div>
@@ -65,6 +96,18 @@ export default defineConfig(({ mode }) => {
       fs.writeFileSync(indexHtmlPath, templateHtml);
       console.log("Created new index.html file");
     }
+  }
+  
+  // Also create a file in the public directory as a backup
+  const publicIndexHtmlPath = path.resolve(projectRoot, "public/index.html");
+  if (!fs.existsSync(path.dirname(publicIndexHtmlPath))) {
+    fs.mkdirSync(path.dirname(publicIndexHtmlPath), { recursive: true });
+  }
+  
+  // Copy index.html to public directory if it doesn't exist
+  if (!fs.existsSync(publicIndexHtmlPath) && fs.existsSync(indexHtmlPath) && fs.statSync(indexHtmlPath).isFile()) {
+    fs.copyFileSync(indexHtmlPath, publicIndexHtmlPath);
+    console.log("Copied index.html to public directory");
   }
   
   return {
