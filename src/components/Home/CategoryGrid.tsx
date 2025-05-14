@@ -32,7 +32,7 @@ const categoryBackgrounds: Record<string, string> = {
   'plumbing': 'url("https://plus.unsplash.com/premium_photo-1683141410787-c4dbd2220487?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
   'garden-terrace': 'url("https://5.imimg.com/data5/SELLER/Default/2024/3/405401849/FO/VF/UZ/52179850/residential-terrace-garden-designing-500x500.jpg")',
   'paint-hardware': 'url("https://paintshardware.co.ke/wp-content/uploads/2020/09/Paints-_-hardware-supermarket-75-1024x683.jpg")',
-  'bathroom-toilet': 'url("https://www.bathroommountain.co.uk/img/1900/1900/resize/catalog/product/c/6/c66037-1000-traditional-toilet-high-level-cistern-soft-seat_1.jpg")',
+  'bathroom-toilet': 'url("https://www.kinedo.com/media/img/1cgqgxwjnt9s1805zdh46sbc2h/toilettes-dans-la-salle-de-bain--512x384c.jpg")',
   'heating-ac': 'url("https://logicoolair.com.au/wp-content/uploads/2021/04/Air-Conditioning-Heating-Everything-You-Need-To-Know.png")',
   'discounts-deals': 'linear-gradient(135deg, #ff4e50 0%, #f9d423 100%)'
 };
