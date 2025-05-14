@@ -13,8 +13,8 @@ export const supabase = createClient<Database>(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false, // Disable auto detection of auth parameters in URL
-      storage: localStorage
+      detectSessionInUrl: false,
+      storage: typeof window !== 'undefined' ? localStorage : undefined
     }
   }
 );
