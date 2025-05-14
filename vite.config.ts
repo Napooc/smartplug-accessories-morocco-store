@@ -10,47 +10,30 @@ export default defineConfig(({ mode }) => {
   // Determine the project root directory
   const projectRoot = process.cwd();
   
-  // Possible locations for index.html
-  const possiblePaths = [
-    path.resolve(projectRoot, "index.html"),
-    path.resolve(projectRoot, "public/index.html")
-  ];
+  // Check if index.html exists and is a file (not a directory)
+  const indexHtmlPath = path.resolve(projectRoot, "index.html");
+  const publicIndexHtmlPath = path.resolve(projectRoot, "public/index.html");
   
-  // Find the first existing index.html file
-  let indexHtmlPath = null;
-  for (const filePath of possiblePaths) {
-    if (fs.existsSync(filePath)) {
-      indexHtmlPath = filePath;
-      console.log(`Found index.html at: ${indexHtmlPath}`);
-      break;
+  // Ensure index.html is a file, not a directory
+  try {
+    const indexStat = fs.statSync(indexHtmlPath);
+    if (indexStat.isDirectory()) {
+      console.warn("Warning: index.html is a directory, removing it...");
+      fs.rmSync(indexHtmlPath, { recursive: true, force: true });
+      
+      // Copy from public if exists, otherwise create a new one
+      if (fs.existsSync(publicIndexHtmlPath)) {
+        fs.copyFileSync(publicIndexHtmlPath, indexHtmlPath);
+        console.log("Copied index.html from public directory");
+      } else {
+        // This will be created by the lov-write operation above
+        console.log("New index.html will be created");
+      }
     }
+  } catch (err) {
+    // File doesn't exist, we'll create it with the write operation above
+    console.log("index.html not found, will create it");
   }
-  
-  if (!indexHtmlPath) {
-    console.error("ERROR: index.html not found in any expected location!");
-    // Create a minimal index.html in the root to prevent build failure
-    const minimalIndexHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Ma7alkom</title>
-        </head>
-        <body>
-          <div id="root"></div>
-          <script type="module" src="/src/main.tsx"></script>
-        </body>
-      </html>
-    `;
-    const fallbackPath = path.resolve(projectRoot, "index.html");
-    fs.writeFileSync(fallbackPath, minimalIndexHtml);
-    indexHtmlPath = fallbackPath;
-    console.log(`Created fallback index.html at: ${indexHtmlPath}`);
-  }
-  
-  // Determine the root directory based on where index.html was found
-  const rootDir = path.dirname(indexHtmlPath);
   
   return {
     server: {
@@ -67,7 +50,7 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(projectRoot, "./src"),
       },
     },
-    root: rootDir,
+    root: projectRoot,
     publicDir: path.resolve(projectRoot, "public"),
     build: {
       outDir: path.resolve(projectRoot, "dist"),
