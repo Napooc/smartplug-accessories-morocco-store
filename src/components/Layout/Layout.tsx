@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import WhatsAppButton from './WhatsAppButton';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
+import Preload from './Preload';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,9 @@ const Layout = ({ children }: LayoutProps) => {
   
   return (
     <div className="flex flex-col min-h-screen w-full">
+      {/* Preload critical resources */}
+      <Preload />
+      
       <Navbar />
       <main className="flex-grow w-full">
         {children}

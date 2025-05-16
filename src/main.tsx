@@ -15,26 +15,28 @@ setUserLanguagePreference(initialLanguage);
 // Add a listener for storage events to sync language between tabs
 window.addEventListener('storage', (event) => {
   if (event.key === 'ma7alkom-language' && event.newValue) {
-    // Only reload if the language is different from current URL parameter
+    // Only update URL parameter without full page reload
     const urlParams = new URLSearchParams(window.location.search);
     const currentLang = urlParams.get('lang');
     
     if (currentLang !== event.newValue) {
       const url = new URL(window.location.href);
       url.searchParams.set('lang', event.newValue);
-      window.location.href = url.toString(); // Hard reload with new language
+      window.history.pushState({}, '', url.toString());
     }
   }
 });
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <LanguageProvider>
-        <StoreProvider>
-          <App />
-        </StoreProvider>
-      </LanguageProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+// Create root element eagerly
+const root = createRoot(document.getElementById("root")!);
+
+// Render without StrictMode for faster initial render
+root.render(
+  <BrowserRouter>
+    <LanguageProvider>
+      <StoreProvider>
+        <App />
+      </StoreProvider>
+    </LanguageProvider>
+  </BrowserRouter>
 );

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,25 +11,37 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { LanguageLinkInjector } from "@/components/ui/language-link-injector";
 import { useLanguage } from "@/lib/languageContext";
 import { updatePageLinks } from "@/lib/languageUtils";
-import Index from "./pages/Index";
-import Shop from "./pages/Shop";
-import ProductDetail from "./pages/ProductDetail";
-import CategoryPage from "./pages/CategoryPage";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderConfirmation from "./pages/OrderConfirmation";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminOrders from "./pages/AdminOrders";
-import AdminProducts from "./pages/AdminProducts";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Create a new QueryClient instance
-const queryClient = new QueryClient();
+// Create a new QueryClient instance with optimized settings
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    },
+  },
+});
+
+// Only load frequently used pages eagerly
+import Index from "./pages/Index";
+import Shop from "./pages/Shop";
+import AdminLogin from "./pages/AdminLogin";
+
+// Lazy load less frequently accessed pages
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminOrders = lazy(() => import("./pages/AdminOrders"));
+const AdminProducts = lazy(() => import("./pages/AdminProducts"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Route Change Handler Component
 const RouteChangeHandler = () => {
@@ -46,6 +58,18 @@ const RouteChangeHandler = () => {
   
   return null; // This component doesn't render anything
 };
+
+// Simple loading component
+const PageLoader = () => (
+  <div className="flex flex-col gap-2 p-4">
+    <Skeleton className="h-[300px] w-full rounded-xl" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+      <Skeleton className="h-[200px] rounded-lg" />
+      <Skeleton className="h-[200px] rounded-lg" />
+      <Skeleton className="h-[200px] rounded-lg" />
+    </div>
+  </div>
+);
 
 // Admin Route Guard Component with enhanced security
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -118,34 +142,72 @@ const App = () => {
           {/* Customer Routes */}
           <Route path="/" element={<Index />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/categories/:categoryId" element={<CategoryPage />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/confirmation" element={<OrderConfirmation />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/product/:id" element={
+            <Suspense fallback={<PageLoader />}>
+              <ProductDetail />
+            </Suspense>
+          } />
+          <Route path="/categories/:categoryId" element={
+            <Suspense fallback={<PageLoader />}>
+              <CategoryPage />
+            </Suspense>
+          } />
+          <Route path="/cart" element={
+            <Suspense fallback={<PageLoader />}>
+              <Cart />
+            </Suspense>
+          } />
+          <Route path="/checkout" element={
+            <Suspense fallback={<PageLoader />}>
+              <Checkout />
+            </Suspense>
+          } />
+          <Route path="/confirmation" element={
+            <Suspense fallback={<PageLoader />}>
+              <OrderConfirmation />
+            </Suspense>
+          } />
+          <Route path="/about" element={
+            <Suspense fallback={<PageLoader />}>
+              <About />
+            </Suspense>
+          } />
+          <Route path="/contact" element={
+            <Suspense fallback={<PageLoader />}>
+              <Contact />
+            </Suspense>
+          } />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={
             <AdminRoute>
-              <AdminDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <AdminDashboard />
+              </Suspense>
             </AdminRoute>
           } />
           <Route path="/admin/orders" element={
             <AdminRoute>
-              <AdminOrders />
+              <Suspense fallback={<PageLoader />}>
+                <AdminOrders />
+              </Suspense>
             </AdminRoute>
           } />
           <Route path="/admin/products" element={
             <AdminRoute>
-              <AdminProducts />
+              <Suspense fallback={<PageLoader />}>
+                <AdminProducts />
+              </Suspense>
             </AdminRoute>
           } />
           
           {/* Catch-all Route */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={
+            <Suspense fallback={<PageLoader />}>
+              <NotFound />
+            </Suspense>
+          } />
         </Routes>
         <Toaster />
         <Sonner />
