@@ -1,4 +1,3 @@
-
 import React, { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,24 +12,25 @@ import { useLanguage } from "@/lib/languageContext";
 import { updatePageLinks } from "@/lib/languageUtils";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // Create a new QueryClient instance with optimized settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // Don't refetch on window focus
-      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      staleTime: 5 * 60 * 1000, // Data fresh for 5 minutes
+      retry: 1, // Minimize retries for faster loading
     },
   },
 });
 
-// Only load frequently used pages eagerly
+// Load core pages eagerly to remove initial loading screen
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import AdminLogin from "./pages/AdminLogin";
+import Layout from "./components/Layout/Layout";
 
-// Lazy load less frequently accessed pages
+// Optimized lazy loading for other pages
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -48,7 +48,7 @@ const RouteChangeHandler = () => {
   const { language } = useLanguage();
   const location = useLocation();
   
-  useEffect(() => {
+  React.useEffect(() => {
     // When route changes, ensure all links have language params
     // Skip for admin routes
     if (!location.pathname.startsWith('/admin')) {
@@ -56,20 +56,11 @@ const RouteChangeHandler = () => {
     }
   }, [location, language]);
   
-  return null; // This component doesn't render anything
+  return null;
 };
 
-// Simple loading component
-const PageLoader = () => (
-  <div className="flex flex-col gap-2 p-4">
-    <Skeleton className="h-[300px] w-full rounded-xl" />
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-      <Skeleton className="h-[200px] rounded-lg" />
-      <Skeleton className="h-[200px] rounded-lg" />
-      <Skeleton className="h-[200px] rounded-lg" />
-    </div>
-  </div>
-);
+// Minimal loading component (no spinners or loading text)
+const MinimalFallback = () => <div className="min-h-screen"></div>;
 
 // Admin Route Guard Component with enhanced security
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -139,41 +130,41 @@ const App = () => {
         <RouteChangeHandler />
         
         <Routes>
-          {/* Customer Routes */}
+          {/* Customer Routes - No loading indicators */}
           <Route path="/" element={<Index />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <ProductDetail />
             </Suspense>
           } />
           <Route path="/categories/:categoryId" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <CategoryPage />
             </Suspense>
           } />
           <Route path="/cart" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <Cart />
             </Suspense>
           } />
           <Route path="/checkout" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <Checkout />
             </Suspense>
           } />
           <Route path="/confirmation" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <OrderConfirmation />
             </Suspense>
           } />
           <Route path="/about" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <About />
             </Suspense>
           } />
           <Route path="/contact" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <Contact />
             </Suspense>
           } />
@@ -182,21 +173,21 @@ const App = () => {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={
             <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<MinimalFallback />}>
                 <AdminDashboard />
               </Suspense>
             </AdminRoute>
           } />
           <Route path="/admin/orders" element={
             <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<MinimalFallback />}>
                 <AdminOrders />
               </Suspense>
             </AdminRoute>
           } />
           <Route path="/admin/products" element={
             <AdminRoute>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<MinimalFallback />}>
                 <AdminProducts />
               </Suspense>
             </AdminRoute>
@@ -204,7 +195,7 @@ const App = () => {
           
           {/* Catch-all Route */}
           <Route path="*" element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<MinimalFallback />}>
               <NotFound />
             </Suspense>
           } />

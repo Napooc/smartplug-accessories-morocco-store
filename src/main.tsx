@@ -27,7 +27,7 @@ window.addEventListener('storage', (event) => {
   }
 });
 
-// Create root element eagerly
+// Mount the app immediately without waiting for all resources
 const root = createRoot(document.getElementById("root")!);
 
 // Render without StrictMode for faster initial render

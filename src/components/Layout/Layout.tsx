@@ -16,7 +16,7 @@ const Layout = ({ children }: LayoutProps) => {
   
   return (
     <div className="flex flex-col min-h-screen w-full">
-      {/* Preload critical resources */}
+      {/* Preload critical resources in background */}
       <Preload />
       
       <Navbar />
