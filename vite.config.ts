@@ -46,13 +46,9 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
-    // Minimize size, improve loading speed
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-      },
-    },
+    // Use esbuild for minification instead of terser
+    minify: 'esbuild',
+    // Remove terser options since we're using esbuild
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom']
