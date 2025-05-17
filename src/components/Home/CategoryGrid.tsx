@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { 
   Home, 
@@ -37,7 +38,7 @@ const categoryBackgrounds: Record<string, string> = {
   'discounts-deals': 'url("https://static.vecteezy.com/system/resources/previews/015/452/522/non_2x/discount-icon-in-trendy-flat-style-isolated-on-background-discount-icon-page-symbol-for-your-web-site-design-discount-icon-logo-app-ui-discount-icon-eps-vector.jpg")'
 };
 
-export default function CategoryGrid() {https://static.vecteezy.com/system/resources/previews/015/452/522/non_2x/discount-icon-in-trendy-flat-style-isolated-on-background-discount-icon-page-symbol-for-your-web-site-design-discount-icon-logo-app-ui-discount-icon-eps-vector.jpg
+export default function CategoryGrid() {
   const { t, direction } = useLanguage();
   
   const categoryTranslationKeys: Record<string, string> = {
