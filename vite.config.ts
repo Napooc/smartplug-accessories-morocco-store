@@ -8,8 +8,8 @@ import { componentTagger } from "lovable-tagger"
 export default defineConfig(({ mode }) => ({
   plugins: [
     react({
-      // Speed up dev mode hot reloads
-      fastRefresh: true,
+      // Using standard React plugin options
+      jsxRuntime: 'automatic',
     }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
