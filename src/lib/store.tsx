@@ -594,14 +594,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Created new order object:", newOrder);
       
-      // Prepare data for Supabase
-      const customerInfoJson = JSON.stringify(customerData);
-      const cartItemsJson = JSON.stringify(cart);
+      // Prepare data for Supabase - stringify objects to match Json type
+      const customerInfoJson = JSON.parse(JSON.stringify(customerData));
+      const cartItemsJson = JSON.parse(JSON.stringify(cart));
       
       const orderData = {
         id: orderId,
-        customer_info: customerData,  // Using the object directly instead of stringifying
-        items: cart,                  // Using the array directly instead of stringifying
+        customer_info: customerInfoJson,  // Using JSON-serialized object instead of direct object
+        items: cartItemsJson,             // Using JSON-serialized array instead of direct array
         status: 'pending',
         total: cartTotal,
         date: new Date().toISOString()
