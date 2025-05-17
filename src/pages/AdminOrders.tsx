@@ -29,7 +29,23 @@ const AdminOrders = () => {
   
   // Fetch orders on component mount
   useEffect(() => {
-    fetchOrders();
+    // Refresh orders from Supabase
+    const loadOrders = async () => {
+      try {
+        await fetchOrders();
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+    };
+    
+    loadOrders();
+    
+    // Set up a refresh interval (optional)
+    const refreshInterval = setInterval(loadOrders, 30000); // Refresh every 30 seconds
+    
+    return () => {
+      clearInterval(refreshInterval);
+    };
   }, [fetchOrders]);
   
   // Filter orders

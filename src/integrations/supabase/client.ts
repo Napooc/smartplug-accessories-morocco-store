@@ -13,8 +13,13 @@ export const supabase = createClient<Database>(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? localStorage : undefined
+    },
+    global: {
+      headers: {
+        'Cache-Control': 'no-store'
+      }
     }
   }
 );

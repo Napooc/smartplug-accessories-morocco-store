@@ -531,6 +531,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const fetchOrders = async () => {
     try {
+      console.log('Fetching orders from Supabase...');
+      
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -538,10 +540,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching orders:', error);
+        toast.error('Failed to load orders');
         return;
       }
       
       if (data) {
+        console.log('Orders fetched successfully:', data.length);
         const formattedOrders: Order[] = data.map(order => ({
           id: order.id,
           items: order.items as unknown as CartItem[],
@@ -555,6 +559,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
+      toast.error('Failed to load orders');
     }
   };
   
@@ -589,13 +594,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Created new order object:", newOrder);
       
-      const customerInfoJson = JSON.parse(JSON.stringify(customerData));
-      const cartItemsJson = JSON.parse(JSON.stringify(cart));
+      // Prepare data for Supabase
+      const customerInfoJson = JSON.stringify(customerData);
+      const cartItemsJson = JSON.stringify(cart);
       
       const orderData = {
         id: orderId,
-        customer_info: customerInfoJson,
-        items: cartItemsJson,
+        customer_info: customerData,  // Using the object directly instead of stringifying
+        items: cart,                  // Using the array directly instead of stringifying
         status: 'pending',
         total: cartTotal,
         date: new Date().toISOString()
@@ -603,6 +609,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log("Sending order data to Supabase:", orderData);
       
+      // Insert the order into Supabase
       const { data, error } = await supabase
         .from('orders')
         .insert(orderData)
@@ -621,6 +628,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Order saved successfully to Supabase:', data);
       
+      // Update local orders state
       setOrders(prevOrders => [...prevOrders, newOrder]);
       
       return newOrder;

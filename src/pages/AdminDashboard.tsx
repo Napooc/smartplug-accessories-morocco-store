@@ -10,8 +10,25 @@ const AdminDashboard = () => {
   const { orders, products, fetchOrders } = useStore();
   const { t } = useLanguage();
   
+  // Fetch orders when the component mounts
   useEffect(() => {
-    fetchOrders();
+    // Refresh the orders data from Supabase
+    const loadOrders = async () => {
+      try {
+        await fetchOrders();
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+    };
+    
+    loadOrders();
+    
+    // Set up a refresh interval (optional)
+    const refreshInterval = setInterval(loadOrders, 60000); // Refresh every minute
+    
+    return () => {
+      clearInterval(refreshInterval);
+    };
   }, [fetchOrders]);
   
   const totalOrders = orders.length;

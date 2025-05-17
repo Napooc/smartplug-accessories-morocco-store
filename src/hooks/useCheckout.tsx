@@ -42,7 +42,7 @@ export function useCheckout() {
       // Prepare customer data for Supabase
       const processedCustomerData = prepareCustomerData(customerData);
       
-      // Place the order
+      // Place the order directly to Supabase via the store function
       const result = await placeOrder(processedCustomerData);
       
       console.log('Order placement result:', result);
