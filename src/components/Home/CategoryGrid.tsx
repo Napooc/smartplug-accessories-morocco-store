@@ -35,7 +35,7 @@ const categoryBackgrounds: Record<string, string> = {
   'paint-hardware': 'url("https://paintshardware.co.ke/wp-content/uploads/2020/09/Paints-_-hardware-supermarket-75-1024x683.jpg")',
   'bathroom-toilet': 'url("https://www.kinedo.com/media/img/1cgqgxwjnt9s1805zdh46sbc2h/toilettes-dans-la-salle-de-bain--512x384c.jpg")',
   'heating-ac': 'url("https://logicoolair.com.au/wp-content/uploads/2021/04/Air-Conditioning-Heating-Everything-You-Need-To-Know.png")',
-  'discounts-deals': 'url("https://static.vecteezy.com/system/resources/previews/015/452/522/non_2x/discount-icon-in-trendy-flat-style-isolated-on-background-discount-icon-page-symbol-for-your-web-site-design-discount-icon-logo-app-ui-discount-icon-eps-vector.jpg")'
+  'discounts-deals': 'url("https://www.searchenginejournal.com/wp-content/uploads/2020/04/should-you-discount-your-seo-services-because-of-coronavirus-5e8c7fb2d5d72.png")'
 };
 
 export default function CategoryGrid() {
