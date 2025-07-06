@@ -81,68 +81,117 @@ export default function Hero() {
   
   // Auto slide
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000);
+    const interval = setInterval(nextSlide, 6000);
     return () => clearInterval(interval);
   }, []);
   
   return (
-    <div className="relative bg-black h-[600px] overflow-hidden">
+    <div className="relative h-[70vh] md:h-[80vh] overflow-hidden bg-background">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
-            currentSlide === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+            currentSlide === index 
+              ? 'opacity-100 scale-100' 
+              : 'opacity-0 scale-105 pointer-events-none'
           }`}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent z-10"></div>
+          {/* Modern gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/40 to-transparent z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
+          
+          {/* Background Image */}
           <img
             src={slide.image}
             alt={slide.title[language]}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center transform transition-transform duration-700 hover:scale-105"
           />
+          
+          {/* Content Container */}
           <div className="container mx-auto px-4 h-full flex items-center relative z-20">
-            <div className="max-w-lg text-white">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">{slide.title[language]}</h1>
-              <p className="text-xl mb-2">{slide.subtitle[language]}</p>
-              <p className="text-2xl font-bold text-smartplug-blue mb-6">{slide.price}</p>
-              <Link
-                to={slide.link}
-                className="inline-block bg-smartplug-blue hover:bg-smartplug-lightblue text-white font-medium py-3 px-8 rounded-md transition-colors"
-              >
-                {slide.cta[language]}
-              </Link>
+            <div className="max-w-2xl">
+              {/* Modern content card */}
+              <div className="backdrop-blur-sm bg-white/10 rounded-2xl p-8 md:p-12 border border-white/20 shadow-2xl">
+                <div className="space-y-6">
+                  {/* Badge */}
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/20 border border-primary/30 backdrop-blur-sm">
+                    <span className="text-sm font-medium text-white">Premium Quality</span>
+                  </div>
+                  
+                  {/* Title */}
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+                    <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                      {slide.title[language]}
+                    </span>
+                  </h1>
+                  
+                  {/* Subtitle */}
+                  <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-md">
+                    {slide.subtitle[language]}
+                  </p>
+                  
+                  {/* Price with modern styling */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      {slide.price}
+                    </span>
+                    <div className="h-8 w-px bg-white/30"></div>
+                    <span className="text-white/70 text-sm">Starting from</span>
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <div className="pt-4">
+                    <Link
+                      to={slide.link}
+                      className="group inline-flex items-center gap-3 bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
+                    >
+                      <span>{slide.cta[language]}</span>
+                      <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+          
+          {/* Decorative elements */}
+          <div className="absolute top-20 right-20 w-32 h-32 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl z-5"></div>
+          <div className="absolute bottom-32 left-20 w-24 h-24 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-2xl z-5"></div>
         </div>
       ))}
       
-      {/* Navigation buttons */}
+      {/* Modern Navigation buttons */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-30"
+        className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-3 rounded-full border border-white/20 transition-all duration-300 hover:scale-110 z-30 group"
       >
-        <ChevronLeft size={24} />
+        <ChevronLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-30"
+        className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-3 rounded-full border border-white/20 transition-all duration-300 hover:scale-110 z-30 group"
       >
-        <ChevronRight size={24} />
+        <ChevronRight size={20} className="group-hover:translate-x-0.5 transition-transform" />
       </button>
       
-      {/* Indicators */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
+      {/* Modern Indicators */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-30">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              currentSlide === index ? 'bg-smartplug-blue' : 'bg-white/50'
+            className={`transition-all duration-300 rounded-full ${
+              currentSlide === index 
+                ? 'w-12 h-3 bg-gradient-to-r from-primary to-accent' 
+                : 'w-3 h-3 bg-white/40 hover:bg-white/60'
             }`}
           ></button>
         ))}
       </div>
+      
+      {/* Bottom fade effect */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-20"></div>
     </div>
   );
 }
