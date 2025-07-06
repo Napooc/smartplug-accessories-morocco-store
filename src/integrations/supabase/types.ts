@@ -9,7 +9,161 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      contact_messages: {
+        Row: {
+          created_at: string
+          date: string
+          email: string
+          id: string
+          message: string
+          name: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_info: Json
+          date: string
+          id: string
+          items: Json
+          status: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          customer_info: Json
+          date?: string
+          id?: string
+          items: Json
+          status?: string
+          total: number
+        }
+        Update: {
+          created_at?: string
+          customer_info?: Json
+          date?: string
+          id?: string
+          items?: Json
+          status?: string
+          total?: number
+        }
+        Relationships: []
+      }
+      product_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          product_id: string
+          rating: number | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          product_id: string
+          rating?: number | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          product_id?: string
+          rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_comments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string
+          color_variants: Json | null
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          images: string[]
+          name: string
+          old_price: number | null
+          on_sale: boolean
+          placement: string | null
+          price: number
+          rating: number | null
+          sku: string
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          color_variants?: Json | null
+          created_at?: string
+          description: string
+          featured?: boolean
+          id?: string
+          images?: string[]
+          name: string
+          old_price?: number | null
+          on_sale?: boolean
+          placement?: string | null
+          price: number
+          rating?: number | null
+          sku: string
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          color_variants?: Json | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          images?: string[]
+          name?: string
+          old_price?: number | null
+          on_sale?: boolean
+          placement?: string | null
+          price?: number
+          rating?: number | null
+          sku?: string
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
