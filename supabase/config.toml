@@ -1,8 +1,1 @@
-
-project_id = "iqnubejihoxrymmskpis"
-
-[functions.enable-orders]
-verify_jwt = false
-
-[functions.enable-contact-messages]
-verify_jwt = false
+project_id = "aeosmjgqdfzrmtbjwpix"
