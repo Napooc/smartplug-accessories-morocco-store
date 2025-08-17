@@ -46,7 +46,7 @@ type CommentFormValues = z.infer<typeof commentFormSchema>;
 
 const ProductComments = ({ productId }: ProductCommentsProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { products } = useStore();
   
@@ -72,7 +72,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     if (!productId) return;
     
     try {
-      setLoading(true);
+      // Removed loading state
       const { data, error } = await supabase
         .from('product_comments')
         .select('*')
@@ -89,7 +89,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     } catch (error) {
       console.error('Error in fetchComments:', error);
     } finally {
-      setLoading(false);
+      // Removed loading state
     }
   };
 
@@ -323,11 +323,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
             : 'No Comments Yet'}
         </h4>
         
-        {loading ? (
-          <div className="flex justify-center p-6">
-            <Loader2 className="h-8 w-8 animate-spin text-smartplug-blue" />
-          </div>
-        ) : comments.length > 0 ? (
+        {comments.length > 0 ? (
           <div className="space-y-4">
             {comments.map((comment) => (
               <CommentItem key={comment.id} comment={comment} />

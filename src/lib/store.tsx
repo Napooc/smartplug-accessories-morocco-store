@@ -68,7 +68,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
@@ -85,13 +85,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
     }
 
-    Promise.all([
-      fetchProducts(),
-      fetchOrders(),
-      fetchContactMessages()
-    ]).finally(() => {
-      setIsLoading(false);
-    });
+    // Load data in background without blocking UI
+    fetchProducts();
+    fetchOrders();
+    fetchContactMessages();
   }, []);
 
   useEffect(() => {
@@ -550,7 +547,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           id: order.id,
           items: order.items as unknown as CartItem[],
           status: order.status as OrderStatus,
-          customer: order.customer_info as unknown as CustomerInfo,
+          customer: order.customer as unknown as CustomerInfo,
           date: new Date(order.date).toISOString().split('T')[0],
           total: order.total
         }));
@@ -600,7 +597,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       const orderData = {
         id: orderId,
-        customer_info: customerInfoJson,  // Using JSON-serialized object instead of direct object
+        customer: customerInfoJson,  // Using JSON-serialized object instead of direct object
         items: cartItemsJson,             // Using JSON-serialized array instead of direct array
         status: 'pending',
         total: cartTotal,
@@ -787,13 +784,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   return (
     <StoreContext.Provider value={value}>
-      {isLoading ? (
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-smartplug-blue"></div>
-        </div>
-      ) : (
-        children
-      )}
+      {children}
     </StoreContext.Provider>
   );
 }

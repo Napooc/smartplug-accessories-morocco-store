@@ -11,7 +11,7 @@ const OrderConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, direction } = useLanguage();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Get order details from location state
   const orderData = location.state || {};
@@ -32,20 +32,11 @@ const OrderConfirmation = () => {
       
       return () => clearTimeout(timer);
     } else {
-      setIsLoading(false);
+      // Removed loading state
     }
   }, [orderId, navigate, t, orderData]);
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-16 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-smartplug-blue"></div>
-        </div>
-      </Layout>
-    );
-  }
+  // Direct rendering without loading state
   
   // If redirecting, don't render the rest
   if (!orderId) {

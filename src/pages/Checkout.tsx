@@ -13,12 +13,12 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal } = useStore();
   const { t, direction } = useLanguage();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Verify cart is not empty and redirect if it is
   useEffect(() => {
     const checkCart = () => {
-      setIsLoading(false);
+      // Removed loading state
       if (cart.length === 0) {
         toast.error(t('emptyCart', { default: 'Your cart is empty' }));
         navigate('/shop');
@@ -32,16 +32,7 @@ const Checkout = () => {
     return () => clearTimeout(timer);
   }, [cart, navigate, t]);
   
-  // Show loading state while checking cart
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-16 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-smartplug-blue"></div>
-        </div>
-      </Layout>
-    );
-  }
+  // Direct rendering without loading state
   
   // Show empty cart message if cart is empty
   if (cart.length === 0) {
