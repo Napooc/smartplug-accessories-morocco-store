@@ -25,11 +25,11 @@ export const getUserLanguagePreference = (): Language => {
   
   // Then check browser language
   const browserLang = navigator.language.split('-')[0];
-  if (browserLang === 'fr') return 'fr';
   if (browserLang === 'ar') return 'ar';
+  if (browserLang === 'fr') return 'fr';
   
-  // Default to English
-  return 'en';
+  // Default to Arabic
+  return 'ar';
 };
 
 /**

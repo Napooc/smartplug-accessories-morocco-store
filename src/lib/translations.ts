@@ -273,47 +273,32 @@ export const translations = {
   categories: {
     en: 'Categories',
     fr: 'Catégories',
-    ar: 'فئات'
+    ar: 'الفئات'
   },
-  homeKitchen: {
-    en: 'Home & Kitchen',
-    fr: 'Maison & Cuisine',
-    ar: 'المنزل والمطبخ'
+  remisesOffres: {
+    en: 'Discounts & Offers',
+    fr: 'Remises et Offres',
+    ar: 'التخفيضات والعروض'
   },
-  electronics: {
-    en: 'Electronics',
-    fr: 'Électronique',
-    ar: 'الإلكترونيات'
+  scotch: {
+    en: 'Scotch',
+    fr: 'Scotch',
+    ar: 'الشريط اللاصق'
   },
-  toolsLighting: {
-    en: 'Tools & Lighting',
-    fr: 'Outils & Éclairage',
-    ar: 'أدوات وإضاءة'
+  droguerie: {
+    en: 'Hardware Store',
+    fr: 'Droguerie',
+    ar: 'البقالة'
   },
-  plumbing: {
-    en: 'Plumbing',
-    fr: 'Plomberie',
-    ar: 'السباكة'
+  sanitaire: {
+    en: 'Sanitary',
+    fr: 'Sanitaire',
+    ar: 'الصحي'
   },
-  gardenTerrace: {
-    en: 'Garden & Terrace',
-    fr: 'Jardin & Terrasse',
-    ar: 'الحديقة والشرفة'
-  },
-  paintHardware: {
-    en: 'Paint & Hardware',
-    fr: 'Peinture & Quincaillerie',
-    ar: 'الطلاء والأجهزة'
-  },
-  bathroomToilet: {
-    en: 'Bathroom & Toilet',
-    fr: 'Salle de bain & Toilette',
-    ar: 'الحمام والمرحاض'
-  },
-  heatingAc: {
-    en: 'Heating & AC',
-    fr: 'Chauffage & Climatisation',
-    ar: 'التدفئة والتكييف'
+  automobile: {
+    en: 'Automobile',
+    fr: 'Automobile',
+    ar: 'السيارات'
   },
   
   // Checkout page

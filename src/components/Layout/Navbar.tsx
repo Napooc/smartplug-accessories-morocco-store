@@ -95,26 +95,23 @@ const Navbar = () => {
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden transform origin-top scale-0 group-hover:scale-100 transition-transform z-50">
                   <div className="py-2">
-                    <Link to="/categories/home-kitchen" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {t('homeKitchen')}
-                    </Link>
-                    <Link to="/categories/electronics" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {t('electronics')}
-                    </Link>
-                    <Link to="/categories/tools-lighting" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {t('toolsLighting')}
-                    </Link>
-                    <Link to="/categories/plumbing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {t('plumbing')}
-                    </Link>
-                    <Link to="/categories/garden-terrace" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      {t('gardenTerrace')}
-                    </Link>
-                    <Link to="/categories/discounts-deals" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600">
+                    <Link to="/categories/remises-offres" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600">
                       <span className="flex items-center">
                         <Tag className="h-4 w-4 mr-1 text-red-500" />
-                        {t('discountsDeals', { default: 'Discounts & Deals' })}
+                        {t('remisesOffres')}
                       </span>
+                    </Link>
+                    <Link to="/categories/scotch" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      {t('scotch')}
+                    </Link>
+                    <Link to="/categories/droguerie" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      {t('droguerie')}
+                    </Link>
+                    <Link to="/categories/sanitaire" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      {t('sanitaire')}
+                    </Link>
+                    <Link to="/categories/automobile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      {t('automobile')}
                     </Link>
                   </div>
                 </div>
@@ -225,49 +222,42 @@ const Navbar = () => {
                 </summary>
                 <div className="ml-8 mt-2 space-y-1">
                   <Link 
-                    to="/categories/home-kitchen" 
-                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t('homeKitchen')}
-                  </Link>
-                  <Link 
-                    to="/categories/electronics" 
-                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t('electronics')}
-                  </Link>
-                  <Link 
-                    to="/categories/tools-lighting" 
-                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t('toolsLighting')}
-                  </Link>
-                  <Link 
-                    to="/categories/plumbing" 
-                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t('plumbing')}
-                  </Link>
-                  <Link 
-                    to="/categories/garden-terrace" 
-                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t('gardenTerrace')}
-                  </Link>
-                  <Link 
-                    to="/categories/discounts-deals" 
+                    to="/categories/remises-offres" 
                     className="block py-2 px-3 rounded-md hover:bg-gray-100 text-red-500"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span className="flex items-center">
                       <Tag className="h-4 w-4 mr-1" />
-                      {t('discountsDeals', { default: 'Discounts & Deals' })}
+                      {t('remisesOffres')}
                     </span>
+                  </Link>
+                  <Link 
+                    to="/categories/scotch" 
+                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('scotch')}
+                  </Link>
+                  <Link 
+                    to="/categories/droguerie" 
+                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('droguerie')}
+                  </Link>
+                  <Link 
+                    to="/categories/sanitaire" 
+                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('sanitaire')}
+                  </Link>
+                  <Link 
+                    to="/categories/automobile" 
+                    className="block py-2 px-3 rounded-md hover:bg-gray-100"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('automobile')}
                   </Link>
                 </div>
               </details>

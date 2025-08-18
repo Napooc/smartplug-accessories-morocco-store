@@ -6,30 +6,23 @@ import { useStore } from '@/lib/store';
 import { categories } from '@/lib/data';
 import { 
   Home, 
-  Headphones,
   Wrench, 
   Droplet,
-  Flower,
-  PaintBucket,
-  Bath,
-  Thermometer,
   ArrowLeft,
-  Percent
+  Percent,
+  Package,
+  Car
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/languageContext';
 
 // Map category IDs to their respective icons
 const categoryIcons: Record<string, JSX.Element> = {
-  'home-kitchen': <Home className="h-6 w-6" />,
-  'electronics': <Headphones className="h-6 w-6" />,
-  'tools-lighting': <Wrench className="h-6 w-6" />,
-  'plumbing': <Droplet className="h-6 w-6" />,
-  'garden-terrace': <Flower className="h-6 w-6" />,
-  'paint-hardware': <PaintBucket className="h-6 w-6" />,
-  'bathroom-toilet': <Bath className="h-6 w-6" />,
-  'heating-ac': <Thermometer className="h-6 w-6" />,
-  'discounts-deals': <Percent className="h-6 w-6" />
+  'remises-offres': <Percent className="h-6 w-6" />,
+  'scotch': <Package className="h-6 w-6" />,
+  'droguerie': <Wrench className="h-6 w-6" />,
+  'sanitaire': <Droplet className="h-6 w-6" />,
+  'automobile': <Car className="h-6 w-6" />
 };
 
 const CategoryPage = () => {

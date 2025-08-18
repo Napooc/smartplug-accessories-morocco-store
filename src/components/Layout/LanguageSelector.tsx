@@ -15,9 +15,9 @@ const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   
   const languages = [
-    { code: 'en', label: 'English', flag: '🇬🇧' },
+    { code: 'ar', label: 'العربية', flag: '🇲🇦' },
     { code: 'fr', label: 'Français', flag: '🇫🇷' },
-    { code: 'ar', label: 'العربية', flag: '🇲🇦' }
+    { code: 'en', label: 'English', flag: '🇬🇧' }
   ];
   
   const handleLanguageChange = (lang: Language) => {

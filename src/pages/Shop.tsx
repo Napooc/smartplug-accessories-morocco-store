@@ -25,14 +25,11 @@ const Shop = () => {
   
   // Map of category IDs to translation keys
   const categoryTranslationKeys: Record<string, string> = {
-    'home-kitchen': 'homeKitchen',
-    'electronics': 'electronics',
-    'tools-lighting': 'toolsLighting',
-    'plumbing': 'plumbing',
-    'garden-terrace': 'gardenTerrace',
-    'paint-hardware': 'paintHardware',
-    'bathroom-toilet': 'bathroomToilet',
-    'heating-ac': 'heatingAc'
+    'remises-offres': 'remisesOffres',
+    'scotch': 'scotch',
+    'droguerie': 'droguerie',
+    'sanitaire': 'sanitaire',
+    'automobile': 'automobile'
   };
   
   // Filter products
