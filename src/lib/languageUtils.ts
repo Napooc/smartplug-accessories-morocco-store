@@ -13,22 +13,22 @@ export const getUserLanguagePreference = (): Language => {
   const urlParams = new URLSearchParams(window.location.search);
   const langParam = urlParams.get('lang');
   
-  if (langParam && ['en', 'fr', 'ar'].includes(langParam)) {
+  if (langParam && ['fr', 'ar'].includes(langParam)) {
     return langParam as Language;
   }
   
   // Then check localStorage
   const savedLang = localStorage.getItem('ma7alkom-language');
-  if (savedLang && ['en', 'fr', 'ar'].includes(savedLang)) {
+  if (savedLang && ['fr', 'ar'].includes(savedLang)) {
     return savedLang as Language;
   }
   
   // Then check browser language
   const browserLang = navigator.language.split('-')[0];
-  if (browserLang === 'ar') return 'ar';
   if (browserLang === 'fr') return 'fr';
+  if (browserLang === 'ar') return 'ar';
   
-  // Default to Arabic
+  // Default to Arabic (primary language)
   return 'ar';
 };
 

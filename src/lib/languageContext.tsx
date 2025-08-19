@@ -13,11 +13,10 @@ import {
 import { useLanguageSync } from '@/hooks/use-language-sync';
 
 // Available languages
-export type Language = 'en' | 'fr' | 'ar';
+export type Language = 'fr' | 'ar';
 
 // Translation dictionary type
 export type TranslationSet = {
-  en: string;
   fr: string;
   ar: string;
 };
@@ -37,9 +36,9 @@ const mergeTranslations = (target: any, source: any): any => {
   const result = { ...target };
   
   for (const key in source) {
-    // If property is an object and not a translation set (which has en, fr, ar keys)
+    // If property is an object and not a translation set (which has fr, ar keys)
     if (source[key] && typeof source[key] === 'object' && 
-        !('en' in source[key] && 'fr' in source[key] && 'ar' in source[key])) {
+        !('fr' in source[key] && 'ar' in source[key])) {
       result[key] = result[key] ? mergeTranslations(result[key], source[key]) : { ...source[key] };
     } else {
       result[key] = source[key];
@@ -78,7 +77,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang');
     
-    if (langParam && ['en', 'fr', 'ar'].includes(langParam) && langParam !== language) {
+    if (langParam && ['fr', 'ar'].includes(langParam) && langParam !== language) {
       setLanguage(langParam as Language);
     } else if (!langParam && language) {
       // Update URL if language param is missing

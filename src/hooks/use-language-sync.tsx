@@ -16,7 +16,7 @@ export const useLanguageSync = (
       const urlParams = new URLSearchParams(window.location.search);
       const langParam = urlParams.get('lang');
       
-      if (langParam && ['en', 'fr', 'ar'].includes(langParam) && langParam !== language) {
+      if (langParam && ['fr', 'ar'].includes(langParam) && langParam !== language) {
         setLanguage(langParam as Language);
       }
     };
