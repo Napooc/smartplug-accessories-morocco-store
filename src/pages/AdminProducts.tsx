@@ -137,6 +137,8 @@ const AdminProducts = () => {
       setIsDeleting(productId);
       console.log("Deleting product:", productId);
       await deleteProduct(productId);
+      // Force refresh the product list after deletion
+      await refreshProducts();
       toast.success("Product deleted successfully");
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -181,6 +183,8 @@ const AdminProducts = () => {
         await deleteProduct(productId);
       }
       
+      // Force refresh after all deletions
+      await refreshProducts();
       toast.success(`${selectedProductsForDeletion.length} products deleted successfully`);
       setSelectedProductsForDeletion([]);
       setShowBulkDeleteConfirm(false);
