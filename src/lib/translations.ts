@@ -516,6 +516,61 @@ export const translations = {
     fr: 'Ajouter au panier',
     ar: 'أضف إلى السلة'
   },
+  currency: {
+    en: 'DH',
+    fr: 'DH',
+    ar: 'د.م.'
+  },
+  sku: {
+    en: 'SKU',
+    fr: 'Référence',
+    ar: 'رقم المنتج'
+  },
+  inStock: {
+    en: 'In Stock',
+    fr: 'En stock',
+    ar: 'متوفر'
+  },
+  outOfStock: {
+    en: 'Out of Stock',
+    fr: 'Rupture de stock',
+    ar: 'غير متوفر'
+  },
+  available: {
+    en: 'available',
+    fr: 'disponible',
+    ar: 'متاح'
+  },
+  description: {
+    en: 'Description',
+    fr: 'Description',
+    ar: 'الوصف'
+  },
+  productDescription: {
+    en: 'Product Description',
+    fr: 'Description du produit',
+    ar: 'وصف المنتج'
+  },
+  selectColor: {
+    en: 'Select Color',
+    fr: 'Sélectionner la couleur',
+    ar: 'اختر اللون'
+  },
+  productNotFound: {
+    en: 'Product not found',
+    fr: 'Produit non trouvé',
+    ar: 'المنتج غير موجود'
+  },
+  returnToShop: {
+    en: 'Return to shop',
+    fr: 'Retour à la boutique',
+    ar: 'العودة إلى المتجر'
+  },
+  relatedProducts: {
+    en: 'Related Products',
+    fr: 'Produits similaires',
+    ar: 'منتجات ذات صلة'
+  },
   viewDetails: {
     en: 'View Details',
     fr: 'Voir les détails',

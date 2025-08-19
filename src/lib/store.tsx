@@ -450,22 +450,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Deleting product with ID:", id);
       
-      const updatedProducts = products.filter(product => product.id !== id);
-      setProducts(updatedProducts);
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
-      
+      // First try to delete from database
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', id);
       
       if (error) {
-        console.error('Error deleting product from Supababase:', error);
-        toast.warning("Product deleted locally but not from database");
-      } else {
-        toast.success('Product deleted successfully');
-        console.log("Product deleted successfully from database");
+        console.error('Error deleting product from database:', error);
+        toast.error("Failed to delete product from database");
+        throw error;
       }
+      
+      // Only update local state if database deletion was successful
+      const updatedProducts = products.filter(product => product.id !== id);
+      setProducts(updatedProducts);
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
+      
+      toast.success('Product deleted successfully');
+      console.log("Product deleted successfully from database");
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
