@@ -693,6 +693,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   
   const value: StoreContextType = {
     products,
+    isLoading,
     featuredProducts,
     saleProducts,
     bestSellingProducts,
@@ -723,7 +724,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     isAdmin,
     login,
     logout,
-    fetchProducts
+    fetchProducts,
+    loadMoreProducts,
+    hasMore
   };
   
   return (

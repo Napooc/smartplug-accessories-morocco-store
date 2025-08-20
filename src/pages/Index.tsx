@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/languageContext";
 const Index = () => {
   const { 
     products,
+    isLoading,
     bestSellingProducts,
     dealsProducts,
     featuredProducts,
@@ -20,16 +21,6 @@ const Index = () => {
   } = useStore();
   
   const { t, direction } = useLanguage();
-  
-  // Fetch orders when the component mounts
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-  
-  // Log for debugging
-  console.log("Best Selling Products:", bestSellingProducts.length, bestSellingProducts.map(p => p.name));
-  console.log("Deals Products:", dealsProducts.length, dealsProducts.map(p => p.name));
-  console.log("Featured Products:", featuredProducts.length, featuredProducts.map(p => p.name));
   
   return (
     <Layout>
@@ -44,6 +35,7 @@ const Index = () => {
               products={bestSellingProducts} 
               title={t('bestSellingItems', { default: 'Best Selling Items' })}
               emptyMessage={t('noBestSellingItems', { default: 'No best selling items yet' })}
+              isLoading={isLoading}
             />
           ) : (
             <TopSellingProducts />
@@ -56,6 +48,7 @@ const Index = () => {
               products={dealsProducts} 
               title={t('discountDeals', { default: 'Discounts & Deals' })}
               emptyMessage={t('noDeals', { default: 'No deals available yet' })}
+              isLoading={isLoading}
             />
           )}
         </div>
@@ -65,6 +58,7 @@ const Index = () => {
             products={featuredProducts} 
             title={t('featured', { default: 'Featured Products' })}
             emptyMessage={t('noFeaturedProducts', { default: 'No featured products yet' })}
+            isLoading={isLoading}
           />
         </div>
         

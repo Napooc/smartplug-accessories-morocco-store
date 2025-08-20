@@ -2,19 +2,28 @@
 import ProductCard from './ProductCard';
 import { Product } from '@/lib/types';
 import { useLanguage } from '@/lib/languageContext';
+import { ProductGridSkeleton } from '@/components/ui/product-skeleton';
 
 interface ProductGridProps {
   products: Product[];
   title?: string;
   emptyMessage?: string;
+  isLoading?: boolean;
+  showLoadMore?: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
-export default function ProductGrid({ products, title, emptyMessage }: ProductGridProps) {
+export default function ProductGrid({ 
+  products, 
+  title, 
+  emptyMessage, 
+  isLoading = false,
+  showLoadMore = false,
+  onLoadMore,
+  hasMore = false
+}: ProductGridProps) {
   const { t, direction } = useLanguage();
-  
-  // Debugging log to verify the products being rendered
-  console.log(`Rendering ProductGrid with title "${title}" and ${products.length} products:`, 
-    products.map(p => ({ id: p.id, name: p.name, placement: p.placement })));
   
   return (
     <div className="py-6 md:py-8" dir={direction}>
@@ -25,12 +34,34 @@ export default function ProductGrid({ products, title, emptyMessage }: ProductGr
         </div>
       )}
       
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-          {products.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+      {isLoading && products.length === 0 ? (
+        <ProductGridSkeleton count={8} />
+      ) : products.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          
+          {showLoadMore && hasMore && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={onLoadMore}
+                disabled={isLoading}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+              >
+                {isLoading ? 'Loading...' : 'Load More Products'}
+              </button>
+            </div>
+          )}
+          
+          {isLoading && products.length > 0 && (
+            <div className="mt-6">
+              <ProductGridSkeleton count={4} />
+            </div>
+          )}
+        </>
       ) : (
         emptyMessage && <p className="text-center text-gray-500 py-6 md:py-8">{emptyMessage}</p>
       )}
