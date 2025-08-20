@@ -99,19 +99,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       console.log('Fetching products from Supabase...');
       
-      const localProductsJson = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      let localProducts: Product[] = [];
-      
-      if (localProductsJson) {
-        try {
-          localProducts = JSON.parse(localProductsJson);
-          setProducts(localProducts);
-          console.log('Loaded products from localStorage:', localProducts.length);
-        } catch (parseError) {
-          console.error('Error parsing local products:', parseError);
-        }
-      }
-      
       const { data, error } = await supabase
         .from('products')
         .select('*');
@@ -119,26 +106,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error fetching products from Supabase:', error);
         toast.error("Error loading products from database");
-        
-        if (localProducts.length === 0 && localProductsJson) {
-          try {
-            const parsedProducts = JSON.parse(localProductsJson);
-            setProducts(parsedProducts);
-            return;
-          } catch (parseError) {
-            console.error('Error parsing local products:', parseError);
-          }
-        }
-        
-        if (localProducts.length === 0) {
-          const productsWithUUIDs = initialProducts.map(product => ({
-            ...product,
-            id: uuidv4()
-          }));
-          setProducts(productsWithUUIDs);
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
-        }
-        
         return;
       }
       
@@ -158,65 +125,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             stock: product.stock,
             rating: product.rating || 0,
             sku: product.sku,
-            placement: 'placement' in product ? product.placement as 'best_selling' | 'deals' | 'regular' : 'regular'
+            placement: 'placement' in product ? product.placement as 'best_selling' | 'deals' | 'regular' : 'regular',
+            colorVariants: product.color_variants ? (
+              typeof product.color_variants === 'string' 
+                ? JSON.parse(product.color_variants) 
+                : product.color_variants
+            ) : []
           }));
           
           setProducts(formattedProducts);
-          
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(formattedProducts));
+          console.log('Products loaded from DB');
         } else {
-          console.log('No products found in DB, initializing with sample data');
-          
-          if (localProducts.length > 0) {
-            await syncLocalProductsToSupabase(localProducts);
-          } else {
-            const productsWithUUIDs = initialProducts.map(product => ({
-              ...product,
-              id: uuidv4()
-            }));
-            
-            setProducts(productsWithUUIDs);
-            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
-            
-            await syncLocalProductsToSupabase(productsWithUUIDs);
-          }
+          console.log('No products found in database, using initial products');
+          const productsWithUUIDs = initialProducts.map(product => ({
+            ...product,
+            id: uuidv4()
+          }));
+          setProducts(productsWithUUIDs);
+          syncProductsToSupabase(productsWithUUIDs);
         }
       }
     } catch (error) {
       console.error('Error in fetchProducts:', error);
       toast.error("Error loading products");
-      
-      const localProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      if (localProducts) {
-        try {
-          const parsedProducts = JSON.parse(localProducts);
-          setProducts(parsedProducts);
-        } catch (parseError) {
-          console.error('Error parsing local products:', parseError);
-          
-          const productsWithUUIDs = initialProducts.map(product => ({
-            ...product,
-            id: uuidv4()
-          }));
-          
-          setProducts(productsWithUUIDs);
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
-        }
-      } else {
-        const productsWithUUIDs = initialProducts.map(product => ({
-          ...product,
-          id: uuidv4()
-        }));
-        
-        setProducts(productsWithUUIDs);
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsWithUUIDs));
-      }
     }
   };
 
-  const syncLocalProductsToSupabase = async (localProducts: Product[]) => {
+  const syncProductsToSupabase = async (productsToSync: Product[]) => {
     try {
-      for (const product of localProducts) {
+      for (const product of productsToSync) {
         const colorVariantsJson = product.colorVariants ? JSON.stringify(product.colorVariants) : null;
         
         await supabase
@@ -238,7 +175,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             color_variants: colorVariantsJson
           }, { onConflict: 'id' });
       }
-      console.log(`Successfully synced ${localProducts.length} products to Supabase`);
+      console.log(`Successfully synced ${productsToSync.length} products to Supabase`);
     } catch (error) {
       console.error('Error syncing products to Supabase:', error);
       toast.warning('Some products may not be synced to the database');
@@ -339,10 +276,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       console.log('Adding new product:', newProduct);
       
-      const updatedProducts = [...products, newProduct];
-      setProducts(updatedProducts);
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
-      
+      // Add to database first
       const colorVariantsJson = colorVariants ? JSON.stringify(colorVariants) : null;
       
       const { error } = await supabase
@@ -366,8 +300,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error adding product to Supabase:', error);
-        toast.warning("Product saved locally but not synced to database");
+        toast.error("Error adding product to database");
+        throw error;
       } else {
+        // Only update local state after successful database insert
+        const updatedProducts = [...products, newProduct];
+        setProducts(updatedProducts);
         toast.success(`${product.name} added to products`);
       }
     } catch (error) {
@@ -399,7 +337,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       );
       
       setProducts(updatedProducts);
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
       const dbUpdate: Record<string, any> = {
         name: productUpdate.name,
@@ -453,7 +390,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // Immediately remove from local state to provide instant feedback
       const updatedProducts = products.filter(product => product.id !== id);
       setProducts(updatedProducts);
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updatedProducts));
       
       // Then delete from database
       const { error } = await supabase
@@ -465,7 +401,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error('Error deleting product from database:', error);
         // Revert local changes if database deletion failed
         setProducts(products);
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
         toast.error("Failed to delete product from database");
         throw error;
       }
