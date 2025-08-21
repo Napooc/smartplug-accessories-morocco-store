@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/lib/languageContext';
 
 const Shop = () => {
-  const { products } = useStore();
+  const { products, isLoading, loadMoreProducts, hasMore } = useStore();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [sortBy, setSortBy] = useState('default');
@@ -161,7 +161,13 @@ const Shop = () => {
               </Select>
             </div>
             
-            <ProductGrid products={sortedProducts} />
+            <ProductGrid 
+              products={sortedProducts}
+              isLoading={isLoading}
+              showLoadMore={hasMore}
+              onLoadMore={loadMoreProducts}
+              hasMore={hasMore}
+            />
           </div>
         </div>
       </div>

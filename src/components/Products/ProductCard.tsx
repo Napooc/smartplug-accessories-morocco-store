@@ -4,6 +4,7 @@ import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import { useLanguage } from '@/lib/languageContext';
+import { LazyImage } from '@/components/ui/lazy-image';
 
 interface ProductCardProps {
   product: Product;
@@ -113,11 +114,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       )}
       
       <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-48">
-        <img 
+        <LazyImage
           src={productImage} 
           alt={getTranslatedProductData('name')}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-          loading="eager"
         />
       </Link>
       
