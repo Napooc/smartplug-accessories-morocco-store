@@ -21,6 +21,9 @@ interface StoreContextType {
   deleteProduct: (id: string) => Promise<void>;
   searchProducts: (query: string) => Product[];
   fetchProducts: () => Promise<void>;
+  isLoading: boolean;
+  loadMoreProducts: () => Promise<void>;
+  hasMore: boolean;
   
   // Cart
   cart: CartItem[];
@@ -69,6 +72,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const PRODUCTS_PER_PAGE = 12;
   
   useEffect(() => {
     const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
@@ -95,13 +101,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
   }, [cart]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page: number = 1, reset: boolean = true) => {
     try {
-      console.log('Fetching products from Supabase...');
+      if (reset) {
+        setIsLoading(true);
+        setCurrentPage(1);
+      }
       
-      const { data, error } = await supabase
+      console.log(`Fetching products from Supabase... Page: ${page}`);
+      
+      const from = (page - 1) * PRODUCTS_PER_PAGE;
+      const to = from + PRODUCTS_PER_PAGE - 1;
+      
+      const { data, error, count } = await supabase
         .from('products')
-        .select('*');
+        .select('*', { count: 'exact' })
+        .range(from, to)
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching products from Supabase:', error);
@@ -110,7 +126,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       
       if (data) {
-        if (data.length > 0) {
+        if (data.length > 0 || (page === 1 && count === 0)) {
           console.log('Products fetched successfully from DB:', data.length);
           const formattedProducts: Product[] = data.map(product => ({
             id: product.id,
@@ -133,22 +149,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ) : []
           }));
           
-          setProducts(formattedProducts);
+          if (reset) {
+            setProducts(formattedProducts);
+          } else {
+            setProducts(prev => [...prev, ...formattedProducts]);
+          }
+          
+          const totalProducts = count || 0;
+          const loadedProducts = reset ? formattedProducts.length : products.length + formattedProducts.length;
+          setHasMore(loadedProducts < totalProducts);
+          
           console.log('Products loaded from DB');
+          
+          if (page === 1 && data.length === 0) {
+            console.log('No products found in database, using initial products');
+            const productsWithUUIDs = initialProducts.map(product => ({
+              ...product,
+              id: uuidv4()
+            }));
+            setProducts(productsWithUUIDs);
+            setHasMore(false);
+            syncProductsToSupabase(productsWithUUIDs);
+          }
         } else {
-          console.log('No products found in database, using initial products');
-          const productsWithUUIDs = initialProducts.map(product => ({
-            ...product,
-            id: uuidv4()
-          }));
-          setProducts(productsWithUUIDs);
-          syncProductsToSupabase(productsWithUUIDs);
+          setHasMore(false);
         }
       }
     } catch (error) {
       console.error('Error in fetchProducts:', error);
       toast.error("Error loading products");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const loadMoreProducts = async () => {
+    if (isLoading || !hasMore) return;
+    
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    await fetchProducts(nextPage, false);
   };
 
   const syncProductsToSupabase = async (productsToSync: Product[]) => {
