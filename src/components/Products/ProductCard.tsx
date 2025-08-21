@@ -53,6 +53,16 @@ const getUniqueProductImage = (productId: string, productName: string): string =
     'mixer': 'https://images.unsplash.com/photo-1594282486552-05a3b6fbff97?w=500&auto=format&fit=crop&q=80',
     'cooker': 'https://images.unsplash.com/photo-1596886251705-2826ffa70eb0?w=500&auto=format&fit=crop&q=80',
     
+    // Bathroom/Sanitaire products
+    'sanitaire': 'https://images.unsplash.com/photo-1620626011761-996317b8d101?w=500&auto=format&fit=crop&q=80',
+    'shower': 'https://images.unsplash.com/photo-1584622781564-1d987ba4dbc2?w=500&auto=format&fit=crop&q=80',
+    'bath': 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&auto=format&fit=crop&q=80',
+    'faucet': 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&auto=format&fit=crop&q=80',
+    'ayman': 'https://images.unsplash.com/photo-1584622781564-1d987ba4dbc2?w=500&auto=format&fit=crop&q=80',
+    'luxury': 'https://images.unsplash.com/photo-1620626011761-996317b8d101?w=500&auto=format&fit=crop&q=80',
+    'bathroom': 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&auto=format&fit=crop&q=80',
+    'system': 'https://images.unsplash.com/photo-1584622781564-1d987ba4dbc2?w=500&auto=format&fit=crop&q=80',
+    
     // Furniture
     'chair': 'https://images.unsplash.com/photo-1551298370-9d3d53740c72?w=500&auto=format&fit=crop&q=80',
     'table': 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=500&auto=format&fit=crop&q=80',
@@ -107,19 +117,20 @@ export default function ProductCard({ product }: ProductCardProps) {
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col h-full" dir={direction}>
-      {product.onSale && (
-        <span className="bg-smartplug-blue text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded">
-          {t('sale')}
-        </span>
-      )}
-      
-      <Link to={`/product/${product.id}`} className="block relative overflow-hidden aspect-square">
-        <LazyImage
-          src={productImage} 
-          alt={getTranslatedProductData('name')}
-          className="absolute inset-0 transition-transform duration-300 hover:scale-105"
-        />
-      </Link>
+      <div className="relative overflow-hidden aspect-square bg-muted group">
+        <Link to={`/product/${product.id}`} className="block w-full h-full">
+          <LazyImage
+            src={productImage} 
+            alt={getTranslatedProductData('name')}
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
+        </Link>
+        {product.onSale && (
+          <span className="bg-smartplug-blue text-white px-2 py-1 text-xs font-bold absolute top-2 right-2 rounded z-10">
+            {t('sale')}
+          </span>
+        )}
+      </div>
       
       <div className="p-4 flex-grow flex flex-col">
         <Link to={`/product/${product.id}`}>

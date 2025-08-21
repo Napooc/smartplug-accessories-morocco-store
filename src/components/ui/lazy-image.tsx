@@ -39,6 +39,13 @@ export function LazyImage({
     }
   }, [isIntersecting, src, imageSrc, fallbackSrc]);
 
+  // Reset states when src changes
+  useEffect(() => {
+    setImageSrc('');
+    setImageLoaded(false);
+    setHasError(false);
+  }, [src]);
+
   const handleLoad = () => {
     setImageLoaded(true);
   };
@@ -51,9 +58,9 @@ export function LazyImage({
   };
 
   return (
-    <div ref={targetRef} className={cn("relative w-full h-full", className)}>
+    <div ref={targetRef} className="relative w-full h-full overflow-hidden">
       {/* Placeholder/Loading state */}
-      {!imageLoaded && (
+      {!imageLoaded && !hasError && (
         <div className={cn(
           "absolute inset-0 bg-muted animate-pulse flex items-center justify-center",
           placeholderClassName
@@ -63,13 +70,14 @@ export function LazyImage({
       )}
       
       {/* Actual image */}
-      {imageSrc && (
+      {imageSrc && !hasError && (
         <img
           src={imageSrc}
           alt={alt}
           className={cn(
             "w-full h-full object-cover transition-opacity duration-300",
-            imageLoaded ? "opacity-100" : "opacity-0"
+            imageLoaded ? "opacity-100" : "opacity-0",
+            className
           )}
           onLoad={handleLoad}
           onError={handleError}
@@ -78,12 +86,17 @@ export function LazyImage({
       )}
       
       {/* Error fallback */}
-      {hasError && imageSrc === fallbackSrc && (
+      {hasError && (
         <div className={cn(
-          "absolute inset-0 bg-muted flex items-center justify-center text-muted-foreground text-sm",
+          "absolute inset-0 bg-gradient-to-br from-muted to-muted/80 flex flex-col items-center justify-center text-muted-foreground",
           placeholderClassName
         )}>
-          Image unavailable
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span className="text-xs font-medium">Image unavailable</span>
         </div>
       )}
     </div>
