@@ -51,7 +51,7 @@ export function LazyImage({
   };
 
   return (
-    <div ref={targetRef} className={cn("relative overflow-hidden", className)}>
+    <div ref={targetRef} className={cn("relative w-full h-full", className)}>
       {/* Placeholder/Loading state */}
       {!imageLoaded && (
         <div className={cn(
@@ -68,9 +68,8 @@ export function LazyImage({
           src={imageSrc}
           alt={alt}
           className={cn(
-            "transition-opacity duration-300",
-            imageLoaded ? "opacity-100" : "opacity-0",
-            className
+            "w-full h-full object-cover transition-opacity duration-300",
+            imageLoaded ? "opacity-100" : "opacity-0"
           )}
           onLoad={handleLoad}
           onError={handleError}

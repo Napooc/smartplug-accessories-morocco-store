@@ -113,11 +113,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         </span>
       )}
       
-      <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-48">
+      <Link to={`/product/${product.id}`} className="block relative overflow-hidden aspect-square">
         <LazyImage
           src={productImage} 
           alt={getTranslatedProductData('name')}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          className="absolute inset-0 transition-transform duration-300 hover:scale-105"
         />
       </Link>
       
