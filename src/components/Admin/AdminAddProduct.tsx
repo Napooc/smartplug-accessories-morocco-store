@@ -17,6 +17,7 @@ import { categories } from '@/lib/data';
 import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ColorVariant } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 import ColorVariantManager from './ColorVariantManager';
 
 interface AdminAddProductProps {
@@ -101,60 +102,79 @@ const AdminAddProduct = ({ onProductAdded }: AdminAddProductProps) => {
     }));
   };
   
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     
-    processFiles(files);
+    await processFiles(files);
   };
 
-  const handleColorVariantImageUpload = (files: FileList, variantId: string) => {
-    processFiles(files, variantId);
+  const handleColorVariantImageUpload = async (files: FileList, variantId: string) => {
+    await processFiles(files, variantId);
   };
   
-  const processFiles = (files: FileList, variantId?: string) => {
+  const processFiles = async (files: FileList, variantId?: string) => {
     setIsUploading(true);
     
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const base64Image = event.target.result as string;
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Create unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+        
+        // Upload to Supabase storage
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file);
+        
+        if (error) {
+          console.error('Upload error:', error);
+          throw error;
+        }
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath);
           
-          if (variantId) {
-            setProduct(prev => ({
+        return urlData.publicUrl;
+      });
+      
+      const imageUrls = await Promise.all(uploadPromises);
+      
+      imageUrls.forEach(imageUrl => {
+        if (variantId) {
+          setProduct(prev => ({
+            ...prev,
+            colorVariants: prev.colorVariants.map(variant => 
+              variant.id === variantId 
+                ? { ...variant, images: [...variant.images, imageUrl] } 
+                : variant
+            )
+          }));
+        } else {
+          setProduct(prev => ({
+            ...prev,
+            images: [...prev.images, imageUrl]
+          }));
+          
+          if (errors.images) {
+            setErrors(prev => ({
               ...prev,
-              colorVariants: prev.colorVariants.map(variant => 
-                variant.id === variantId 
-                  ? { ...variant, images: [...variant.images, base64Image] } 
-                  : variant
-              )
+              images: ''
             }));
-          } else {
-            setProduct(prev => ({
-              ...prev,
-              images: [...prev.images, base64Image]
-            }));
-            
-            if (errors.images) {
-              setErrors(prev => ({
-                ...prev,
-                images: ''
-              }));
-            }
           }
         }
-        setIsUploading(false);
-      };
+      });
       
-      reader.onerror = () => {
-        toast.error("Failed to read image file");
-        setIsUploading(false);
-      };
-      
-      reader.readAsDataURL(file);
-    });
+      toast.success(`Successfully uploaded ${imageUrls.length} image(s)`);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error("Failed to upload images. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
     
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
